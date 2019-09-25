@@ -2,6 +2,8 @@ module CellularInfo
 
 export simulate
 
+include("te.jl")
+
 using Images, VideoIO
 
 function update!(state, rule)
