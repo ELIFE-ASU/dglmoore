@@ -1,3 +1,5 @@
+using Random
+
 const Series = AbstractVector{Int}
 const Ensemble = AbstractArray{Int,2}
 
@@ -122,6 +124,7 @@ function transferentropy(src::Series, dst::Series, cond::Ensemble, k::Int)
     b = max(1, maximum(xs), maximum(ys), maximum(cs)) + 1
     tedist = TransferDist(b, k, size(cond,1))
     observe!(tedist, xs, ys, cond)
+    tedist()
 end
 
 function transferentropy(src::Series, dst::Series, k::Int)
@@ -130,6 +133,49 @@ function transferentropy(src::Series, dst::Series, k::Int)
     b = max(1, maximum(xs), maximum(ys)) + 1
     tedist = TransferDist(b, k, 0)
     observe!(tedist, xs, ys)
+    tedist()
 end
 
 transferentropy(src::Series, dst::Series, cond::Series, k::Int) = transferentropy(src, dst, cond', k)
+
+struct Significance
+    value::Float64
+    p::Float64
+    se::Float64
+end
+
+function transferentropy(rng::AbstractRNG, src::Series, dst::Series, cond::Union{Series,Ensemble}, k::Int, nperm::Int)
+    if nperm < 10
+        throw(DomainError(nperm, "expected at least 10 permutation, got $(nperm)"))
+    end
+
+    te = transferentropy(src, dst, cond, k)
+    count = 1
+    for _ in 1:nperm
+        permutedsrc = src[randperm(rng, length(src))]
+        count += transferentropy(permutedsrc, dst, cond, k) >= te
+    end
+    p = count / (nperm + 1)
+    se = sqrt((p * (1 - p)) / (nperm + 1))
+
+    Significance(te, p, se)
+end
+transferentropy(src, dst, cond, k, nperm) = transferentropy(Random.GLOBAL_RNG, src, dst, cond, k, nperm)
+
+function transferentropy(rng::AbstractRNG, src::Series, dst::Series, k::Int, nperm::Int)
+    if nperm < 10
+        throw(DomainError(nperm, "expected at least 10 permutation, got $(nperm)"))
+    end
+
+    te = transferentropy(src, dst, k)
+    count = 1
+    for _ in 1:nperm
+        permutedsrc = src[randperm(rng, length(src))]
+        count += transferentropy(permutedsrc, dst, k) >= te
+    end
+    p = count / (nperm + 1)
+    se = sqrt((p * (1 - p)) / (nperm + 1))
+
+    Significance(te, p, se)
+end
+transferentropy(src, dst, k, nperm) = transferentropy(Random.GLOBAL_RNG, src, dst, k, nperm)
