@@ -1,6 +1,6 @@
 module CellularInfo
 
-export simulate
+export simulate, tovideo
 
 include("te.jl")
 
@@ -31,16 +31,22 @@ function toimage(state, cellsize)
     convert(Array{Gray{N0f8}}, img)
 end
 
-function simulate(rule; width=21, cellwidth=10, outdir=".")
-    state = zeros(Int, width)
-    state[width ÷ 2 + 1] = 1
-    frames = [toimage(state, cellwidth)]
-    for i in 0:1000
-        push!(frames, toimage(update!(state, rule), cellwidth))
+function simulate(rule, state::AbstractVector{Int}, t::Int)
+    traj = [state]
+    for _ in 1:t
+        push!(traj, update!(traj[end][:], rule))
     end
+    traj
+end
 
-    outfile = joinpath(outdir, "rule$(rule).avi")
-    encodevideo(outfile, frames, framerate=25)
+function simulate(rule, width::Int, t::Int)
+    state = zeros(Int, width)
+    state[length(state) ÷ 2 + 1] = 1
+    simulate(rule, state, t)
+end
+
+function tovideo(filename, series; cellwidth=10)
+    encodevideo(filename, map(f -> toimage(f, cellwidth), series), framerate=25)
 end
 
 end
