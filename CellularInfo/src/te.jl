@@ -1,5 +1,5 @@
-const Series = Vector{Int}
-const Ensemble = Array{Int, 2}
+const Series = AbstractVector{Int}
+const Ensemble = AbstractArray{Int,2}
 
 mutable struct TransferDist
     b::Int
@@ -32,17 +32,20 @@ end
 
 isvalid(t::TransferDist) = t.counts != 0
 
-function observe!(t::TransferDist, src::Series, dst::Series, cond::Ensemble)
+function observe!(t::TransferDist, src::Series, dst::Series, cond::Union{Nothing,Ensemble} = nothing)
     if size(src) != size(dst)
         throw(ArgumentError("length(src) must equal length(dst)"))
     end
     if length(dst) <= t.k
         throw(ArgumentError("length(dst) must be greater than the history length"))
     end
-    if size(cond, 1) != t.ncond
+    if isnothing(cond) && t.ncond != 0
+        throw(ArgumentError("expected $(t.ncond) conditions, got 0"))
+    end
+    if !isnothing(cond) && size(cond, 1) != t.ncond
         throw(ArgumentError("expected $(t.ncond) conditions, got $(size(cond, 1))"))
     end
-    if size(cond, 2) != length(dst)
+    if !isnothing(cond) && size(cond, 2) != length(dst)
         throw(ArgumentError("size(cond, 2) must be equal to length(dist)"))
     end
 
@@ -77,41 +80,7 @@ function observe!(t::TransferDist, src::Series, dst::Series, cond::Ensemble)
     t
 end
 
-function observe!(t::TransferDist, src::Series, dst::Series)
-    if t.ncond != 0
-        throw(ArgumentError("expected $(t.ncond) conditions, got 0"))
-    end
-    if size(src) != size(dst)
-        throw(ArgumentError("length(src) must equal length(dst)"))
-    end
-    if length(dst) <= t.k
-        throw(ArgumentError("length(dst) must be greater than the history length"))
-    end
-    t.counts += length(dst) - t.k
-    src_state, future, state, source, predicate = 0, 0, 0, 0, 0
-    history, q = 0, 1
-    for i in 1:t.k
-        q *= t.b
-        history *= t.b
-        history += dst[i]
-    end
-    for i in t.k+1:length(src)
-        src_state = src[i-1]
-        future = dst[i]
-        source = history * t.b + src_state
-        predicate = history * t.b + future
-        state = predicate * t.b + src_state
-
-        t.states[state + 1] += 1
-        t.histories[history + 1] += 1
-        t.sources[source + 1] += 1
-        t.predicates[predicate + 1] += 1
-
-        history = predicate - q * dst[i - t.k]
-    end
-
-    t
-end
+observe!(t::TransferDist, src::Series, dst::Series, cond::Series) = observe!(t, src, dst, cond')
 
 function (t::TransferDist)()
     if !isvalid(t)
@@ -146,14 +115,6 @@ function (t::TransferDist)()
     te / t.counts
 end
 
-function transferentropy(src::Series, dst::Series, k::Int)
-    xs = src .- minimum(src)
-    ys = dst .- minimum(dst)
-    b = max(1, maximum(xs), maximum(ys)) + 1
-    tedist = TransferDist(b, k)
-    observe!(tedist, xs, ys)
-end
-
 function transferentropy(src::Series, dst::Series, cond::Ensemble, k::Int)
     xs = src .- minimum(src)
     ys = dst .- minimum(dst)
@@ -163,6 +124,12 @@ function transferentropy(src::Series, dst::Series, cond::Ensemble, k::Int)
     observe!(tedist, xs, ys, cond)
 end
 
-function transferentropy(src::Series, dst::Series, cond::Series, k::Int)
-    transferentropy(src, dst, reshape(cond, 1, length(cond)), k)
+function transferentropy(src::Series, dst::Series, k::Int)
+    xs = src .- minimum(src)
+    ys = dst .- minimum(dst)
+    b = max(1, maximum(xs), maximum(ys)) + 1
+    tedist = TransferDist(b, k, 0)
+    observe!(tedist, xs, ys)
 end
+
+transferentropy(src::Series, dst::Series, cond::Series, k::Int) = transferentropy(src, dst, cond', k)
