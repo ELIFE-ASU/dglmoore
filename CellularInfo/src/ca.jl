@@ -8,6 +8,15 @@ canonical(a::Int) = min(a, yflip(a), complement(a), complement(yflip(a)))
 
 const EQUIVALENT_RULES = Dict(c => (yflip(c), complement(c), complement(yflip(c))) for c in 0:255)
 const ECA_RULES = [Set(vcat(map(canonical, 0:255)))...]
+const ECA_CLASS_I = [0,8,32,40,128,136,160,168]
+const ECA_CLASS_III = [18,22,30,45,60,90,105,122,126,146,150]
+const ECA_CLASS_IV = [54,106,110]
+const ECA_CLASS_II = setdiff(ECA_RULES, ECA_CLASS_I, ECA_CLASS_III, ECA_CLASS_IV)
+
+@assert ECA_CLASS_I ⊆ ECA_RULES
+@assert ECA_CLASS_III ⊆ ECA_RULES
+@assert ECA_CLASS_IV ⊆ ECA_RULES
+@assert length(ECA_CLASS_II) == 66
 
 function update!(state, rule)
     if length(state) < 2

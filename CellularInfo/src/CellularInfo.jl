@@ -2,7 +2,7 @@ module CellularInfo
 
 using Images, VideoIO
 
-export EQUIVALENT_RULES, ECA_RULES
+export EQUIVALENT_RULES, ECA_RULES, ECA_CLASS_I, ECA_CLASS_II, ECA_CLASS_III, ECA_CLASS_IV
 export simulate, tovideo, transferentropy
 
 include("ca.jl")
