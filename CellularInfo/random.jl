@@ -20,7 +20,7 @@ function main()
         @time begin
             @info "Building graph for $(rule)..."
             k = 5
-            width = 11
+            width = 101
             duration = 200 + (width ÷ 2)
             samples = 10
 
