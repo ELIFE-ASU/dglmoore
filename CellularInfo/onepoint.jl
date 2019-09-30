@@ -8,10 +8,10 @@ end
 @everywhere using CellularInfo
 
 @everywhere function transfer(traj, src, dst, k)
-    back = filter(f -> f != src && f != dst, 1:size(traj,2))
-    cond = traj[:,back]
-    transferentropy(traj[:,src], traj[:,dst], cond', k, 1000)
-    #  transferentropy(traj[:,src], traj[:,dst], k, 1000)
+    #  back = filter(f -> f != src && f != dst, 1:size(traj,2))
+    #  cond = traj[:,back]
+    #  transferentropy(traj[:,src], traj[:,dst], cond', k, 1000)
+    transferentropy(traj[:,src], traj[:,dst], k, 1000)
 end
 
 function main()
@@ -50,7 +50,7 @@ function main()
         end
     end
 
-    open("meancondte.json", "w") do handle
+    open("onepoint.json", "w") do handle
         JSON.print(handle, meante)
     end
 end
