@@ -26,4 +26,4 @@ function plotit(basename)
 end
 
 plotit("onepoint")
-#  plotit("random")
+plotit("rand")
