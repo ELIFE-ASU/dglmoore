@@ -1,8 +1,46 @@
-using Distributed, DelimitedFiles
+using ArgParse
+
+const aps = ArgParseSettings(version="1.0", add_version=true)
+
+add_arg_group(aps, "Input and Output")
+@add_arg_table aps begin
+    "video"
+        help = "path to the video to process"
+        required = true
+    "--outdir"
+        help = "output directory"
+        arg_type = String
+        default = "data"
+end
+
+add_arg_group(aps, "Worker Process Control")
+@add_arg_table aps begin
+    "--procs"
+        help = "number of worker processes; must be non-negative"
+        arg_type = Int
+        default = 0
+        range_tester = p -> p ≥ 0
+    "--slurm"
+        help = "use the SLURM cluster manager"
+        action = :store_true
+end
+
+args = parse_args(ARGS, aps)
+
+if args["procs"] != 0
+    using Distributed
+    if args["slurm"]
+        using ClusterManagers
+        addprocs(SlurmManager(args["procs"]))
+    else
+        addprocs(args["procs"])
+    end
+end
 
 @everywhere begin
     using Pkg
     Pkg.activate(".")
+
     using Base.Iterators, DelimitedFiles
     include("src/load.jl")
     include("src/info.jl")
@@ -27,7 +65,7 @@ end
 
 function main(filename; outdir="data")
     futures = Future[]
-    for nperms in [100]
+    for nperms in [100, 1000, 10000, 100000]
         for (m, n) in [(1,10), (10,1), (10,10)]
             f = @spawn main(filename, (m, n), nperms;
                             outdir=outdir, crop = [57:456, 61:460, :])
@@ -37,4 +75,4 @@ function main(filename; outdir="data")
     foreach(wait, futures)
 end
 
-@time main("videos/Before2-MPGC.mov")
+@time main(args["video"]; outdir=args["outdir"])
