@@ -55,7 +55,7 @@ end
         fs = fs[crop...]
     end
     greenchannel = green(fs)
-    greengrid = gridmean(greenchannel, grid...)
+    greengrid = coarse(greenchannel, grid...)
     mi = analyze(greengrid; nperms=nperms)
 
     infopath = joinpath(outdir, join(string.(grid), "x"), string(nperms))
@@ -64,15 +64,12 @@ end
 end
 
 function main(filename; outdir="data")
-    futures = Future[]
-    for nperms in [100, 1000, 10000, 100000]
-        for (m, n) in [(1,10), (10,1), (10,10)]
-            f = @spawn main(filename, (m, n), nperms;
-                            outdir=outdir, crop = [57:456, 61:460, :])
-            push!(futures, f)
+    for nperms in [1000]
+        for (m, n) in [(1,5), (5,1), (1,10), (10,1), (32,1), (1,32), (5,5), (10,10), (32,32)]
+            @info "Evaluating grid $((m, n))"
+            @time main(filename, (m, n), nperms; outdir=outdir, crop = [57:456, 61:460, :])
         end
     end
-    foreach(wait, futures)
 end
 
 @time main(args["video"]; outdir=args["outdir"])
