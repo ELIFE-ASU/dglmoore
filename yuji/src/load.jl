@@ -32,16 +32,17 @@ for color in (:red, :green, :blue)
 end
 colors(f::AbstractArray{Color}) = red(f), green(f), blue(f), map(c -> Float64(gray(convert(Gray, c))), f)
 
-function gridmean(frame::AbstractArray{T, 3}, n::Int, m::Int) where {T}
+function coarse(agg::Function, frame::AbstractArray{T, 3}, n::Int, m::Int) where {T <: Real}
     cellheight, cellwidth, N = size(frame) .÷ (n, m, 1)
-    coarse = Array{T}(undef, n, m, N)
+    coarse = Array{Float64}(undef, n, m, N)
     for i in 1:n, j in 1:m
-        rows = 1:cellheight + (i-1)*cellheight
-        cols = 1:cellwidth + (j-1)*cellwidth
-        coarse[i, j, :] = @views mean(frame[rows, cols, :], dims=(1,2))
+        rows = (1:cellheight) .+ (i-1)*cellheight
+        cols = (1:cellwidth) .+ (j-1)*cellwidth
+        @inbounds coarse[i, j, :] = @views agg(frame[rows, cols, :], dims=(1,2))
     end
     coarse
 end
+coarse(frame::AbstractArray{T, 3}, n::Int, m::Int) where {T <: Real} = coarse(mean, frame, n, m)
 
 squish(xs::AbstractArray) = if ndims(xs) == 1
     xs
