@@ -1,4 +1,4 @@
-using Random, TimeSeries
+using Random
 
 const Series = AbstractVector{Int}
 
@@ -48,10 +48,6 @@ function mutualinfo!(dist::MIDist, xs::AbstractVector{Int}, ys::AbstractVector{I
     @views entropy(accumulate!(dist, xs[1:end-l], ys[l+1:end]))
 end
 
-function mutualinfo!(dist::MIDist, xs::TimeArray, ys::TimeArray; l::Int=0)
-    mutualinfo!(dist, values(xs), values(ys); l=l)
-end
-
 function significance(rng::AbstractRNG, measure::Function, xs::Series, ys::Series; nperms=1000)
     dist = MIDist()
     gt = measure(dist, xs, ys)
@@ -67,10 +63,6 @@ function significance(rng::AbstractRNG, measure::Function, xs::Series, ys::Serie
     se = sqrt((p * (1 - p)) / (nperms + 1))
 
     gt, p, se
-end
-
-function significance(rng::AbstractRNG, measure::Function, xs::TimeArray, ys::TimeArray; nperms=1000)
-    significance(rng, measure, values(xs), values(ys); nperms=nperms)
 end
 
 function issig(datum::NTuple{3, Float64}; p::Float64=0.05)
