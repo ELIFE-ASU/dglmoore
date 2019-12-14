@@ -1,16 +1,21 @@
-using ArgParse
+using ArgParse, Distributed
 
 const aps = ArgParseSettings(version="1.0", add_version=true)
 
 add_arg_group(aps, "Input and Output")
 @add_arg_table aps begin
-    "video"
-        help = "path to the video to process"
+    "input"
+        help = "path to the video or directory to process"
         required = true
-    "--outdir"
-        help = "output directory"
-        arg_type = String
-        default = "data"
+end
+
+add_arg_group(aps, "Evaluation Parameters")
+@add_arg_table aps begin
+    "--nperms"
+        help = "number of permutations to use for significance testing"
+        arg_type = Int
+        default = 100000
+        range_tester = p -> p > 0
 end
 
 add_arg_group(aps, "Worker Process Control")
@@ -28,7 +33,6 @@ end
 args = parse_args(ARGS, aps)
 
 if args["procs"] != 0
-    using Distributed
     if args["slurm"]
         using ClusterManagers
         addprocs(SlurmManager(args["procs"]))
@@ -48,8 +52,8 @@ end
     include("src/analysis.jl")
 end
 
-@everywhere function main(filename::AbstractString, grid::NTuple{2,Int}, nperms::Int;
-                          outdir="data", crop=nothing)
+@everywhere function process(filename::AbstractString, grid::NTuple{2,Int}, nperms::Int;
+                             outdir="data", crop=nothing)
     fs = frames(filename)
     if !isnothing(crop)
         fs = fs[crop...]
@@ -58,18 +62,41 @@ end
     greengrid = coarse(greenchannel, grid...)
     mi = analyze(greengrid; nperms=nperms)
 
-    infopath = joinpath(outdir, join(string.(grid), "x"), string(nperms))
+    infopath = joinpath(outdir, join(string.(grid), "x"), string(nperms), "info.txt")
     mkpath(dirname(infopath))
     writedlm(infopath, hcat(linearize.(mi)...))
 end
 
-function main(filename; outdir="data")
-    for nperms in [1000]
-        for (m, n) in [(1,5), (5,1), (1,10), (10,1), (32,1), (1,32), (5,5), (10,10), (32,32)]
-            @info "Evaluating grid $((m, n))"
-            @time main(filename, (m, n), nperms; outdir=outdir, crop = [57:456, 61:460, :])
-        end
+function process(filename, nperms; outdir="data")
+    futures = Future[]
+    for (m, n) in [(1,5), (5,1), (1,10), (10,1), (30,1), (1,30), (5,5), (10,10), (30,30)]
+        f = @spawn process(filename, (m, n), nperms; outdir=outdir, crop=[57:456, 61:460, :])
+        push!(futures, f)
     end
+    foreach(wait, futures)
 end
 
-@time main(args["video"]; outdir=args["outdir"])
+ismov(f) = last(splitext(f)) == ".mov"
+
+function main(input, nperms)
+    if isfile(input) && ismov(input)
+        dir = dirname(input)
+        base = first(splitext(basename(input)))
+        process(input, nperms; outdir=joinpath(dir, base))
+    elseif isdir(input)
+        futures = Future[]
+        for (root, _, files) in walkdir(input)
+            for file in filter(ismov, files)
+                push!(futures, @spawn main(joinpath(root, file), nperms))
+            end
+        end
+        if isempty(futures)
+            @warn "no valid movie file found in $input"
+        else
+            foreach(wait, futures)
+        end
+    else
+        @error "\"$input\"' is not a valid movie file path"
+    end
+end
+@time main(args["input"], args["nperms"])
