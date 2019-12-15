@@ -9,7 +9,7 @@ const ChannelFrame = Array{Float64, 2}
 function block(xs::Vector{Array{T, 2}}) where {T}
     b = Array{T}(undef, size(first(xs))..., length(xs))
     for i in 1:length(xs)
-       b[:, :, i] = xs[i] 
+       b[:, :, i] = xs[i]
     end
     b
 end
@@ -21,6 +21,19 @@ function frames(filename)
         push!(frames, read(r))
     end
     block(frames)
+end
+
+croprange(w::Int, c::Int) = let margin = (w - c + 1) ÷ 2
+    margin .+ (1:c)
+end
+
+croprange(n::Int, c::Colon) = c
+
+function crop(f::AbstractArray, dims::Union{Int,Colon}...)
+    if length(dims) != ndims(f)
+        throw(DimensionMismatch("trying to crop on $(length(dims)) dimensions of a $(typeof(f))"))
+    end
+    f[map(x -> croprange(x...), zip(size(f), dims))...]
 end
 
 for color in (:red, :green, :blue)

@@ -1,4 +1,4 @@
-using ArgParse, Distributed
+using ArgParse, Distributed, DrWatson
 
 const aps = ArgParseSettings(version="1.0", add_version=true)
 
@@ -6,7 +6,8 @@ add_arg_group(aps, "Input and Output")
 @add_arg_table aps begin
     "input"
         help = "path to the video or directory to process"
-        required = true
+        arg_type = String
+        default = datadir("videos")
 end
 
 add_arg_group(aps, "Evaluation Parameters")
@@ -39,38 +40,47 @@ if args["procs"] != 0
     else
         addprocs(args["procs"])
     end
+
+    @everywhere begin
+        using Pkg
+        Pkg.activate(".")
+    end
 end
 
 @everywhere begin
-    using Pkg
-    Pkg.activate(".")
+    using Base.Iterators, DelimitedFiles, DrWatson
 
-    using Base.Iterators, DelimitedFiles
     include("src/load.jl")
     include("src/info.jl")
     include("src/binning.jl")
     include("src/analysis.jl")
 end
 
-@everywhere function process(filename::AbstractString, grid::NTuple{2,Int}, nperms::Int;
-                             outdir="data", crop=nothing)
-    fs = frames(filename)
-    if !isnothing(crop)
-        fs = fs[crop...]
+@everywhere filename(path::AbstractString) = basename(first(splitext(path)))
+
+@everywhere function process(filepath::AbstractString, grid::NTuple{2,Int}, nperms::Int;
+                             crops=nothing)
+    data = Dict{Symbol,Any}(:gh => first(grid), :gw => last(grid), :nperms => nperms)
+    relativepath = relpath(filepath, datadir("videos"))
+    path = datadir("info", dirname(relativepath), filename(relativepath), savename(data, "bson"))
+
+    fs = frames(filepath)
+    if !isnothing(crops)
+        fs = crop(fs, crops...)
     end
     greenchannel = green(fs)
     greengrid = coarse(greenchannel, grid...)
-    mi = analyze(greengrid; nperms=nperms)
 
-    infopath = joinpath(outdir, join(string.(grid), "x"), string(nperms), "info.txt")
-    mkpath(dirname(infopath))
-    writedlm(infopath, hcat(linearize.(mi)...))
+    data[:mi] = analyze(greengrid; nperms=nperms)
+    data[:videopath] = relpath(filepath, datadir())
+
+    @tagsave path data safe=true
 end
 
-function process(filename, nperms; outdir="data")
+function process(filepath, nperms)
     futures = Future[]
-    for (m, n) in [(1,5), (5,1), (1,10), (10,1), (30,1), (1,30), (5,5), (10,10), (30,30)]
-        f = @spawn process(filename, (m, n), nperms; outdir=outdir, crop=[57:456, 61:460, :])
+    for grid in [(1,5), (5,1), (1,10), (10,1), (30,1), (1,30), (5,5), (10,10), (30,30)]
+        f = @spawn process(filepath, grid, nperms; crops=(400, 400, :))
         push!(futures, f)
     end
     foreach(wait, futures)
@@ -79,24 +89,23 @@ end
 ismov(f) = last(splitext(f)) == ".mov"
 
 function main(input, nperms)
+    input = abspath(input)
     if isfile(input) && ismov(input)
-        dir = dirname(input)
-        base = first(splitext(basename(input)))
-        process(input, nperms; outdir=joinpath(dir, base))
+        process(input, nperms)
     elseif isdir(input)
-        futures = Future[]
+        video_found = false
         for (root, _, files) in walkdir(input)
             for file in filter(ismov, files)
-                push!(futures, @spawn main(joinpath(root, file), nperms))
+                video_found = true
+                process(joinpath(root, file), nperms)
             end
         end
-        if isempty(futures)
+        if !video_found
             @warn "no valid movie file found in $input"
-        else
-            foreach(wait, futures)
         end
     else
-        @error "\"$input\"' is not a valid movie file path"
+        @error "\"$input\" is not a path to a video file or directory"
     end
 end
+
 @time main(args["input"], args["nperms"])
