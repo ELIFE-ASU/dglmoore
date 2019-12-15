@@ -86,6 +86,7 @@ end
 end
 
 function process(filepath, nperms)
+    @info "Processing" video=filepath
     futures = Future[]
     for grid in [(1,5), (5,1), (1,10), (10,1), (30,1), (1,30), (5,5), (10,10), (30,30)]
         f = @spawn process(filepath, grid, nperms; crops=(400, 400, :))
