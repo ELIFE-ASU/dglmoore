@@ -72,6 +72,8 @@ end
     merge!(data, Dict(:gh => first(grid), :gw => last(grid), :nperms => nperms))
     path = datadir("info", savename(data, "bson"))
 
+    @info "Processing" from=filepath to=path parameters=data
+
     fs = frames(filepath)
     if !isnothing(crops)
         fs = crop(fs, crops...)
@@ -86,13 +88,9 @@ end
 end
 
 function process(filepath, nperms)
-    @info "Processing" video=filepath
-    futures = Future[]
     for grid in [(1,5), (5,1), (1,10), (10,1), (30,1), (1,30), (5,5), (10,10), (30,30)]
-        f = @spawn process(filepath, grid, nperms; crops=(400, 400, :))
-        push!(futures, f)
+        process(filepath, grid, nperms; crops=(400, 400, :))
     end
-    foreach(wait, futures)
 end
 
 ismov(f) = last(splitext(f)) == ".mov"
