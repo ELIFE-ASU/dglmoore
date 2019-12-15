@@ -58,11 +58,19 @@ end
 
 @everywhere filename(path::AbstractString) = basename(first(splitext(path)))
 
+@everywhere function str2sym(d::Dict{String})
+    e = Dict{Symbol,Any}()
+    for (k, v) in d
+        e[Symbol(k)] = v
+    end
+    e
+end
+
 @everywhere function process(filepath::AbstractString, grid::NTuple{2,Int}, nperms::Int;
                              crops=nothing)
-    data = Dict{Symbol,Any}(:gh => first(grid), :gw => last(grid), :nperms => nperms)
-    relativepath = relpath(filepath, datadir("videos"))
-    path = datadir("info", dirname(relativepath), filename(relativepath), savename(data, "bson"))
+    data = str2sym(parse_savename(filepath)[2])
+    merge!(data, Dict(:gh => first(grid), :gw => last(grid), :nperms => nperms))
+    path = datadir("info", savename(data, "bson"))
 
     fs = frames(filepath)
     if !isnothing(crops)
