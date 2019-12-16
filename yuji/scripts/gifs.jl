@@ -1,29 +1,36 @@
-using Plots, DelimitedFiles
+using DrWatson, DataFrames, Plots, Printf
 
-function migif(filepath; outdir=dirname(filepath))
-    raw = readdlm(filepath)
-    n, m = size(raw)
-    grid = reshape(raw, n, n, m ÷ n)
+include(srcdir("load.jl"))
 
-    anim = @animate for i in 1:size(grid, 3)
-        heatmap(grid[:, :, i], title="Lag: $(i - 1)", clim=(0,1))
+function migif(df)
+    grid = @sprintf "%dx%d" df[:gh] df[:gw]
+    basepath = datadir("plots", joinpath(df[:drug], string(df[:trial]), grid, string(df[:nperms])))
+    mkpath(basepath)
+    mkpath(joinpath(basepath, "frames"))
+
+    mi = df[:mi]
+    miframes = []
+    anim = @animate for i in eachindex(mi)
+        p = heatmap(linearize(mi[i]), title="Lag: $(i - 1)", clim=(0,1))
+        push!(miframes, p)
+        p
     end
-    giffile = joinpath(outdir, first(splitext(basename(filepath))) * ".gif")
-    gif(anim, giffile, fps=0.25)
+
+    for (i, p) in enumerate(miframes)
+        framename = @sprintf "%02d_%s.png" (i-1) df[:phase]
+        framefile = datadir(basepath, "frames", framename)
+        savefig(p, framefile)
+    end
+
+    giffile = datadir(basepath, df[:phase] * ".gif")
+    gif(anim, giffile, fps=0.5)
 end
 
-istxt(filepath) = last(splitext(filepath)) == ".txt"
-
-function main(dirname)
-    for (root, _, files) in walkdir(dirname)
-        for file in files
-            filepath = joinpath(root, file)
-            if istxt(filepath)
-                @info "Processing $filepath..."
-                migif(filepath)
-            end
-        end
+function main(dirname="info")
+    df = collect_results!(datadir(dirname); subfolders=true)
+    for row in eachrow(df)
+        migif(row)
     end
 end
 
-foreach(main, ["10x1", "1x10", "10x10"])
+@time main()
