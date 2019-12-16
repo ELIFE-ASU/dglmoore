@@ -81,7 +81,7 @@ end
     greenchannel = green(fs)
     greengrid = coarse(greenchannel, grid...)
 
-    data[:mi] = analyze(greengrid; nperms=nperms)
+    data[:runtime] = (@elapsed data[:mi] = analyze(greengrid; nperms=nperms))
     data[:videopath] = relpath(filepath, datadir())
 
     @tagsave path data safe=true

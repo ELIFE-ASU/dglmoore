@@ -48,21 +48,43 @@ function mutualinfo!(dist::MIDist, xs::AbstractVector{Int}, ys::AbstractVector{I
     @views entropy(accumulate!(dist, xs[1:end-l], ys[l+1:end]))
 end
 
-function significance(rng::AbstractRNG, measure::Function, xs::Series, ys::Series; nperms=1000)
+function significance(rng::AbstractRNG, measure::Function, xs::Series, ys::Series; nperms=1000,
+                     pvalue=0.05, spotcheck=1000)
     dist = MIDist()
     gt = measure(dist, xs, ys)
     clear!(dist)
 
     count = 0
     xsperm = xs[:]
-    for _ in 1:nperms
-        count += (measure(dist, shuffle!(rng, xsperm), ys) ≥ gt)
-        clear!(dist)
-    end
-    p = count / (nperms + 1)
-    se = sqrt((p * (1 - p)) / (nperms + 1))
 
-    gt, p, se
+    if nperms <= spotcheck
+        for _ in 1:nperms
+            count += (measure(dist, shuffle!(rng, xsperm), ys) ≥ gt)
+            clear!(dist)
+        end
+        p = count / (nperms + 1)
+        se = sqrt((p * (1 - p)) / (nperms + 1))
+
+        return gt, p, se
+    else
+        for _ in 1:spotcheck
+            count += (measure(dist, shuffle!(rng, xsperm), ys) ≥ gt)
+            clear!(dist)
+        end
+        p = count / (spotcheck + 1)
+        se = sqrt((p * (1 - p)) / (spotcheck + 1))
+
+        if abs(p - pvalue) < 2pvalue
+            for _ in 1:(nperms - spotcheck)
+                count += (measure(dist, shuffle!(rng, xsperm), ys) ≥ gt)
+                clear!(dist)
+            end
+            p = count / (nperms + 1)
+            se = sqrt((p * (1 - p)) / (nperms + 1))
+        end
+
+        return gt, p, se
+    end
 end
 
 function issig(datum::NTuple{3, Float64}; p::Float64=0.05)
