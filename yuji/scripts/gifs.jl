@@ -66,8 +66,8 @@ function migif(df)
         p = heatmap(linearize(mi[i]),
                     title=title,
                     titleloc=:left,
-                    xlabel="target cell",
-                    ylabel="source cell",
+                    xlabel="source cell",
+                    ylabel="target cell",
                     clim=(0,1))
         push!(miframes, p)
         p
