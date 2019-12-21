@@ -68,11 +68,8 @@ end
 
 @everywhere function process(filepath::AbstractString, grid::NTuple{2,Int}, nperms::Int;
                              crops=nothing)
-    data = str2sym(parse_savename(filepath)[2])
-    merge!(data, Dict(:gh => first(grid), :gw => last(grid), :nperms => nperms))
-    path = datadir("info", savename(data, "bson"))
-
-    @info "Processing" from=filepath to=path parameters=data
+    parameters = str2sym(parse_savename(filepath)[2])
+    merge!(parameters, Dict(:gh => first(grid), :gw => last(grid), :nperms => nperms))
 
     fs = frames(filepath)
     if !isnothing(crops)
@@ -80,15 +77,23 @@ end
     end
     greenchannel = green(fs)
     greengrid = coarse(greenchannel, grid...)
+    runtime = (@elapsed allmi = analyze(greengrid; nperms=nperms))
 
-    data[:runtime] = (@elapsed data[:mi] = analyze(greengrid; nperms=nperms))
-    data[:videopath] = relpath(filepath, datadir())
+    for (i, mi) in enumerate(allmi)
+        data = merge(parameters, Dict(:lag => i - 1))
+        path = datadir("info", savename(data, "bson"))
 
-    @tagsave path data safe=true
+        data[:mi] = mi
+        data[:runtime] = runtime
+        data[:videopath] = relpath(filepath, datadir())
+
+        @tagsave path data safe=true
+    end
+
 end
 
 function process(filepath, nperms)
-    for grid in [(1,5), (5,1), (1,10), (10,1), (30,1), (1,30), (5,5), (10,10), (30,30)]
+    for grid in [(1,5)] #, (5,1), (1,10), (10,1), (30,1), (1,30), (5,5), (10,10), (30,30)]
         process(filepath, grid, nperms; crops=(400, 400, :))
     end
 end
