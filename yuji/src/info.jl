@@ -44,9 +44,11 @@ end
     dist
 end
 
-function mutualinfo!(dist::MIDist, xs::Series, ys::Series; l::Int=0)
-    @views entropy(accumulate!(dist, xs[1:end-l], ys[l+1:end]))
+function mutualinfo!(dist::MIDist, xs::Series, ys::Series)
+    entropy(accumulate!(dist, xs, ys))
 end
+
+mutualinfo(xs::Series, ys::Series) = mutualinfo!(MIDist(), xs, ys)
 
 mutable struct TEDist <: InfoDist
     k::Int
