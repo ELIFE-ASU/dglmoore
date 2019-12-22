@@ -47,4 +47,19 @@ include("../src/info.jl")
         @test abs(transferentropy(as, bs, 2) - 1/4) < 1e-6
         @test abs(transferentropy(bs, as, 2) - 0.344361) < 1e-6
     end
+
+    let xs = rand(1:2, 60), ys = rand(1:2, 60)
+        @time for _ in 1:810000
+            mutualinfo!(MIDist(), xs, ys)
+        end
+    end
+
+    let xs = rand(1:2, 60), ys = rand(1:2, 60)
+        @time for _ in 1:810000
+            transferentropy(xs, ys, 2)
+        end
+        @time for _ in 1:810000
+            transferentropy(xs, ys, 3)
+        end
+    end
 end

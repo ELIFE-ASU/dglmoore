@@ -50,17 +50,18 @@ end
 
 mutable struct TEDist <: InfoDist
     k::Int
-    states::Array{Int}
-    histories::Array{Int}
-    sources::Array{Int}
-    predicates::Array{Int}
+    states::Vector{Int}
+    histories::Vector{Int}
+    sources::Vector{Int}
+    predicates::Vector{Int}
     N::Int
 
     function TEDist(k::Int)
-        states = zeros(Int, fill(2, k+2)...)
-        histories = zeros(Int, fill(2, k)...)
-        sources = zeros(Int, fill(2, k+1)...)
-        predicates = zeros(Int, fill(2, k+1)...)
+        q = 2^k
+        states = zeros(Int, 4q)
+        histories = zeros(Int, q)
+        sources = zeros(Int, 2q)
+        predicates = zeros(Int, 2q)
         new(k, states, histories, sources, predicates, 0)
     end
 end
@@ -76,14 +77,25 @@ end
 
 function accumulate!(dist::TEDist, xs::Series, ys::Series)
     rng = dist.k:(length(ys)-1)
-    dist.N += length(rng)
-    @inbounds for i in rng
-        yᵏ = ys[i-dist.k+1:i]
-        x, y⁺ = xs[i], ys[i+1]
-        dist.states[yᵏ..., x, y⁺] += 1
-        dist.histories[yᵏ...] += 1
-        dist.sources[yᵏ..., x] += 1
-        dist.predicates[yᵏ..., y⁺] += 1
+    dist.N = length(rng)
+    history, q = 0, 1
+    for i in 1:dist.k
+        q *= 2
+        history = 2history + ys[i] - 1;
+    end
+    for i in rng
+        src = xs[i] - 1
+        future = ys[i + 1] - 1
+        source = 2history + src
+        predicate = 2history + future
+        state = 2predicate + src
+
+        dist.states[state + 1] += 1
+        dist.histories[history + 1] += 1
+        dist.sources[source + 1] += 1
+        dist.predicates[predicate + 1] += 1
+
+        history = predicate - q*(ys[i - dist.k + 1] - 1)
     end
     dist
 end
