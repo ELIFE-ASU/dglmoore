@@ -23,9 +23,26 @@ function analyze(rng::AbstractRNG, mi::MIAnalysis,
                  nperms=nperms(mi), pvalue=pvalue(mi), spotcheck=spotcheck(mi))
 end
 
+struct TEAnalysis <: Analysis
+    ks::UnitRange{Int}
+    nperms::Int
+    p::Float64
+    spotcheck::Int
+    TEAnalysis(; ks=1:9, nperms=1000, p=0.05, spotcheck=1000) = new(ks, nperms, p, spotcheck)
+end
+
+params(te::TEAnalysis) = te.ks
+
+function analyze(rng::AbstractRNG, te::TEAnalysis,
+                 xs::AbstractVector{Int}, ys::AbstractVector{Int},
+                 k::Int)
+    significance(rng, TEDist(k), transferentropy!, xs, ys;
+                 nperms=nperms(te), pvalue=pvalue(te), spotcheck=spotcheck(te))
+end
+
 function analyze(rng::AbstractRNG, an::Analysis, binned::AbstractArray{Int,3})
     m, n, t = size(binned)
-    mi = Array{Float64,4}[]
+    allinfo = Array{Float64,4}[]
     for l in params(an)
         info = SharedArray{Float64,4}((m, n, m, n))
         @sync @distributed for a in 1:m*n
@@ -38,10 +55,9 @@ function analyze(rng::AbstractRNG, an::Analysis, binned::AbstractArray{Int,3})
                 info[i, j, u, v] = issig(value; p=pvalue(an)) ? first(value) : zero(Float64)
             end
         end
-        push!(mi, Array(info))
+        push!(allinfo, Array(info))
     end
-    mi
+    allinfo
 end
 
-analyze(rng::AbstractRNG, an::Analysis, g::AbstractArray{Float64,3}) = analyze(rng, an, bin(g))
-analyze(an::Analysis, g::AbstractArray{Float64,3}) = analyze(Random.GLOBAL_RNG, an, g)
+analyze(an::Analysis, binned::AbstractArray{Int,3}) = analyze(Random.GLOBAL_RNG, an, binned)

@@ -77,15 +77,31 @@ end
     end
     greenchannel = green(fs)
     greengrid = coarse(greenchannel, grid...)
-    analysis = MIAnalysis(nperms=nperms)
-    runtime = (@elapsed allmi = analyze(analysis, greengrid))
+    greenbinned = bin(greengrid)
 
-    for (i, mi) in enumerate(allmi)
-        data = merge(parameters, Dict(:lag => i - 1))
-        path = datadir("info", savename(data, "bson"))
+    mianalysis = MIAnalysis(nperms=nperms)
+    teanalysis = TEAnalysis(nperms=nperms)
+
+    miruntime = (@elapsed allmi = analyze(mianalysis, greenbinned))
+    teruntime = (@elapsed allte = analyze(teanalysis, greenbinned))
+
+    for (lag, mi) in zip(params(mianalysis), allmi)
+        data = merge(parameters, @dict lag)
+        path = datadir("info", "mi", savename(data, "bson"))
 
         data[:mi] = mi
-        data[:runtime] = runtime
+        data[:runtime] = miruntime
+        data[:videopath] = relpath(filepath, datadir())
+
+        @tagsave path data safe=true
+    end
+
+    for (k, te) in zip(params(teanalysis), allmi)
+        data = merge(parameters, @dict k)
+        path = datadir("info", "te", savename(data, "bson"))
+
+        data[:te] = te
+        data[:runtime] = teruntime
         data[:videopath] = relpath(filepath, datadir())
 
         @tagsave path data safe=true
@@ -94,8 +110,7 @@ end
 end
 
 function process(filepath, nperms)
-    #  for grid in [(1,5), (5,1), (1,10), (10,1), (30,1), (1,30), (5,5), (10,10), (30,30)]
-    for grid in [(1,5)]
+    for grid in [(1,5), (5,1), (1,10), (10,1), (30,1), (1,30), (5,5), (10,10), (30,30)]
         process(filepath, grid, nperms; crops=(400, 400, :))
     end
 end
