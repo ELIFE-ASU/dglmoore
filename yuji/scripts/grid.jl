@@ -77,7 +77,8 @@ end
     end
     greenchannel = green(fs)
     greengrid = coarse(greenchannel, grid...)
-    runtime = (@elapsed allmi = analyze(greengrid; nperms=nperms))
+    analysis = MIAnalysis(nperms=nperms)
+    runtime = (@elapsed allmi = analyze(analysis, greengrid))
 
     for (i, mi) in enumerate(allmi)
         data = merge(parameters, Dict(:lag => i - 1))
