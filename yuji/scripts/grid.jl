@@ -94,7 +94,8 @@ end
 end
 
 function process(filepath, nperms)
-    for grid in [(1,5), (5,1), (1,10), (10,1), (30,1), (1,30), (5,5), (10,10), (30,30)]
+    #  for grid in [(1,5), (5,1), (1,10), (10,1), (30,1), (1,30), (5,5), (10,10), (30,30)]
+    for grid in [(1,5)]
         process(filepath, grid, nperms; crops=(400, 400, :))
     end
 end

@@ -81,11 +81,11 @@ function accumulate!(dist::TEDist, xs::Series, ys::Series)
     rng = dist.k:(length(ys)-1)
     dist.N = length(rng)
     history, q = 0, 1
-    for i in 1:dist.k
+    @inbounds for i in 1:dist.k
         q *= 2
         history = 2history + ys[i] - 1;
     end
-    for i in rng
+    @inbounds for i in rng
         src = xs[i] - 1
         future = ys[i + 1] - 1
         source = 2history + src
