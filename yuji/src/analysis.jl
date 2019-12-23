@@ -61,3 +61,19 @@ function analyze(rng::AbstractRNG, an::Analysis, binned::AbstractArray{Int,3})
 end
 
 analyze(an::Analysis, binned::AbstractArray{Int,3}) = analyze(Random.GLOBAL_RNG, an, binned)
+
+function analyze(an::Analysis, data::AbstractArray{Int,3},
+                 parameters::Dict, pkey::Symbol, akey::Symbol,
+                 videopath::String)
+    runtime = (@elapsed allinfo = analyze(an, data))
+    for (param, info) in zip(params(an), allinfo)
+        data = merge(parameters, Dict(pkey => param))
+        path = datadir("info", string(akey), savename(data, "bson"))
+
+        data[akey] = info
+        data[:runtime] = runtime
+        data[:videopath] = videopath
+
+        @tagsave path data safe=true
+    end
+end

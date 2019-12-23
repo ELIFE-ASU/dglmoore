@@ -68,6 +68,7 @@ end
 
 @everywhere function process(filepath::AbstractString, grid::NTuple{2,Int}, nperms::Int;
                              crops=nothing)
+    videopath = relpath(filepath, datadir())
     parameters = str2sym(parse_savename(filepath)[2])
     merge!(parameters, Dict(:gh => first(grid), :gw => last(grid), :nperms => nperms))
 
@@ -79,34 +80,8 @@ end
     greengrid = coarse(greenchannel, grid...)
     greenbinned = bin(greengrid)
 
-    mianalysis = MIAnalysis(nperms=nperms)
-    teanalysis = TEAnalysis(nperms=nperms)
-
-    miruntime = (@elapsed allmi = analyze(mianalysis, greenbinned))
-    teruntime = (@elapsed allte = analyze(teanalysis, greenbinned))
-
-    for (lag, mi) in zip(params(mianalysis), allmi)
-        data = merge(parameters, @dict lag)
-        path = datadir("info", "mi", savename(data, "bson"))
-
-        data[:mi] = mi
-        data[:runtime] = miruntime
-        data[:videopath] = relpath(filepath, datadir())
-
-        @tagsave path data safe=true
-    end
-
-    for (k, te) in zip(params(teanalysis), allte)
-        data = merge(parameters, @dict k)
-        path = datadir("info", "te", savename(data, "bson"))
-
-        data[:te] = te
-        data[:runtime] = teruntime
-        data[:videopath] = relpath(filepath, datadir())
-
-        @tagsave path data safe=true
-    end
-
+    analyze(MIAnalysis(nperms=nperms), greenbinned, parameters, :lag, :mi, videopath)
+    analyze(TEAnalysis(nperms=nperms), greenbinned, parameters, :k, :te, videopath)
 end
 
 function process(filepath, nperms)
