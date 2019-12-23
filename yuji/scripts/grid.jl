@@ -96,7 +96,7 @@ end
         @tagsave path data safe=true
     end
 
-    for (k, te) in zip(params(teanalysis), allmi)
+    for (k, te) in zip(params(teanalysis), allte)
         data = merge(parameters, @dict k)
         path = datadir("info", "te", savename(data, "bson"))
 
