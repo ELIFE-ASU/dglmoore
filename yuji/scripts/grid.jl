@@ -19,6 +19,16 @@ add_arg_group(aps, "Evaluation Parameters")
         range_tester = p -> p > 0
 end
 
+add_arg_group(aps, "Analyses")
+@add_arg_table aps begin
+    "--skip-mi"
+        help = "skip the mutual information analysis"
+        action = :store_true
+    "--skip-te"
+        help = "skip the transfer entropy analysis"
+        action = :store_true
+end
+
 add_arg_group(aps, "Worker Process Control")
 @add_arg_table aps begin
     "--procs"
@@ -67,41 +77,48 @@ end
 end
 
 @everywhere function process(filepath::AbstractString, grid::NTuple{2,Int}, nperms::Int;
-                             crops=nothing)
-    videopath = relpath(filepath, datadir())
-    parameters = str2sym(parse_savename(filepath)[2])
-    merge!(parameters, Dict(:gh => first(grid), :gw => last(grid), :nperms => nperms))
+                             crops=nothing, skipmi=false, skipte=false)
+    if !(skipmi && skipte)
+        videopath = relpath(filepath, datadir())
+        parameters = str2sym(parse_savename(filepath)[2])
+        merge!(parameters, Dict(:gh => first(grid), :gw => last(grid), :nperms => nperms))
 
-    fs = frames(filepath)
-    if !isnothing(crops)
-        fs = crop(fs, crops...)
+        fs = frames(filepath)
+        if !isnothing(crops)
+            fs = crop(fs, crops...)
+        end
+        greenchannel = green(fs)
+        greengrid = coarse(greenchannel, grid...)
+        greenbinned = bin(greengrid)
+
+        if !skipmi
+            analyze(MIAnalysis(nperms=nperms), greenbinned, parameters, :lag, :mi, videopath)
+        end
+        if !skipte
+            analyze(TEAnalysis(nperms=nperms), greenbinned, parameters, :k, :te, videopath)
+        end
     end
-    greenchannel = green(fs)
-    greengrid = coarse(greenchannel, grid...)
-    greenbinned = bin(greengrid)
-
-    analyze(MIAnalysis(nperms=nperms), greenbinned, parameters, :lag, :mi, videopath)
-    analyze(TEAnalysis(nperms=nperms), greenbinned, parameters, :k, :te, videopath)
 end
 
-function process(filepath, nperms)
-    for grid in [(1,5), (5,1), (1,10), (10,1), (30,1), (1,30), (5,5), (10,10), (30,30)]
-        process(filepath, grid, nperms; crops=(400, 400, :))
+function process(filepath, nperms; skipmi=false, skipte=false)
+    #  for grid in [(1,5), (5,1), (1,10), (10,1), (30,1), (1,30), (5,5), (10,10), (30,30)]
+    for grid in [(1,5)]
+        process(filepath, grid, nperms; crops=(400, 400, :), skipmi=skipmi, skipte=skipte)
     end
 end
 
 ismov(f) = last(splitext(f)) == ".mov"
 
-function main(input, nperms)
+function main(input, nperms; skipmi=false, skipte=false)
     input = abspath(input)
     if isfile(input) && ismov(input)
-        process(input, nperms)
+        process(input, nperms; skipmi=skipmi, skipte=skipte)
     elseif isdir(input)
         video_found = false
         for (root, _, files) in walkdir(input)
             for file in filter(ismov, files)
                 video_found = true
-                process(joinpath(root, file), nperms)
+                process(joinpath(root, file), nperms; skipmi=skipmi, skipte=skipte)
             end
         end
         if !video_found
@@ -112,4 +129,4 @@ function main(input, nperms)
     end
 end
 
-@time main(args["input"], args["nperms"])
+@time main(args["input"], args["nperms"]; skipmi=args["skip-mi"], skipte=args["skip-te"])
