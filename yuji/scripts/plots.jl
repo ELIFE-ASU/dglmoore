@@ -63,21 +63,21 @@ function mutualinfo()
         g = groups[key]
 
         p = g |> @infoplot :lag :eigen "Lag" "Largest Eigenvalue"
-        savefig(p, joinpath(basepath, "eigen.png"))
+        savefig(p, joinpath(basepath, "eigen.svg"))
 
         p = g |> @infoplot :lag :nnz "Lag" "Number of Nonzero Values"
-        savefig(p, joinpath(basepath, "nnz.png"))
+        savefig(p, joinpath(basepath, "nnz.svg"))
 
         p = g |> @map({_.drug, _.trial, _.phase, _.lag, μ=mean(_.mi)}) |>
                  DataFrame |>
                  @infoplot :lag :μ "Lag" "Average MI"
-        savefig(p, joinpath(basepath, "mean.png"))
+        savefig(p, joinpath(basepath, "mean.svg"))
 
         p = g |> @map({_.drug, _.trial, _.phase, _.lag, μ=mean(nonzeros(_.mi))}) |>
                  @map({_.drug, _.trial, _.phase, _.lag, μ=isnan(_.μ) ? zero(_.μ) : _.μ}) |>
                  DataFrame |>
                  @infoplot :lag :μ "Lag" "Average Nonzero MI" :bottomright
-        savefig(p, joinpath(basepath, "mean-nz.png"))
+        savefig(p, joinpath(basepath, "mean-nz.svg"))
     end
 end
 
@@ -95,22 +95,22 @@ function transferentropy()
 
         g = groups[key]
 
-        p = g |> @infoplot :k :eigen "History Length" "Largest Eigenvalue"
-        savefig(p, joinpath(basepath, "eigen.png"))
+        p = g |> @infoplot :k :eigen "History Length" "Largest Eigenvalue" :bottomright
+        savefig(p, joinpath(basepath, "eigen.svg"))
 
-        p = g |> @infoplot :k :nnz "History Length" "Number of Nonzero Values"
-        savefig(p, joinpath(basepath, "nnz.png"))
+        p = g |> @infoplot :k :nnz "History Length" "Number of Nonzero Values" :bottomright
+        savefig(p, joinpath(basepath, "nnz.svg"))
 
         p = g |> @map({_.drug, _.trial, _.phase, _.k, μ=mean(_.te)}) |>
                  DataFrame |>
-                 @infoplot :k :μ "History Length" "Average TE"
-        savefig(p, joinpath(basepath, "mean.png"))
+                 @infoplot :k :μ "History Length" "Average TE" :bottomright
+        savefig(p, joinpath(basepath, "mean.svg"))
 
         p = g |> @map({_.drug, _.trial, _.phase, _.k, μ=mean(nonzeros(_.te))}) |>
                  @map({_.drug, _.trial, _.phase, _.k, μ=isnan(_.μ) ? zero(_.μ) : _.μ}) |>
                  DataFrame |>
                  @infoplot :k :μ "History Length" "Average Nonzero TE" :bottomright
-        savefig(p, joinpath(basepath, "mean-nz.png"))
+        savefig(p, joinpath(basepath, "mean-nz.svg"))
     end
 end
 
