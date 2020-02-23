@@ -1,0 +1,5 @@
+[deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+Discretizers = "6e83dbb3-75ca-525b-8ae2-3751f0dd50b4"
+XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
