@@ -4,6 +4,13 @@ normalize(xs) = xs ./ sum(xs)
 
 #  map(df -> by(df, :KO, count=(:KO => length)), frames)
 
+function filtrate!(frames, col)
+    for (i, frame) in enumerate(frames[2:end])
+        frames[1 + i] = filter(r -> all(g -> r[col] in g[:,col], frames[1:i]), frame)
+    end
+    frames
+end
+
 function kos(filename::AbstractString, i=Colon())
     excel = XLSX.openxlsx(filename)
     sheets = XLSX.sheetnames(excel)[i]
