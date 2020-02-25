@@ -151,7 +151,7 @@ function subsample(G, prev, n)
     next = redux(G, prev)
     N = length(next)
     if N > n
-        sort!(randperm(N)[1:n])
+        sort!(next[randperm(N)][1:n])
     else
         while N < n
             next = unique!(append!(next, sample(G, n - N)))
@@ -159,6 +159,13 @@ function subsample(G, prev, n)
         end
         sort!(next)
     end
+    #  N = length(prev)
+    #  if N > n
+    #      next = sort!(prev[randperm(N)[1:n]])
+    #      redux(G, next)
+    #  else
+    #      prev
+    #  end
 end
 
 function occurances(G, samplings)
@@ -184,31 +191,33 @@ function cbw(G, m, ns)
     oc
 end
 
-function Eolas.mutualinfo(data, i, j)
+function Eolas.mutualinfo(xs::AbstractMatrix, ys::AbstractMatrix)
+    @assert size(xs) == size(ys)
     m = MutualInfo(2, 2)
-    for k in 1:size(data,2)
-        observe!(m, data[1:end-1,k,i], data[2:end,k,j])
+    for k in 1:size(xs,2)
+        @views observe!(m, xs[1:end-1, k], ys[2:end, k])
     end
     estimate(m)
 end
 
-function Eolas.transferentropy(data, i, j)
+function Eolas.transferentropy(xs::AbstractMatrix, ys::AbstractMatrix)
+    @assert size(xs) == size(ys)
     te = TransferEntropy(2, 2, 1)
-    for k in 1:size(data, 2)
-        @views observe!(te, data[:, k, i], data[:, k, j])
+    for k in 1:size(xs, 2)
+        @views observe!(te, xs[:, k], ys[:, k])
     end
     estimate(te)
 end
 
-function sigtest(measure, data, i, j; nperms=100)
-    ds = copy(data)
-    gt = measure(data, i, j)
+function sigtest(measure, xs, ys; nperms=100)
+    xsperm = copy(xs)
+    gt = measure(xs, ys)
     c = 1
     for i in 1:nperms
-        for k in 1:size(data, 2)
-            shuffle!(@view ds[:, k, i])
+        @views for k in 1:size(xsperm, 2)
+            shuffle!(xsperm[:, k])
         end
-        c += (measure(data, i, j) ≥ gt)
+        c += (measure(xsperm, ys) ≥ gt)
     end
     gt, c / (nperms + 1)
 end
@@ -216,15 +225,17 @@ end
 function lmi(data; nperms=0)
     mi = Array{Float64}(undef, size(data,3), size(data,3))
     @threads for i in 1:size(data, 3)
-        @threads for j in i:size(data, 3)
+        for j in i:size(data, 3)
             a, b = if !iszero(nperms)
-                a, p = sigtest(mutualinfo, data, i, j; nperms=nperms)
-                b, q = sigtest(mutualinfo, data, j, i; nperms=nperms)
+                a, p = @views sigtest(mutualinfo, data[:, :, i], data[:, :, j]; nperms=nperms)
+                b, p = @views sigtest(mutualinfo, data[:, :, j], data[:, :, i]; nperms=nperms)
                 a = p < 0.05 ? a : zero(a)
                 b = p < 0.05 ? b : zero(b)
                 a, b
             else
-                mutualinfo(data, i, j) , mutualinfo(data, j, i)
+                a = @views mutualinfo(data[:, :, i], data[:, :, j])
+                b = @views mutualinfo(data[:, :, j], data[:, :, i])
+                a, b
             end
             mi[i, j] = mi[j, i] = 0.5 * (a + b)
         end
@@ -235,15 +246,17 @@ end
 function nte(data; nperms=0)
     te = Array{Float64}(undef, size(data,3), size(data,3))
     @threads for i in 1:size(data, 3)
-        @threads for j in i:size(data, 3)
+        for j in i:size(data, 3)
             a, b = if !iszero(nperms)
-                a, p = sigtest(transferentropy, data, i, j; nperms=nperms)
-                b, p = sigtest(transferentropy, data, j, i; nperms=nperms)
+                a, p = @views sigtest(transferentropy, data[:, :, i], data[:, :, j]; nperms=nperms)
+                b, p = @views sigtest(transferentropy, data[:, :, j], data[:, :, i]; nperms=nperms)
                 a = p < 0.05 ? a : zero(a)
                 b = p < 0.05 ? b : zero(b)
                 a, b
             else
-                transferentropy(data, i, j), transferentropy(data, j, i)
+                a = @views transferentropy(data[:, :, i], data[:, :, j])
+                b = @views transferentropy(data[:, :, j], data[:, :, i])
+                a, b
             end
             te[i, j] = te[j, i] = 0.5 * (a + b)
         end
