@@ -2,4 +2,6 @@
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 Discretizers = "6e83dbb3-75ca-525b-8ae2-3751f0dd50b4"
+LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
+SimpleWeightedGraphs = "47aef6b3-ad0c-573a-a1e2-d07658019622"
 XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"

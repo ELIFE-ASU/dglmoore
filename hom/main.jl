@@ -1,8 +1,6 @@
-using XLSX, DataFrames, Discretizers
+using XLSX, DataFrames, Discretizers, LightGraphs, LightGraphs.SimpleGraphs, Random
 
 normalize(xs) = xs ./ sum(xs)
-
-#  map(df -> by(df, :KO, count=(:KO => length)), frames)
 
 function filtrate!(frames, col)
     for (i, frame) in enumerate(frames[2:end])
@@ -15,13 +13,13 @@ function kos(filename::AbstractString, i=Colon())
     excel = XLSX.openxlsx(filename)
     sheets = XLSX.sheetnames(excel)[i]
     frames = map(s -> DataFrame(XLSX.gettable(excel[s])...), sheets)
-    dropmissing!.(select!.(frames, :KO), disallowmissing=true)
+    sort!.(dropmissing!.(select!.(frames, :KO), disallowmissing=true))
 end
 
 function bootstrap(df, col, n)
     gf = DataFrame(Symbol(string(col) * "0") => df[:,col])
     for i in 1:n
-        gf[!,Symbol(string(col) * string(i))] = rand(df[:,col], length(df[:,col]))
+        gf[!,Symbol(string(col) * string(i))] = sort!(rand(df[:,col], length(df[:,col])))
     end
     gf
 end
@@ -36,4 +34,140 @@ function genus(filename::AbstractString, i=Colon())
         df[!,name] = strip.(df[:,name])
         sort!(df)
     end
+end
+
+discretizer(dfs, col) = CategoricalDiscretizer(sort!(unique!(vcat(dfs...)))[:,col])
+function encode!(disc::CategoricalDiscretizer, df::DataFrame, col::Symbol)
+    df[!,Symbol(string(col) * "code")] = encode(disc, df[:,col])
+    df
+end
+
+function discretize(dfs, col)
+    disc = discretizer(dfs, col)
+    map(df -> encode!(disc, df, col), dfs), disc
+end
+
+struct Space
+    n::Int
+    v::Int
+    Space(n) = n < 0 ? error("invalid dimension") : new(n, 2^n - 1)
+end
+
+Base.iterate(space::Space) = trues(space.n), (0, trues(space.n))
+
+function Base.iterate(space::Space, state)
+    n, s = state
+    if n >= space.v - 1
+        nothing
+    else
+        for i in 1:space.n
+            if s[i]
+                s[i] = zero(s[i])
+                s[1:i-1] .= one(s[i])
+                break
+            end
+        end
+        copy(s), (n + 1, s)
+    end
+end
+
+Base.length(space::Space) = space.v
+Base.eltype(space::Space) = BitArray{1}
+
+venn(xs, col) = venn(map(x -> x[:,col], xs))
+function venn(xs::AbstractVector{T}) where T
+    v = Dict{BitArray{1}, T}()
+    for idx in Space(length(xs))
+        v[idx] = setdiff(intersect(xs[idx]...), xs[.!idx]...)
+    end
+    v
+end
+
+function assignkos(genera::AbstractVector{DataFrame}, kos::AbstractVector{DataFrame})
+    @assert length(genera) == length(kos)
+    gvenn = venn(genera, :genuscode)
+    kvenn = venn(kos, :KOcode)
+    merge((assignkos(gvenn[idx], kvenn[idx]) for idx in keys(gvenn))...)
+end
+
+function assignkos(genera::AbstractVector{S}, kos::AbstractVector{T}) where {S, T}
+    assignment = Dict{S, Set{T}}()
+    for g in genera
+        assignment[g] = Set(rand(kos, 10))
+    end
+    for k in kos
+        push!(assignment[rand(genera)], k)
+    end
+    assignment
+end
+
+function group!(depends, genera, n, m)
+    N = length(genera)
+    for _ in 1:n
+        U = rand(2:m)
+        group = genera[randperm(N)[1:U]]
+        for i in 1:U, j in 1:U
+            if i != j
+                add_edge!(depends, group[i], group[j])
+            end
+        end
+    end
+    depends
+end
+
+function group(genera::AbstractVector{DataFrame}, n, m)
+    M = length(genera)
+    N = length(unique!(vcat(genera...)).genuscode)
+    gvenn = venn(genera, :genuscode)
+    T = gvenn |> valtype |> eltype
+
+    G = SimpleGraph(N)
+    for i in 1:M
+        a = Set{T}()
+        for j in 1:M
+            for s in Space(M)
+                if s[i] && !s[j]
+                    union!(a, Set(gvenn[s]))
+                end
+            end
+        end
+        group!(G, collect(a), n, m)
+    end
+    G
+end
+
+sample(G, n) = sort!(randperm(nv(G))[1:n])
+
+redux(G, prev) = filter(i -> neighbors(G, i) ⊆ prev, prev)
+
+function subsample(G, prev, n)
+    next = redux(G, prev)
+    N = length(next)
+    if N > n
+        sort!(randperm(N)[1:n])
+    elseif N == n
+        next
+    end
+    while N < n
+        next = unique!(append!(next, sample(G, n - N)))
+        N = length(next)
+    end
+    sort!(next)
+end
+
+function cbw(G, ns)
+    samplings = [sample(G, ns[1])]
+    for n in ns[2:end]
+        push!(samplings, subsample(G, samplings[end], n))
+    end
+    samplings
+end
+
+function occurances(G, samplings)
+    N = length(samplings)
+    occurs = Array{Int}(undef, N, nv(G))
+    for j in 1:nv(G), i in 1:N
+        occurs[i, j] = (j in samplings[i]) ? 2 : 1
+    end
+    occurs
 end
