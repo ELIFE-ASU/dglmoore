@@ -1,4 +1,11 @@
-using XLSX, DataFrames, Discretizers, LightGraphs, LightGraphs.SimpleGraphs, Random
+using Base.Threads
+using DataFrames
+using Discretizers
+using Eolas
+using LightGraphs
+using LightGraphs.SimpleGraphs
+using Random
+using XLSX
 
 normalize(xs) = xs ./ sum(xs)
 
@@ -145,22 +152,13 @@ function subsample(G, prev, n)
     N = length(next)
     if N > n
         sort!(randperm(N)[1:n])
-    elseif N == n
-        next
+    else
+        while N < n
+            next = unique!(append!(next, sample(G, n - N)))
+            N = length(next)
+        end
+        sort!(next)
     end
-    while N < n
-        next = unique!(append!(next, sample(G, n - N)))
-        N = length(next)
-    end
-    sort!(next)
-end
-
-function cbw(G, ns)
-    samplings = [sample(G, ns[1])]
-    for n in ns[2:end]
-        push!(samplings, subsample(G, samplings[end], n))
-    end
-    samplings
 end
 
 function occurances(G, samplings)
@@ -170,4 +168,46 @@ function occurances(G, samplings)
         occurs[i, j] = (j in samplings[i]) ? 2 : 1
     end
     occurs
+end
+
+cbw(G, m, dfs::AbstractVector{DataFrame}) = cbw(G, m, nrow.(dfs))
+
+function cbw(G, m, ns)
+    oc = Array{Int}(undef, length(ns), m, nv(G))
+    @threads for i in 1:m
+        samplings = [sample(G, ns[1])]
+        for n in ns[2:end]
+            push!(samplings, subsample(G, samplings[end], n))
+        end
+        oc[:,i,:] .= occurances(G, samplings)
+    end
+    oc
+end
+
+function Eolas.mutualinfo(data, i, j)
+    m = MutualInfo(2, 2)
+    for k in 1:size(data,2)
+        observe!(m, data[1:end-1,k,i], data[2:end,k,j])
+    end
+    estimate(m)
+end
+
+function lmi(data)
+    mi = Array{Float64}(undef, size(data,3), size(data,3))
+    @threads for i in 1:size(data, 3)
+        @threads for j in i:size(data, 3)
+            mi[i, j] = mi[j, i] = 0.5 * (mutualinfo(data, i, j) + mutualinfo(data, j, i))
+        end
+    end
+    mi
+end
+
+function neighboring(G)
+    ns = falses(nv(G), nv(G))
+    for i in 1:nv(G)
+        for j in neighbors(G, i)
+            ns[i, j] = true
+        end
+    end
+    ns
 end
