@@ -16,9 +16,9 @@ function filtrate!(frames, col)
     frames
 end
 
-function kos(filename::AbstractString, i=Colon())
-    excel = XLSX.openxlsx(filename)
-    sheets = XLSX.sheetnames(excel)[i]
+function kos()
+    excel = XLSX.openxlsx("kos.xlsx")
+    sheets = XLSX.sheetnames(excel)[2:4]
     frames = map(s -> DataFrame(XLSX.gettable(excel[s])...), sheets)
     sort!.(dropmissing!.(select!.(frames, :KO), disallowmissing=true))
 end
@@ -31,9 +31,9 @@ function bootstrap(df, col, n)
     gf
 end
 
-function genus(filename::AbstractString, i=Colon())
-    excel = XLSX.openxlsx(filename)
-    sheets = XLSX.sheetnames(excel)[i]
+function genus()
+    excel = XLSX.openxlsx("genus.xlsx")
+    sheets = XLSX.sheetnames(excel)[2:4]
     map(sheets) do sheet
         column = filter(!ismissing, excel[sheet]["J"])
         name, values = Symbol(column[1]), column[2:end]
@@ -192,14 +192,63 @@ function Eolas.mutualinfo(data, i, j)
     estimate(m)
 end
 
-function lmi(data)
+function Eolas.transferentropy(data, i, j)
+    te = TransferEntropy(2, 2, 1)
+    for k in 1:size(data, 2)
+        @views observe!(te, data[:, k, i], data[:, k, j])
+    end
+    estimate(te)
+end
+
+function sigtest(measure, data, i, j; nperms=100)
+    ds = copy(data)
+    gt = measure(data, i, j)
+    c = 1
+    for i in 1:nperms
+        for k in 1:size(data, 2)
+            shuffle!(@view ds[:, k, i])
+        end
+        c += (measure(data, i, j) ≥ gt)
+    end
+    gt, c / (nperms + 1)
+end
+
+function lmi(data; nperms=0)
     mi = Array{Float64}(undef, size(data,3), size(data,3))
     @threads for i in 1:size(data, 3)
         @threads for j in i:size(data, 3)
-            mi[i, j] = mi[j, i] = 0.5 * (mutualinfo(data, i, j) + mutualinfo(data, j, i))
+            a, b = if !iszero(nperms)
+                a, p = sigtest(mutualinfo, data, i, j; nperms=nperms)
+                b, q = sigtest(mutualinfo, data, j, i; nperms=nperms)
+                a = p < 0.05 ? a : zero(a)
+                b = p < 0.05 ? b : zero(b)
+                a, b
+            else
+                mutualinfo(data, i, j) , mutualinfo(data, j, i)
+            end
+            mi[i, j] = mi[j, i] = 0.5 * (a + b)
         end
     end
     mi
+end
+
+function nte(data; nperms=0)
+    te = Array{Float64}(undef, size(data,3), size(data,3))
+    @threads for i in 1:size(data, 3)
+        @threads for j in i:size(data, 3)
+            a, b = if !iszero(nperms)
+                a, p = sigtest(transferentropy, data, i, j; nperms=nperms)
+                b, p = sigtest(transferentropy, data, j, i; nperms=nperms)
+                a = p < 0.05 ? a : zero(a)
+                b = p < 0.05 ? b : zero(b)
+                a, b
+            else
+                transferentropy(data, i, j), transferentropy(data, j, i)
+            end
+            te[i, j] = te[j, i] = 0.5 * (a + b)
+        end
+    end
+    te
 end
 
 function neighboring(G)
@@ -210,4 +259,11 @@ function neighboring(G)
         end
     end
     ns
+end
+
+function main()
+    genera = genus()
+    _, gdisc = discretize(genera, :genus)
+    G = group(genera, 20, 5)
+    genera, gdisc, G
 end
