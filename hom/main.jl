@@ -6,6 +6,8 @@ using LightGraphs
 using LightGraphs.SimpleGraphs
 using Random
 using XLSX
+using Plots
+using MLBase
 
 normalize(xs) = xs ./ sum(xs)
 
@@ -276,7 +278,36 @@ end
 
 function main()
     genera = genus()
-    _, gdisc = discretize(genera, :genus)
+    discretize(genera, :genus)
     G = group(genera, 20, 5)
-    genera, gdisc, G
+    gt = vec(neighboring(G))
+    @time te = vec(nte(cbw(G, 12, genera); nperms=100))
+    idx = te .!= zero(eltype(te))
+    gt = gt[idx]
+    te = te[idx]
+    p = rocplot(gt, te)
+    for _ in 1:10
+        G = group(genera, 20, 5)
+        gt = vec(neighboring(G))
+        @time te = vec(nte(cbw(G, 12, genera); nperms=100))
+        idx = te .!= zero(eltype(te))
+        gt = gt[idx]
+        te = te[idx]
+        rocplot!(p, gt, te)
+    end
+    savefig(p, "roc.svg")
+    p
+end
+
+function rocplot!(p, gt, score)
+    c = roc(gt, score, 100)
+    fpr, tpr = false_positive_rate.(c), true_positive_rate.(c)
+    plot!(p, fpr, tpr; linecolor=:black)
+end
+
+function rocplot(gt, score)
+    p = plot(title="Receiver Operating Characteristic", xlabel="FPR", ylabel="TPR",
+             xlim=(0,1), ylim=(0,1), aspect_ratio=1, size=(600,600), legend=nothing)
+    plot!(p, [0, 1], [0, 1]; linecolor=:gray, line=:dash)
+    rocplot!(p, gt, score)
 end
