@@ -284,13 +284,13 @@ function invariantterms(as::AbstractVector{PolyVar{true}})
     x, terms, as
 end
 
-function invariant(a::AbstractVector{PolyVar{true}}, ss::AbstractVector{SolSub})
+function Invariant(a::AbstractVector{PolyVar{true}}, ss::AbstractVector{SolSub})
     x, terms = invariantterms(a)
     factors = groupterms(x, map(t -> subs(t, ss...), terms))
     Invariant(x, a, factors)
 end
 
-function invariant(net::Network)
+function Invariant(net::Network)
     A = system(net)
     elim!(A)
     invariant(solve(A)...)
