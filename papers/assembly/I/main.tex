@@ -1,0 +1,682 @@
+\documentclass[aps,prd,onecolumn,nofootinbib,letterpaper,preprintnumbers,superscriptaddress,eqsecnum]{revtex4}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{dsfont}
+\usepackage{tikz-cd}
+\usepackage{cleveref}
+\usepackage{txfonts}
+\usepackage{tikz, tikz-cd}
+\usepackage{subfigure}
+\usepackage[version=4]{mhchem}
+\usetikzlibrary{backgrounds,circuits,circuits.ee.IEC,shapes,fit,matrix}
+
+\tikzstyle{simple}=[-,line width=2.000]
+\tikzstyle{arrow}=[-,postaction={decorate},decoration={markings,mark=at position .5 with {\arrow{>}}},line width=1.100]
+\pgfdeclarelayer{edgelayer}
+\pgfdeclarelayer{nodelayer}
+\pgfsetlayers{edgelayer,nodelayer,main}
+
+\tikzstyle{none}=[inner sep=0pt]
+
+\definecolor{lblue}{rgb}{0,250,255}
+
+\tikzstyle{site}=[circle, fill=lblue!20, draw=black, scale=1, minimum size=1cm]
+\tikzstyle{catalyst}=[circle, fill=lblue!20, draw=red, scale=1, minimum size=1cm]
+\tikzstyle{transition}=[rectangle, fill=gray!30, draw=black, scale=1, minimum size=1cm]
+\tikzstyle{morphism}=[rectangle, fill=gray!30, draw=black, scale=1, minimum size=1cm]
+
+\tikzstyle{empty}=[circle,fill=none, draw=none]
+\tikzstyle{inputdot}=[circle,fill=black,draw=black, scale=.5]
+\tikzstyle{dot}=[circle,fill=black,draw=black]
+\tikzstyle{bounding}=[circle,dashed, fill=none,draw=black, scale=9.00]
+\tikzstyle{simple}=[-,draw=black,line width=1.000]
+\tikzstyle{inarrow}=[-,draw=black,postaction={decorate},decoration={markings,mark=at position .5 with {\arrow{>}}},line width=1.000]
+\tikzstyle{tick}=[-,draw=black,postaction={decorate},decoration={markings,mark=at position .5 with {\draw (0,-0.1) -- (0,0.1);}},line width=1.000]
+\tikzstyle{inputarrow}=[->,draw=black, shorten >=.05cm]
+\tikzstyle{sitemap}=[->, dashed, draw=red, ultra thick, shorten >=.05cm]
+\tikzstyle{transitionmap}=[->, dashed, draw=blue, ultra thick, shorten >=.05cm]
+
+
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{theorem}{Theorem}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\newcommand{\upset}[1]{#1\!\!\uparrow}
+\newcommand{\downset}[1]{#1\!\!\downarrow}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\B}{\mathcal{B}}
+\newcommand{\Min}[1]{\min{(#1)}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\powerset}{\mathcal{P}}
+
+\newcommand{\TODO}{\noindent\textbf{TODO:}~}
+
+\begin{document}
+
+\title{Supplementary Information: Quantifying the pathways to life using assembly spaces}
+\author{Stuart M. Marshall}
+\author{Douglas G. Moore}
+\author{Alastair R. G. Murray}
+\author{Sara I. Walker}
+\author{Leroy Cronin}
+
+\maketitle
+
+\section{Introduction}
+
+This formalism arose as a means of rigorously describing the ``simplest" way of assembling a given object by combining basic building blocks.
+With this in mind, we consider a universe of objects together with transitions representing ways in which objects can be combined, mutated or disassembled to yield other objects.
+In this setting, the concrete rules or laws relating the transitions with the objects is largely neglected herein, though they are certainly necessary for initially constructing the space for consideration.
+We quickly come to the conclusion that a Petri network is appropriate when we consider this kind of process in general, though with specific modifications to allow the types of questions in which we are interested to be well defined.
+As such, the fundamental mathematical structure we define and explore herein, referred to as an assembly space, can be described as a sourceless, sinkless Petri net with a chosen basis.
+The details of this description will, of course, be made precise below.
+With assembly spaces defined, we are then able to define an assembly index for each object in the space, relative to the chosen basis, which characterizes how directly that object can be assembled.
+Further, we prove several axioms relating to method of bounding the assembly index for a given object and algorithms for computing or approximating it.
+
+\section{Petri Nets}
+
+The first task we are faced with is how to formally represent the substrates and products of some transition.
+We can look to introductory Chemistry for inspiration.
+When we consider a process like
+\begin{equation*}
+    \ce{2H_2} + \ce{O_2} \rightarrow \ce{2H_2O}
+\end{equation*}
+we are expressing the idea that some chemical process (transition) consumes twice as much $\ce{H_2}$ as $\ce{O_2}$ and yields $\ce{H_2O}$.
+The apparent multiplication ($\ce{2H_2}$) and addition ($\ce{2H_2} + \ce{O_}$) are simply formal constructs use to encode the stoichiometry of the reaction.
+The addition here is commutative; we could have written $\ce{O_2} + \ce{2H_2}$, and it would have meant precisely the same thing.
+
+We take a similar approach herein, though mathematically explicit. Let $X$ be a set. This may be, for example, a set of types of molecules $\{\ce{H_2}, \ce{O_2}, \ce{H_2O}\}$ or a set of kinds of building materials and products $\{\textrm{wood}, \textrm{glass pane}, \textrm{nail}, \textrm{picture frame}\}$.
+We can then construct formal linear combinations of the elements of $X$ where the coefficients are natural numbers, e.g. $\ce{2H_2} + \ce{O_2}$ or $4\textrm{wood} + \textrm{glass pane} + 8\textrm{nail}$, and only finitely many coefficients are nonzero.
+
+The collection of such formal linear combinations is referred to as the \textit{free commutative monoid} on $X$ over the natural number $\N$, and is typically denoted $\N[X]$.
+The set $X$, in this context, is referred to as the set of generators of $\N[X]$.
+An element $a \in \N[X]$ can be written as
+\begin{equation*}
+    a = \sum_{x \in X} a_x x
+\end{equation*}
+with natural number coefficients $a_x$, only finitely many non-zero.
+This construction naturally has a monoidal structure, hence the name.
+You can add such linear combinations to gether, e.g. $\ce{H_2} + (\ce{H_2} + \ce{O_2}) = \ce{2H_2} + \ce{O_2}$, and there exists an identity element $0$ such that $0 + a = a + 0 = a$ for all $a \in \N[X]$.
+It is important to stress at this point that the linear combinations do not need to ``make sense'', at least not yet.
+Taking the molecular example, $\ce{H_2}$, $\ce{7H_2} + \ce{O_2}$ and $\ce{H_2} + \ce{H_2O} + \ce{O_2}$ are permissible linear combinations and so are elements of $\N[X]$.
+This does not mean that we will, in practice, consider all of them.
+Restrictions on which linear combinations are consider will come into the picture when we introduce transitions.
+
+For some of the definitions we will present in coming sections, it will be useful to denote the subset of generators appearing in a given linear combinations. That is for a given element $a \in \N[X]$, the subset generators with non-zero coefficients in $a$, denoted $\pi : \N[X] \rightarrow \powerset{X}$ where 
+\begin{equation*}
+    \displaystyle \sum_{x \in X} a_x x \mapsto \{ x \in X ~|~ a_x \ne 0 \}.
+\end{equation*}
+To clarify this point, $\pi(\ce{2H2} + \ce{O_2}) = \{\ce{H_2}, \ce{O_2}\}$.
+
+Before departing from the topic of the free commutative monoid, we want to note that while it may seem that we are being overly formalistic, we gain some power by taking this approach.
+Most importantly, we can consider what happens if you ``map'' one set of objects into another. 
+As a concrete example, you could imagine mapping each of the molecules $\ce{H_2}$, $\ce{O_2}$ and $\ce{H_2O}$ to the number of Hydrogen atoms they contain, i.e. $2$, $0$, and $2$.
+\textbf{I don't like that example very much, but it's good enough for the moment.}
+This mapping process can be ``lifted'' into a map on the linear combinations by distributing the map over addition, so that $\ce{H_2} + \ce{O_2}$ maps to $2 + 0 = 2$. More formally, any function between sets $f : X \rightarrow Y$ can be uniquely extended to a function $\N[f] : \N[X] \rightarrow \N[Y]$ such that
+\begin{equation*}
+    \sum_{x \in X} a_x x \mapsto \sum_{x \in X} a_x f(x).
+\end{equation*}
+The value of doing this is that it will allow us to coherently define a map between assembly spaces, to be defined, which will then be useful for proving certain theorems regarding bounds on quantities of interest.
+
+\begin{definition}\label{def:petri}
+    A \textbf{Petri net} is a $P$ consisting of
+    \begin{itemize}
+        \item a set of \textit{sites}, $S(P)$
+        \item a set of \textit{transitions}, $T(P)$
+        \item a pair of maps $\begin{tikzcd}
+                T(P)
+                \arrow[r, shift left = 1, "\sigma_P"]
+                \arrow[r, shift right = 1, "\tau_P", swap]
+                &
+                \N[S(P)]
+        \end{tikzcd}$.
+    \end{itemize}
+    We call $\sigma_P$ the source map and $\tau_Q$ the target map.
+    An element of $\N[S(P)]$ is called a \textbf{marking} of the Petri net.
+    Where context is unambiguous we may simply write $\sigma$ and $\tau$, but will generally retain the $T(P)$ and $S(P)$ notation.
+\end{definition}
+
+Consider, for example, the Petri $P$ net described by $S(P) = \{ A, B, C, AA, AB, AAAB \}$ and $T(P) = \{ \alpha, \beta, \gamma, \delta \}$ with source and target maps:
+
+\begin{align*}
+    \sigma(\alpha) &= 2A           & \tau(\alpha) &= AA         \\
+    \sigma(\beta)  &= A + B        & \tau(\beta)  &= AB         \\
+    \sigma(\gamma) &= AA + AB + C  & \tau(\gamma) &= AAAB + C   \\
+    \sigma(\delta) &= AAAB         & \tau(\delta) &= A + AA + B.
+\end{align*}
+
+A natural way of graphically representing this $P$ is with a bipartite multigraph:
+
+\begin{figure}[!h]
+    \scalebox{0.6}{
+    \begin{tikzpicture}
+        \begin{pgfonlayer}{nodelayer}
+            \node [style=site] (A) at (0, 0.8) {$A$};
+            \node [style=site] (B) at (0, -0.8) {$B$};
+            \node [style=site] (C) at (6, -1.6) {$C$};
+            \node [style=site] (AA) at (4, 0.8) {$AA$};
+            \node [style=site] (AB) at (4, -0.8) {$AB$};
+            \node [style=site] (AAAB) at (8, 0) {$AAAB$};
+            \node [style=transition] (tau1) at (2, 0.8) {$\alpha$};
+            \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
+            \node [style=transition] (tau3) at (6, 0) {$\gamma$};
+            \node [style=transition] (tau4) at (10, 0) {$\delta$};
+        \end{pgfonlayer}
+        \begin{pgfonlayer}{edgelayer}
+            \draw [style=inarrow, bend right=15] (A) to (tau1);
+            \draw [style=inarrow, bend left=15] (A) to (tau1);
+            \draw [style=inarrow, bend right=15] (A) to (tau2);
+            \draw [style=inarrow] (tau1) to (AA);
+            \draw [style=inarrow] (B) to (tau2);
+            \draw [style=inarrow] (tau2) to (AB);
+            \draw [style=inarrow] (AA) to (tau3);
+            \draw [style=inarrow] (AB) to (tau3);
+            \draw [style=inarrow, bend left=30] (C) to (tau3);
+            \draw [style=inarrow] (tau3) to (AAAB);
+            \draw [style=inarrow, bend left=30] (tau3) to (C);
+            \draw [style=inarrow] (AAAB) to (tau4);
+            \draw [style=inarrow, bend right=30] (tau4) to (A);
+            \draw [style=inarrow, bend right=30] (tau4) to (AA);
+            \draw [style=inarrow, bend left=40] (tau4) to (B);
+        \end{pgfonlayer}
+    \end{tikzpicture}
+}
+\end{figure}
+
+\begin{definition}\label{def:petri-map}
+    A \textbf{Petri net morphism} from a Petri net $P$ to a Petri net $Q$, denoted $f : P \rightarrow Q$, consisists of a pair of functions $T(f) : T(P) \rightarrow T(Q)$ and $S(f): S(P) \rightarrow S(Q))$ such that the following diagrams commute:
+    \begin{equation*}
+        \begin{tikzcd}
+            T(P)
+            \arrow[r, "\sigma_P"]
+            \arrow[d, "T(f)", swap]
+            &
+            \N[S(P)]
+            \arrow[d, "\N \lbrack S(f) \rbrack"]
+            \\
+            T(Q)
+            \arrow[r, "\sigma_Q"]
+            &
+            \N[S(Q)]
+        \end{tikzcd}
+        \quad
+        \textrm{and}
+        \quad
+        \begin{tikzcd}
+            T(P)
+            \arrow[r, "\tau_P"]
+            \arrow[d, "T(f)", swap]
+            &
+            \N[S(P)]
+            \arrow[d, "\N \lbrack S(f) \rbrack"]
+            \\
+            T(Q)
+            \arrow[r, "\tau_Q"]
+            &
+            \N[S(Q)].
+        \end{tikzcd}
+    \end{equation*}
+    When possible, we will abuse notation and write $f(s)$ or $f(t)$ for sites $s \in S(P)$ and transitions $t \in T(P)$, in lieu of the more verbose $S(f)(s)$ and $T(f)(t)$.
+\end{definition}
+
+\begin{align*}
+    f(\alpha) &= f(\beta) = \chi    & g&(A)    = g(B) = X \\
+    f(\gamma) &= \psi               & g&(AA)   = g(AB) = g(C) = Y \\
+    f(\delta) &= \omega             & g&(AAAB) = Z
+\end{align*}
+
+\begin{figure}[!h]
+    \scalebox{0.6}{
+    \begin{tikzpicture}
+        \begin{pgfonlayer}{nodelayer}
+            \node [style=site] (A) at (0, 0.8) {$A$};
+            \node [style=site] (B) at (0, -0.8) {$B$};
+            \node [style=site] (C) at (6, -1.6) {$C$};
+            \node [style=site] (AA) at (4, 0.8) {$AA$};
+            \node [style=site] (AB) at (4, -0.8) {$AB$};
+            \node [style=site] (AAAB) at (8, 0) {$AAAB$};
+            \node [style=transition] (tau1) at (2, 0.8) {$\alpha$};
+            \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
+            \node [style=transition] (tau3) at (6, 0) {$\gamma$};
+            \node [style=transition] (tau4) at (10, 0) {$\delta$};
+
+
+            \node [style=site] (W) at (-4, -6) {$W$};
+            \node [style=site] (X) at (0, -6) {$X$};
+            \node [style=site] (Y) at (4, -6) {$Y$};
+            \node [style=site] (Z) at (8, -6) {$Z$};
+            \node [style=transition] (tau5) at (-2, -6) {$\phi$};
+            \node [style=transition] (tau6) at (2, -6) {$\chi$};
+            \node [style=transition] (tau7) at (6, -6) {$\psi$};
+            \node [style=transition] (tau8) at (10, -6) {$\omega$};
+
+            \node [text=red, scale=2] (g) at (-1.5, -3) {$g$};
+            \node [text=blue, scale=2] (f) at (0.5, -3) {$f$};
+        \end{pgfonlayer}
+        \begin{pgfonlayer}{edgelayer}
+            \draw [style=inarrow, draw=gray!80, bend right=15] (A) to (tau1);
+            \draw [style=inarrow, draw=gray!80, bend left=15] (A) to (tau1);
+            \draw [style=inarrow, draw=gray!80, bend right=15] (A) to (tau2);
+            \draw [style=inarrow, draw=gray!80] (tau1) to (AA);
+            \draw [style=inarrow, draw=gray!80] (B) to (tau2);
+            \draw [style=inarrow, draw=gray!80] (tau2) to (AB);
+            \draw [style=inarrow, draw=gray!80] (AA) to (tau3);
+            \draw [style=inarrow, draw=gray!80] (AB) to (tau3);
+            \draw [style=inarrow, draw=gray!80, bend left=30] (C) to (tau3);
+            \draw [style=inarrow, draw=gray!80] (tau3) to (AAAB);
+            \draw [style=inarrow, draw=gray!80, bend left=30] (tau3) to (C);
+            \draw [style=inarrow, draw=gray!80] (AAAB) to (tau4);
+            \draw [style=inarrow, draw=gray!80, bend right=30] (tau4) to (A);
+            \draw [style=inarrow, draw=gray!80, bend right=30] (tau4) to (AA);
+            \draw [style=inarrow, draw=gray!80, bend left=40] (tau4) to (B);
+
+            \draw [style=inarrow, draw=gray!80, bend left=15] (W) to (tau5);
+            \draw [style=inarrow, draw=gray!80, bend right=15] (W) to (tau5);
+            \draw [style=inarrow, draw=gray!80, bend left=15] (tau5) to (X);
+            \draw [style=inarrow, draw=gray!80, bend right=15] (tau5) to (X);
+            \draw [style=inarrow, draw=gray!80, bend left=15] (X) to (tau6);
+            \draw [style=inarrow, draw=gray!80, bend right=15] (X) to (tau6);
+            \draw [style=inarrow, draw=gray!80] (tau6) to (Y);
+            \draw [style=inarrow, draw=gray!80, bend left=20] (Y) to (tau7);
+            \draw [style=inarrow, draw=gray!80] (Y) to (tau7);
+            \draw [style=inarrow, draw=gray!80, bend right=20] (Y) to (tau7);
+            \draw [style=inarrow, draw=gray!80] (tau7) to (Z);
+            \draw [style=inarrow, draw=gray!80, bend left=50] (tau7.south) to (Y.south);
+            \draw [style=inarrow, draw=gray!80] (Z) to (tau8);
+            \draw [style=inarrow, draw=gray!80, bend left=30] (tau8) to (X);
+            \draw [style=inarrow, draw=gray!80, bend right=30] (tau8) to (X);
+            \draw [style=inarrow, draw=gray!80, bend right=30] (tau8) to (Y);
+
+            \draw [style=sitemap, bend right=30] (A) to (X);
+            \draw [style=sitemap, bend right=30] (B) to (X);
+            \draw [style=sitemap, bend right=30] (AA) to (Y);
+            \draw [style=sitemap, bend right=30] (AB) to (Y);
+            \draw [style=sitemap, bend right=30] (C) to (Y);
+            \draw [style=sitemap, bend right=30] (AAAB) to (Z);
+            \draw [style=transitionmap, bend right=30] (tau1) to (tau6);
+            \draw [style=transitionmap, bend right=30] (tau2) to (tau6);
+            \draw [style=transitionmap, bend right=30] (tau3) to (tau7);
+            \draw [style=transitionmap, bend right=30] (tau4) to (tau8);
+        \end{pgfonlayer}
+    \end{tikzpicture}
+}
+\end{figure}
+
+\begin{definition}\label{def:subnet}
+    % Let $P$ and $Q$ be Petri nets.
+    % We say that $P$ is a \textbf{Petri subnet} of $Q$ when $T(P) \subseteq T(Q)$, $S(P) \subseteq S(Q)$, $\sigma_P = \sigma_Q|_{T(P)}$ and $\tau_P = \tau_Q|_{T(P)}$.
+    Let $Q$ be a Petri net. A \textbf{Petri subnet} $P$ of $Q$ consists of
+    \begin{itemize}
+        \item a subset of sites of $Q$, denoted $S(P)$
+        \item a subset of transitions of $Q$, denoted $T(P)$
+        \item a pair of maps $\begin{tikzcd}
+                T(P)
+                \arrow[r, shift left = 1, "\sigma_P"]
+                \arrow[r, shift right = 1, "\tau_P", swap]
+                &
+                \N[S(P)]
+        \end{tikzcd}$.
+    \end{itemize}
+    such that $\sigma_P = \sigma_Q|_{T(P)}$ and $\tau_P = \tau_Q|_{T(P)}$.
+\end{definition}
+
+\begin{figure}[!h]
+    \scalebox{0.6}{
+    \begin{tikzpicture}
+        \begin{pgfonlayer}{nodelayer}
+            \node [style=site] (A) at (0, 0.8) {$A$};
+            \node [style=site] (B) at (0, -0.8) {$B$};
+            \node [style=site] (C) at (6, -1.6) {$C$};
+            \node [style=site] (AA) at (4, 0.8) {$AA$};
+            \node [style=site] (AB) at (4, -0.8) {$AB$};
+            \node [style=site] (AAAB) at (8, 0) {$AAAB$};
+            \node [style=transition] (tau1) at (2, 0.8) {$\alpha$};
+            \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
+            \node [style=transition] (tau3) at (6, 0) {$\gamma$};
+
+            \node [style=site] (W) at (-4, -6) {$W$};
+            \node [style=site, fill=green!20] (X) at (0, -6) {$X$};
+            \node [style=site, fill=green!20] (Y) at (4, -6) {$Y$};
+            \node [style=site, fill=green!20] (Z) at (8, -6) {$Z$};
+            \node [style=transition] (tau5) at (-2, -6) {$\phi$};
+            \node [style=transition, fill=yellow!20] (tau6) at (2, -6) {$\chi$};
+            \node [style=transition, fill=yellow!20] (tau7) at (6, -6) {$\psi$};
+            \node [style=transition] (tau8) at (10, -6) {$\omega$};
+        \end{pgfonlayer}
+        \begin{pgfonlayer}{edgelayer}
+            \draw [style=inarrow, draw=gray!80, bend right=15] (A) to (tau1);
+            \draw [style=inarrow, draw=gray!80, bend left=15] (A) to (tau1);
+            \draw [style=inarrow, draw=gray!80, bend right=15] (A) to (tau2);
+            \draw [style=inarrow, draw=gray!80] (tau1) to (AA);
+            \draw [style=inarrow, draw=gray!80] (B) to (tau2);
+            \draw [style=inarrow, draw=gray!80] (tau2) to (AB);
+            \draw [style=inarrow, draw=gray!80] (AA) to (tau3);
+            \draw [style=inarrow, draw=gray!80] (AB) to (tau3);
+            \draw [style=inarrow, draw=gray!80, bend left=30] (C) to (tau3);
+            \draw [style=inarrow, draw=gray!80] (tau3) to (AAAB);
+            \draw [style=inarrow, draw=gray!80, bend left=30] (tau3) to (C);
+
+            \draw [style=inarrow, draw=gray!80, bend left=15] (W) to (tau5);
+            \draw [style=inarrow, draw=gray!80, bend right=15] (W) to (tau5);
+            \draw [style=inarrow, draw=gray!80, bend left=15] (tau5) to (X);
+            \draw [style=inarrow, draw=gray!80, bend right=15] (tau5) to (X);
+            \draw [style=inarrow, draw=red, bend left=15] (X) to (tau6);
+            \draw [style=inarrow, draw=red, bend right=15] (X) to (tau6);
+            \draw [style=inarrow, draw=red] (tau6) to (Y);
+            \draw [style=inarrow, draw=red, bend left=20] (Y) to (tau7);
+            \draw [style=inarrow, draw=red] (Y) to (tau7);
+            \draw [style=inarrow, draw=red, bend right=20] (Y) to (tau7);
+            \draw [style=inarrow, draw=red] (tau7) to (Z);
+            \draw [style=inarrow, draw=red, bend left=50] (tau7.south) to (Y.south);
+            \draw [style=inarrow, draw=gray!80] (Z) to (tau8);
+            \draw [style=inarrow, draw=gray!80, bend left=30] (tau8) to (X);
+            \draw [style=inarrow, draw=gray!80, bend right=30] (tau8) to (X);
+            \draw [style=inarrow, draw=gray!80, bend right=30] (tau8) to (Y);
+
+            \draw [style=sitemap, bend right=30, shorten >=2mm] (A) to (X);
+            \draw [style=sitemap, bend right=30, shorten >=2mm] (B) to (X);
+            \draw [style=sitemap, bend right=30, shorten >=2mm] (AA) to (Y);
+            \draw [style=sitemap, bend right=30, shorten >=2mm] (AB) to (Y);
+            \draw [style=sitemap, bend right=30, shorten >=2mm] (C) to (Y);
+            \draw [style=sitemap, bend right=30, shorten >=2mm] (AAAB) to (Z);
+            \draw [style=transitionmap, bend right=30, shorten >=2mm] (tau1) to (tau6);
+            \draw [style=transitionmap, bend right=30, shorten >=2mm] (tau2) to (tau6);
+            \draw [style=transitionmap, bend right=30, shorten >=2mm] (tau3) to (tau7);
+        \end{pgfonlayer}
+    \end{tikzpicture}
+}
+\end{figure}
+
+For a Petri net morphism $f : P \rightarrow Q$, the image $f(P)$ in $Q$ is a Petri subnet with source and target maps $\sigma_{f(P)}$ and $\tau_{f(P)}$ defined by restriction of $\sigma_Q$ and $\tau_Q$, respectively.
+Similarly, the preimage of a Petri subnet of $Q$ is a Petri subnet of $P$ with source and target maps defined by restriction of $\sigma_P$ and $\tau_P$.
+
+\begin{definition}\label{def:source-sink}
+    Let $P$ be a Petri net and let $t$ be a transition.
+    We say that $t$ is a \textbf{source} if $\sigma(t) = 0$, and is a \textbf{sink} if $\tau(t) = 0$.
+    $P$ is said to be \textbf{sourceless} if it has no sources.
+    Similarly, $P$ is \textbf{sinkless} if it has no sinks.
+\end{definition}
+
+It follows immediately from the definition of a Petri map that the image of a sourceless Petri net is sourceless, otherwise the $\sigma$-diagram would not commute.
+Similarly, the image of a sinkless Petri net is sinkless.
+
+\begin{figure}[!h]
+    \scalebox{0.6}{
+    \begin{tikzpicture}
+        \begin{pgfonlayer}{nodelayer}
+            \node [style=site] (A) at (2, 0.8) {$A$};
+            \node [style=site] (B) at (2, -0.8) {$B$};
+            \node [style=transition] (tau1) at (0, 0) {$\alpha$};
+            \node [style=transition] (tau2) at (4, 0) {$\beta$};
+        \end{pgfonlayer}
+        \begin{pgfonlayer}{edgelayer}
+            \draw [style=inarrow, bend left=15] (tau1) to (A);
+            \draw [style=inarrow, bend right=15] (tau1) to (B);
+            \draw [style=inarrow, bend left=15] (A) to (tau2);
+            \draw [style=inarrow, bend right=15] (B) to (tau2);
+        \end{pgfonlayer}
+    \end{tikzpicture}
+}
+\end{figure}
+
+\begin{definition}\label{def:pathway}
+    If $P$ is a Petri net, a \textbf{pathway} $\gamma = t_n \ldots t_1$ in $P$ of length $n \ge 1$ is a sequence of transitions $t_i \in T$ such that $\tau(t_i) \ne 0$, $\sigma(t_i) \ne 0$, $m_{i} + \tau(t_i) = n_{i+1} + \sigma(t_{i+1})$ with $\sigma(t_{i+1}) \ne m_{i}$ and $\tau(t_{i+1}) \ne n_{i+1}$. We write $t \in \gamma$ to denote that the transition $t$ appears in the pathway $\gamma$.
+\end{definition}
+
+\begin{figure}[!h]
+    \scalebox{0.6}{
+    \begin{tikzpicture}
+        \begin{pgfonlayer}{nodelayer}
+            \node [style=site] (A) at (0, 0.8) {$A$};
+            \node [style=site] (B) at (0, -0.8) {$B$};
+            \node [style=site] (C) at (6, -1.6) {$C$};
+            \node [style=site] (AA) at (4, 0.8) {$AA$};
+            \node [style=site] (AB) at (4, -0.8) {$AB$};
+            \node [style=site] (AAAB) at (8, 0) {$AAAB$};
+            \node [style=transition, fill=green!20] (tau1) at (2, 0.8) {$\alpha$};
+            \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
+            \node [style=transition, fill=green!20] (tau3) at (6, 0) {$\gamma$};
+            \node [style=transition] (tau4) at (10, 0) {$\delta$};
+        \end{pgfonlayer}
+        \begin{pgfonlayer}{edgelayer}
+            \draw [style=inarrow, bend right=15] (A) to (tau1);
+            \draw [style=inarrow, bend left=15] (A) to (tau1);
+            \draw [style=inarrow, bend right=15] (A) to (tau2);
+            \draw [style=inarrow] (tau1) to (AA);
+            \draw [style=inarrow] (B) to (tau2);
+            \draw [style=inarrow] (tau2) to (AB);
+            \draw [style=inarrow] (AA) to (tau3);
+            \draw [style=inarrow] (AB) to (tau3);
+            \draw [style=inarrow, bend left=30] (C) to (tau3);
+            \draw [style=inarrow] (tau3) to (AAAB);
+            \draw [style=inarrow, bend left=30] (tau3) to (C);
+            \draw [style=inarrow] (AAAB) to (tau4);
+            \draw [style=inarrow, bend right=30] (tau4) to (A);
+            \draw [style=inarrow, bend right=30] (tau4) to (AA);
+            \draw [style=inarrow, bend left=40] (tau4) to (B);
+        \end{pgfonlayer}
+    \end{tikzpicture}
+}
+\end{figure}
+
+\begin{definition}\label{def:pathway-connected}
+    Let $P$ be a Petri net and $x,y \in S(P)$.
+    We say that $x$ is \textbf{pathway connected to} $y$ if and only if there exists a pathway $\gamma = t_n \ldots t_1$ such that $\sigma(t_1) = x + m$ and $\tau(t_n) = y + n$ for some $m, n \in \N[S(P)]$.
+    The set of all pathways in $P$ from $x$ to $y$ is denoted $\Gamma_x^y$.
+    We denote the set of all pathways in $P$ starting from $x$ as $\Gamma_x = \bigcup_{y \in S(P)} \Gamma_x^y$, and all pathways terminating at $y$ as $\Gamma^y = \bigcup_{x \in S(P)} \Gamma_x^y$.
+\end{definition}
+
+\begin{lemma}\label{lem:image-of-pathways}
+    Let $f: P \rightarrow Q$ be a Petri net morphism and let $x, y \in S(P)$ be pathway connected in $P$.
+    Then $f(x)$ and $f(y)$ are pathway connected in $f(P)$.
+\end{lemma}
+\begin{proof}
+    Let $\gamma = t_n \ldots t_1$ be a pathway from $x$ to $y$.
+    Given that $\sigma_P(t_i) \ne 0$ and $\tau_P(t_i) \ne 0$, we know that $\sigma_{f(P)} \ne 0$ and $\tau_{f(P)} \ne 0$.
+    Since $\sigma_P(t_1) = x + m$, $\sigma_{f(P)}(f(x)) = f(x) + m'$ for some $m' \in \N[S(f(P))]$; similarly, $\tau_{f(P)}(f(y)) = f(y) + n'$ for some $n' \in \N[S(f(P))]$.
+
+    Now, consider two transitions $t_i$ and $t_{i+1}$ in $\gamma$.
+    We know then that there exist $m, n \in \N[S(P)]$ such that $m + \tau_P(t_i) = n + \sigma_P(t_{i+1})$ with $m \ne \sigma_P(t_{i+1})$ and $n \ne \tau_P(t_i)$.
+    We can then apply $\N[S(f)]$ to each side to yield
+    \begin{equation*}
+        \N[S(f)](m) + \N[S(f)](\tau_P(t_i)) = \N[S(f)](n) + \N[S(f)](\sigma_P(t_{i+1})).
+    \end{equation*}
+    Per the commutativity relations imposed by the assembly map,
+    \begin{equation*}
+        \N[S(f)](\tau_P(t_i)) = \tau_{f(P)}(f(t_i)))
+        \quad\textrm{and}\quad
+        \N[S(f)](\sigma_P(t_{i+1})) = \sigma_{f(P)}(f(t_{i+1})).
+    \end{equation*}
+    So, there exist an $m', n' \in \N[S(f(P))]$ such that $m + \tau_{f(P)}(f(t_i)) = n + \sigma_{f(P)}(f(t_{i+1}))$, namely $m' = \N[S(f)](m)$ and $n' = \N[S(f)](n)$.
+    Finally, we know that $m' \ne \sigma_{f(P)}(f(t_{i+1}))$ as otherwise $m = \sigma_P(t_{i+1})$, and similarly $n' \ne \tau_{f(P)}(f(t_i))$.
+
+    This shows that a pathway exists from $f(x)$ to $f(y)$, so $f(x)$ and $f(y)$ are pathway connected.
+\end{proof}
+
+\begin{definition}\label{def:site-completion}
+    Let $P$ be a petri net and let $X \subseteq T(P)$.
+    The \textbf{site completion} of $X$ in $P$, denoted $X^*$ is the Petri net defined by $T(X^*) = X$, $S(X^*) = \pi(X)$, $\sigma_{X^*} = \sigma_P|_{X^*}$ and $\tau_{X^*} = \tau_P|_{X^*}$.
+\end{definition}
+
+\begin{definition}\label{def:upper-lower-subnet}
+    Let $P$ be a Petri net and let $X \subseteq S(P)$.
+    The \textbf{upper subnet} of $X$ in $P$, denoted $\upset{X}$, consists of transitions $T(\upset{X}) = \bigcup_{x \in X}\{t \in \gamma ~|~ \gamma \in \Gamma_x\}$, sites $S(\upset{X}) = X \cup S(T(\upset{X})^*)$, $\sigma_{X\uparrow} = \sigma_P|_{T(X\uparrow)^*}$ and $\tau_{X\uparrow} = \tau_P|_{T(X\uparrow)^*}$.
+    Similarly, the \textbf{lower subnet} of $X$ in $P$, denoted $\downset{X}$, consists of transitions $T(\downset{X}) = \{t \in \gamma ~|~ \gamma \in \Gamma_X\}$, sites $S(\downset{X}) = X \cup S(T(\downset{X})^*)$, $\sigma' = \sigma|_{T(X\downarrow)^*}$ and $\tau = \tau|_{T(X\downarrow)^*}$.
+    If $x$ is an element $x \in P$, we write $\upset{x} = \upset{\{x\}}$ and $\downset{x} = \downset{\{x\}}$.
+\end{definition}
+
+\begin{definition}\label{def:minimal}
+    Let $P$ be a Petri net. A site $y$ is \textbf{minimal} in $P$ if $\Gamma_x^y = \emptyset$ for all sites $y \ne x$ in $P$.
+    The set of all minimal sites of $P$ is denoted $\Min{P}$.
+\end{definition}
+
+\begin{definition}\label{def:basis}
+    Let $P$ be a Petri net and let $\B$ be a non-empty subset of sites of $P$.
+    We say that $\B$ is a \textbf{basis} of $P$ if $P = \upset{\B}$ such that if $U \subseteq \B$ with $P = \upset{U}$ then $U = \B$.
+\end{definition}
+
+\begin{lemma}
+    Let $P$ be a Petri net. For any basis $\B$ of $P$, $\Min{P} \subseteq \B$.
+    Furthermore, if $\Min{P}$ is a basis of $P$, then $\Min{P}$ is the unique basis of $P$.
+\end{lemma}
+\begin{proof}
+    Let $x \in \Min{P}$ and $\B$ be a basis of $P$, then either there exists a $y \in \B$ such that $\Gamma_y^x$ is non-empty, or $x \in \B$.
+    However, $\Gamma^x$ is empty by definition of $\Min{P}$, so we have that $x \in B$.
+    Since the choice of $x$ was arbitrary, every element of $\Min{P}$ is in the basis $\B$ and thus $\min{P} \subseteq \B$.
+    Furthermore, suppose that $P = \upset{\Min{P}}$.
+    Then $\B = \Min{P}$, otherwise $\B$ would not be a basis, by definition.
+    Since $\B$ was chosen arbitrarily, this holds for every choice of $\B$ and as such $\Min{P}$ is a unqiue basis for $P$.
+\end{proof}
+
+\begin{lemma}\label{lem:image-basis}
+    Let $P$ be a Petri net with basis $\B$ and let $f : A \rightarrow B$ be a Petri net morphism.
+    Then $f(\B)$ is a basis for $f(P)$.
+\end{lemma}
+\begin{proof}
+    Certainly $f(\B)$ is nonempty as $\B$ is nonempty, and of course $f(P)$ must be in the upper set of $f(\B)$.
+    This follows immediately from \cref{lem:image-of-pathways} since every site in $P$ is pathway connected to a site in $\B$.
+    Now let $U \subset f(\B)$ such that $f(P) = \upset{U}$.
+    \TODO: Show that $f(\B)$ is minimal.
+\end{proof}
+
+\section{Assembly Spaces, Subspaces and Maps}
+
+\begin{definition}\label{def:assembly-space}
+    An \textbf{assembly space} $(A, \B_A)$ is a sourceless and sinkless Petri net with basis $\B_A$.
+    Were possible, we will simply write $A$ to denote an assembly space $(A, \B_A)$.
+\end{definition}
+
+\begin{definition}\label{def:assembly-subspace}
+    Let $A$ and $A'$ be assembly spaces.
+    $A'$ is an \textbf{assembly subspace} of $A$ if $A'$ is a Petri subnet of $A$.
+    This relationship is denoted $A' \subseteq A$.
+\end{definition}
+
+\begin{definition}\label{def:rooted}
+    Let $(A', \B_{A'})$ be an assembly subspace of $(A, \B_A)$.
+    We say that $A'$ is rooted in $A$ if $\B_{A'} \subseteq \B_A$.
+\end{definition}
+
+\begin{lemma}\label{lem:lower-is-rooted}
+    Let $A$ be an assembly space and let $x \in S(A)$.
+    Then $\downset{x}$ with basis $\B_A \cap S(\downset{x})$ is a rooted assembly subspace of $A$.
+\end{lemma}
+\begin{proof}
+    By construction, $\downset{x}$ is a Petri subnet of $A$.
+    Since $A$ is an assembly space, it is sourceless and sinkless; and given that $\downset{x}$ is a site-completion, $\downset{x}$ is also sourceless and sinkless.
+    This gives us that $\downset{x}$ is an assembly subspace of $A$.
+    We need only show that $\B_{x\downarrow} = \B_A \cap S(\downset{x}) \subseteq \B_A$ is a basis of $\downset{x}$.
+    First, $\B_{x\downarrow}$ is necessarily nonempty since $\B_A$ is a basis in $A$.
+    Further, we know that every site in $\downset{x}$ is above $\B_A \cap S(\downset{x})$ since, again $\B_A$ is a basis in $A$.
+    \TODO: Show that $\B_{x\downarrow}$ is minimal.
+\end{proof}
+
+\begin{definition}\label{def:assembly-map}
+    Let $A$ and $B$ be assembly spaces.
+    An \textbf{assembly map} is simply a Petri net map $f: A \rightarrow B$ between assembly spaces.
+\end{definition}
+
+\begin{theorem}\label{lem:assembly-image-is-subspace}
+    If $f : A \rightarrow B$ is an assembly map between assembly spaces $A$ and $B$, then $f(A)$ is an assembly subspace of $B$.
+\end{theorem}
+\begin{proof}
+    This follows directly from the fact that the image of a Petri net morphism is a Petri subnet, and that the image of a sourceless, sinkless Petri net is itself sourceless and sinkless.
+\end{proof}
+
+\begin{theorem}\label{thm:rooted-image}
+    Let $A$ be an assembly space, $Z \subseteq A$ a rooted assembly subspace, and $f : A \rightarrow B$ an assembly map.
+    Then $(f(Z), S(f)(\B_Z))$ is rooted in $(f(A), S(f)(\B_A)$.
+\end{theorem}
+\begin{proof}
+    First, $f(Z)$ is certainly an assembly subspace of $f(A)$ as we can view $f|_Z$ as an assembly map, and thus \cref{lem:assembly-image-is-subspace} applies.
+    To see that $f(Z)$ is rooted, we first note that $S(f)(\B_Z)$ and $S(f)(\B_A)$ are bases for $f(Z)$ and $f(A)$, respectively.
+    Further, since $Z$ is rooted in $A$, then $\B_Z \subset \B_A$, so $f(\B_Z) \subseteq f(\B_A)$.
+\end{proof}
+
+\section{The Assembly Index}
+
+\begin{definition}\label{def:size}
+    Let $A$ be an assembly space.
+    The \textbf{size} of $A$ is the cardinality of $T(A)$, denoted $|A|$.
+\end{definition}
+
+\begin{definition}\label{def:finiteness}
+    Let $A$ be an assembly space and let $x$ be a site in $A$.
+    We say that $x$ is \textbf{finite} in $A$ if $\downset{x}$ in $A$ has finite size.
+\end{definition}
+
+\begin{definition}\label{def:index}
+    Let $A$ be an assembly space and let $x$ be a finite site in $A$.
+    The \textbf{assembly index} of $x$ is the minimal size of all rooted assembly subspaces of $A$ containing $x$, and is denoted $c_A(x)$.
+    This can be written $c(x)$ when the relevant assembly space is clear from context.
+\end{definition}
+
+\subsection{Bounds on the Assembly Index}
+
+\begin{theorem}\label{cor:subspace-index-upper-bound}
+    Let $(A, \B_A)$ be an assembly space and let $(B, \B_A)$ be a rooted assembly subspace of $A$.
+    For every finite $b \in S(B)$, the assembly index of $b$ in $B$ is at least the assembly index of $b$ in $A$.
+    That is, $c_B(b) \ge c_A(b)$ for all $b \in S(B)$
+\end{theorem}
+\begin{proof}
+    We need only show that $c_A(b)$ cannot be greater than $c_B(b)$ for any $b \in S(B)$.
+    To see this, let $Z \subseteq B$ be a rooted assembly subspace containing $b$ with $|Z| = c_B(b)$.
+    Then $Z$ is also a rooted assembly subspace of $A$ containing $b$, and so $c_A(b)$ can be at most $|Z|$.
+    That is, $c_A(b) \le |Z| = c_B(b)$.
+\end{proof}
+
+\begin{theorem}\label{thm:image-lower-bound}
+    If $f: A \rightarrow B$ is an assembly map, then $c_{f(A)}(f(x)) \le c_A(x)$ for all finite $x \in S(A)$.
+    Furthermore, if $f$ is an embedding, then $c_{f(A)}(f(x)) = c_A(x)$.
+\end{theorem}
+\begin{proof}
+    Suppose $x \in S(A)$ is finite, and $Z \subseteq A$ is a rooted with $s \in S(Z)$ and $|Z| = c_A(x)$.
+    Restricting $f$ to $Z$ provides an assembly map $f^* : Z \rightarrow B$ such that $f(Z)$ contains $f(x)$, and is rooted in $B$.
+    As such, $c_{f(A)}(f(x))$ can be no larger than $|f(Z)|$, so $c_{f(A)}(f(x)) \le c_A(x)$.
+
+    Furthermore, suppose that $f$ is an embedding, and consider any $Z' \subseteq f(A)$ rooted and containing $f(x)$.
+    The preimage of $Z'$ under $f$ is then a rooted assembly subspace of $A$ containing $x$, so $c_A(x)$ can be no larger than $|f^{-1}(Z)|$.
+    Together with the previous result, we then have $c_{f(A)}(f(x)) = c_A(x)$.
+\end{proof}
+
+\begin{corollary}\label{cor:lowerset-index}
+    Let $A$ be an assembly space and $x \in S(A)$ be finite.
+    Then $c_A(x) = c_{x\downarrow}(x)$.
+\end{corollary}
+\begin{proof}
+    There is a natural embedding $i : \downset{x} \rightarrow A$, so $c_A(x) = c_{x\downarrow}(x)$ for all finite $x \in S(A)$, as per \cref{thm:image-lower-bound}.
+\end{proof}
+
+\subsection{Computability and Algorithms}
+
+\begin{theorem}\label{thm:computable}
+    If $A$ is an assembly space and $x \in S(A)$ is finite, then $c(x)$ is computable.
+\end{theorem}
+\begin{proof}
+    Every rooted assembly subspace with minimal size and containing $x$ is a minimal, rooted assembly subspace of $\downset{x}$.
+    Since $x$ is finite, $\downset{x}$ is finite; that is $\downset{x}$ has finitely many transitions.
+    This, together with the fact that $\pi(\sigma(t))$ and $\pi(\tau(t))$ are finite for all $t \in T(A)$, ensures that there areonly finitely many assembly subspaces of $\downset{x}$.
+    As such, the set of all rooted assembly subspaces is computable; simply enumerate them.
+    The size of each subspace is, of course, computable as one need simply count the transitions in the subspace.
+    Finally, finding the minimum value in a finite set of natural numbers is computable.
+    Thus, $c(x)$ is computable.
+\end{proof}
+
+\TODO Typeset split-branch algorithm
+
+\section{Assembly Examples}
+
+\TODO Come up with a few fun examples.
+
+\end{document}
