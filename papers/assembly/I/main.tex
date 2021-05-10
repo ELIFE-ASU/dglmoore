@@ -60,7 +60,8 @@
 \newcommand{\A}{\mathcal{A}}
 \newcommand{\powerset}{\mathcal{P}}
 
-\newcommand{\TODO}{\noindent\textbf{TODO:}~}
+\newcommand{\red}[1]{{\color{red}#1}}
+\newcommand{\TODO}[1]{\noindent\red{\textbf{TODO:}~#1}}
 
 \begin{document}
 
@@ -124,7 +125,7 @@ To clarify this point, $\pi(\ce{2H2} + \ce{O_2}) = \{\ce{H_2}, \ce{O_2}\}$.
 Before departing from the topic of the free commutative monoid, we want to note that while it may seem that we are being overly formalistic, we gain some power by taking this approach.
 Most importantly, we can consider what happens if you ``map'' one set of objects into another. 
 As a concrete example, you could imagine mapping each of the molecules $\ce{H_2}$, $\ce{O_2}$ and $\ce{H_2O}$ to the number of Hydrogen atoms they contain, i.e. $2$, $0$, and $2$.
-\textbf{I don't like that example very much, but it's good enough for the moment.}
+\red{I don't like that example very much, but it's good enough for the moment.}
 This mapping process can be ``lifted'' into a map on the linear combinations by distributing the map over addition, so that $\ce{H_2} + \ce{O_2}$ maps to $2 + 0 = 2$. More formally, any function between sets $f : X \rightarrow Y$ can be uniquely extended to a function $\N[f] : \N[X] \rightarrow \N[Y]$ such that
 \begin{equation*}
     \sum_{x \in X} a_x x \mapsto \sum_{x \in X} a_x f(x).
@@ -551,7 +552,7 @@ Similarly, the image of a sinkless Petri net is sinkless.
     Certainly $f(\B)$ is nonempty as $\B$ is nonempty, and of course $f(P)$ must be in the upper set of $f(\B)$.
     This follows immediately from \cref{lem:image-of-pathways} since every site in $P$ is pathway connected to a site in $\B$.
     Now let $U \subset f(\B)$ such that $f(P) = \upset{U}$.
-    \TODO: Show that $f(\B)$ is minimal.
+    \TODO{Show that $f(\B)$ is minimal.}
 \end{proof}
 
 \section{Assembly Spaces, Subspaces and Maps}
@@ -583,7 +584,7 @@ Similarly, the image of a sinkless Petri net is sinkless.
     We need only show that $\B_{x\downarrow} = \B_A \cap S(\downset{x}) \subseteq \B_A$ is a basis of $\downset{x}$.
     First, $\B_{x\downarrow}$ is necessarily nonempty since $\B_A$ is a basis in $A$.
     Further, we know that every site in $\downset{x}$ is above $\B_A \cap S(\downset{x})$ since, again $\B_A$ is a basis in $A$.
-    \TODO: Show that $\B_{x\downarrow}$ is minimal.
+    \TODO{Show that $\B_{x\downarrow}$ is minimal.}
 \end{proof}
 
 \begin{definition}\label{def:assembly-map}
@@ -677,10 +678,10 @@ Similarly, the image of a sinkless Petri net is sinkless.
     Thus, $c(x)$ is computable.
 \end{proof}
 
-\TODO Typeset split-branch algorithm
+\TODO{Typeset split-branch algorithm}
 
 \section{Assembly Examples}
 
-\TODO Come up with a few fun examples.
+\TODO{Come up with a few fun examples.}
 
 \end{document}
