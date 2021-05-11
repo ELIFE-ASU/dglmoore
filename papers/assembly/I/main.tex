@@ -38,7 +38,7 @@
 \tikzstyle{dot}=[circle,fill=black,draw=black]
 \tikzstyle{bounding}=[circle,dashed, fill=none,draw=black, scale=9.00]
 \tikzstyle{simple}=[-,draw=black,line width=1.000]
-\tikzstyle{inarrow}=[-,draw=black,postaction={decorate},decoration={markings,mark=at position .5 with {\arrow{>}}},line width=1.000]
+\tikzstyle{arrow}=[-,draw=black,postaction={decorate},decoration={markings,mark=at position .5 with {\arrow{>}}},line width=1.000]
 \tikzstyle{tick}=[-,draw=black,postaction={decorate},decoration={markings,mark=at position .5 with {\draw (0,-0.1) -- (0,0.1);}},line width=1.000]
 \tikzstyle{inputarrow}=[->,draw=black, shorten >=.05cm]
 \tikzstyle{sitemap}=[->, dashed, draw=red, ultra thick, shorten >=.05cm]
@@ -134,6 +134,12 @@ The value of doing this is that it will allow us to coherently define a map betw
 
 \subsection{Petri Nets}
 
+We wish to represent the idea of assembling objects out of ``simpler'' objects, in some sense of the word.
+To formalize this idea, we will build off of the concept of a \textit{Petri net}.
+In simple terms, a Petri net is a set of sites which we think of as representing types of objects, e.g. molecules, building materials, characters, etc..., and a set of transitions representing the ways in which sites can be combined to yield other sites.
+For the sake of formalism, we somewhat elevate the transitions above the sites in that we mostly consider the ``inputs'' and ``outputs'' of transitions, rather the transitions that a given site participates in.
+With this in mind, we formally define a Petri net as follows.
+
 \begin{definition}\label{def:petri}
     A \textbf{Petri net} is a $P$ consisting of
     \begin{itemize}
@@ -152,52 +158,121 @@ The value of doing this is that it will allow us to coherently define a map betw
     Where context is unambiguous we may simply write $\sigma$ and $\tau$, but will generally retain the $T(P)$ and $S(P)$ notation.
 \end{definition}
 
-Consider, for example, the Petri $P$ net described by $S(P) = \{ A, B, C, AA, AB, AAAB \}$ and $T(P) = \{ \alpha, \beta, \gamma, \delta \}$ with source and target maps:
+The maps $\sigma$ and $\tau$ assign to each transition a formal linear combination of sites.
+Picking up our molecular example from the previous section, we can consider the Petri net with sites $S = \{\ce{H_2}, \ce{O_2}, \ce{H_2O}\}$, a single transition $T = \{\alpha\}$, and source and target maps
+\begin{equation*}
+    \begin{tikzcd}
+        \alpha \arrow[r, mapsto, "\sigma"] & 2\ce{H_2} + \ce{O_2}
+        \quad\textrm{and}\quad
+        \alpha \arrow[r, mapsto, "\tau"] & 2\ce{H_2O}
+    \end{tikzcd}
+\end{equation*}
+
+There is a natural way of graphically representing a Petri net as a bipartite multigraph:
+
+\begin{center}
+    \scalebox{0.6}{
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [style=site] (H2) at (0, 1) {$\ce{H_2}$};
+                \node [style=site] (O2) at (0, -1) {$\ce{O_2}$};
+                \node [style=site] (H2O) at (4, 0) {$\ce{H_2O}$};
+                \node [style=transition] (alpha) at (2, 0) {$\alpha$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow, bend right=15] (H2) to (alpha);
+                \draw [style=arrow, bend left=15] (H2) to (alpha);
+                \draw [style=arrow] (O2) to (alpha);
+                \draw [style=arrow, bend right=15] (alpha) to (H2O);
+                \draw [style=arrow, bend left=15] (alpha) to (H2O);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
+
+We read this as ``\textit{transition $\alpha$ can only proceed if at least two $\ce{H_2}$ and one $\ce{O_2}$ are present in the system, and will yield two $\ce{H_2O}$ when it does}''.
+In essence, this is a statement about was can possibly happen, not necessarily what will happen; that's more a question of dynamics.
+
+As a more elaborate example, one which we will repeatedly refer to as we expand on the formalism, we imagine a simple ligation type process where in the characters $A$ and $B$ can be combined into strings and $C$ acts something like a \red{``catalyst''} making some transitions possible if and only if $C$ exists.
+Consider the Petri $P$ net described by $S(P) = \{ A, B, C, AA, AB, AAAB \}$ and $T(P) = \{ \alpha, \beta, \gamma, \delta \}$ with source and target maps:
 
 \begin{align*}
     \sigma(\alpha) &= 2A           & \tau(\alpha) &= AA         \\
     \sigma(\beta)  &= A + B        & \tau(\beta)  &= AB         \\
     \sigma(\gamma) &= AA + AB + C  & \tau(\gamma) &= AAAB + C   \\
-    \sigma(\delta) &= AAAB         & \tau(\delta) &= A + AA + B.
+    \sigma(\delta) &= AAAB         & \tau(\delta) &= A + AA + B
 \end{align*}
 
-A natural way of graphically representing this $P$ is with a bipartite multigraph:
+which we graphically represent as
 
-\begin{figure}[!h]
+\begin{center}
     \scalebox{0.6}{
-    \begin{tikzpicture}
-        \begin{pgfonlayer}{nodelayer}
-            \node [style=site] (A) at (0, 0.8) {$A$};
-            \node [style=site] (B) at (0, -0.8) {$B$};
-            \node [style=site] (C) at (6, -1.6) {$C$};
-            \node [style=site] (AA) at (4, 0.8) {$AA$};
-            \node [style=site] (AB) at (4, -0.8) {$AB$};
-            \node [style=site] (AAAB) at (8, 0) {$AAAB$};
-            \node [style=transition] (tau1) at (2, 0.8) {$\alpha$};
-            \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
-            \node [style=transition] (tau3) at (6, 0) {$\gamma$};
-            \node [style=transition] (tau4) at (10, 0) {$\delta$};
-        \end{pgfonlayer}
-        \begin{pgfonlayer}{edgelayer}
-            \draw [style=inarrow, bend right=15] (A) to (tau1);
-            \draw [style=inarrow, bend left=15] (A) to (tau1);
-            \draw [style=inarrow, bend right=15] (A) to (tau2);
-            \draw [style=inarrow] (tau1) to (AA);
-            \draw [style=inarrow] (B) to (tau2);
-            \draw [style=inarrow] (tau2) to (AB);
-            \draw [style=inarrow] (AA) to (tau3);
-            \draw [style=inarrow] (AB) to (tau3);
-            \draw [style=inarrow, bend left=30] (C) to (tau3);
-            \draw [style=inarrow] (tau3) to (AAAB);
-            \draw [style=inarrow, bend left=30] (tau3) to (C);
-            \draw [style=inarrow] (AAAB) to (tau4);
-            \draw [style=inarrow, bend right=30] (tau4) to (A);
-            \draw [style=inarrow, bend right=30] (tau4) to (AA);
-            \draw [style=inarrow, bend left=40] (tau4) to (B);
-        \end{pgfonlayer}
-    \end{tikzpicture}
-}
-\end{figure}
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [style=site] (A) at (0, 0.8) {$A$};
+                \node [style=site] (B) at (0, -0.8) {$B$};
+                \node [style=site] (C) at (6, -1.6) {$C$};
+                \node [style=site] (AA) at (4, 0.8) {$AA$};
+                \node [style=site] (AB) at (4, -0.8) {$AB$};
+                \node [style=site] (AAAB) at (8, 0) {$AAAB$};
+                \node [style=transition] (tau1) at (2, 0.8) {$\alpha$};
+                \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
+                \node [style=transition] (tau3) at (6, 0) {$\gamma$};
+                \node [style=transition] (tau4) at (10, 0) {$\delta$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow, bend right=15] (A) to (tau1);
+                \draw [style=arrow, bend left=15] (A) to (tau1);
+                \draw [style=arrow, bend right=15] (A) to (tau2);
+                \draw [style=arrow] (tau1) to (AA);
+                \draw [style=arrow] (B) to (tau2);
+                \draw [style=arrow] (tau2) to (AB);
+                \draw [style=arrow] (AA) to (tau3);
+                \draw [style=arrow] (AB) to (tau3);
+                \draw [style=arrow, bend left=30] (C) to (tau3);
+                \draw [style=arrow] (tau3) to (AAAB);
+                \draw [style=arrow, bend left=30] (tau3) to (C);
+                \draw [style=arrow] (AAAB) to (tau4);
+                \draw [style=arrow, bend right=30] (tau4) to (A);
+                \draw [style=arrow, bend right=30] (tau4) to (AA);
+                \draw [style=arrow, bend left=40] (tau4) to (B);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
+
+This particular example exhibits a number of interesting features.
+First, there are transitions wherein one of the input sites is also an output site, namely $\gamma$'s dependence on $C$.
+Drawing from chemical parlance, this represents a catalytic effect; the transition can only proceed when the site is present\footnote{The addition of another transitition next to $\gamma$ which does not depend on or yield $C$ can model processes that can proceed without $C$ but is accelerated by it.}.
+Second, transitions such as $\delta$ can be viewed as a degradation or disassembly process.
+This allows reactions to run in both directions.
+To elaborate on this point, we can return to the water example and introduce a second transition allowing for the degradation of water back into Hydrogen and Oxygen:
+
+\begin{center}
+    \scalebox{0.6}{
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [style=site] (H2) at (0, 1) {$\ce{H_2}$};
+                \node [style=site] (O2) at (0, -1) {$\ce{O_2}$};
+                \node [style=site] (H2O) at (4, 0) {$\ce{H_2O}$};
+                \node [style=transition] (alpha) at (2, 0) {$\alpha$};
+                \node [style=transition] (beta) at (6, 0) {$\beta$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow, bend right=15] (H2) to (alpha);
+                \draw [style=arrow, bend left=15] (H2) to (alpha);
+                \draw [style=arrow] (O2) to (alpha);
+                \draw [style=arrow, bend right=15] (alpha) to (H2O);
+                \draw [style=arrow, bend left=15] (alpha) to (H2O);
+                \draw [style=arrow, bend right=15] (H2O) to (beta);
+                \draw [style=arrow, bend left=15] (H2O) to (beta);
+                \draw [style=arrow, bend right=25] (beta.north) to (H2);
+                \draw [style=arrow, bend right=15] (beta.north) to (H2);
+                \draw [style=arrow, bend left=15] (beta.south) to (O2);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
 
 \begin{definition}\label{def:petri-map}
     A \textbf{Petri net morphism} from a Petri net $P$ to a Petri net $Q$, denoted $f : P \rightarrow Q$, consisists of a pair of functions $T(f) : T(P) \rightarrow T(Q)$ and $S(f): S(P) \rightarrow S(Q))$ such that the following diagrams commute:
@@ -241,82 +316,82 @@ A natural way of graphically representing this $P$ is with a bipartite multigrap
     f(\delta) &= \omega             & g&(AAAB) = Z
 \end{align*}
 
-\begin{figure}[!h]
+\begin{center}
     \scalebox{0.6}{
-    \begin{tikzpicture}
-        \begin{pgfonlayer}{nodelayer}
-            \node [style=site] (A) at (0, 0.8) {$A$};
-            \node [style=site] (B) at (0, -0.8) {$B$};
-            \node [style=site] (C) at (6, -1.6) {$C$};
-            \node [style=site] (AA) at (4, 0.8) {$AA$};
-            \node [style=site] (AB) at (4, -0.8) {$AB$};
-            \node [style=site] (AAAB) at (8, 0) {$AAAB$};
-            \node [style=transition] (tau1) at (2, 0.8) {$\alpha$};
-            \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
-            \node [style=transition] (tau3) at (6, 0) {$\gamma$};
-            \node [style=transition] (tau4) at (10, 0) {$\delta$};
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [style=site] (A) at (0, 0.8) {$A$};
+                \node [style=site] (B) at (0, -0.8) {$B$};
+                \node [style=site] (C) at (6, -1.6) {$C$};
+                \node [style=site] (AA) at (4, 0.8) {$AA$};
+                \node [style=site] (AB) at (4, -0.8) {$AB$};
+                \node [style=site] (AAAB) at (8, 0) {$AAAB$};
+                \node [style=transition] (tau1) at (2, 0.8) {$\alpha$};
+                \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
+                \node [style=transition] (tau3) at (6, 0) {$\gamma$};
+                \node [style=transition] (tau4) at (10, 0) {$\delta$};
 
 
-            \node [style=site] (W) at (-4, -6) {$W$};
-            \node [style=site] (X) at (0, -6) {$X$};
-            \node [style=site] (Y) at (4, -6) {$Y$};
-            \node [style=site] (Z) at (8, -6) {$Z$};
-            \node [style=transition] (tau5) at (-2, -6) {$\phi$};
-            \node [style=transition] (tau6) at (2, -6) {$\chi$};
-            \node [style=transition] (tau7) at (6, -6) {$\psi$};
-            \node [style=transition] (tau8) at (10, -6) {$\omega$};
+                \node [style=site] (W) at (-4, -6) {$W$};
+                \node [style=site] (X) at (0, -6) {$X$};
+                \node [style=site] (Y) at (4, -6) {$Y$};
+                \node [style=site] (Z) at (8, -6) {$Z$};
+                \node [style=transition] (tau5) at (-2, -6) {$\phi$};
+                \node [style=transition] (tau6) at (2, -6) {$\chi$};
+                \node [style=transition] (tau7) at (6, -6) {$\psi$};
+                \node [style=transition] (tau8) at (10, -6) {$\omega$};
 
-            \node [text=red, scale=2] (g) at (-1.5, -3) {$g$};
-            \node [text=blue, scale=2] (f) at (0.5, -3) {$f$};
-        \end{pgfonlayer}
-        \begin{pgfonlayer}{edgelayer}
-            \draw [style=inarrow, draw=gray!80, bend right=15] (A) to (tau1);
-            \draw [style=inarrow, draw=gray!80, bend left=15] (A) to (tau1);
-            \draw [style=inarrow, draw=gray!80, bend right=15] (A) to (tau2);
-            \draw [style=inarrow, draw=gray!80] (tau1) to (AA);
-            \draw [style=inarrow, draw=gray!80] (B) to (tau2);
-            \draw [style=inarrow, draw=gray!80] (tau2) to (AB);
-            \draw [style=inarrow, draw=gray!80] (AA) to (tau3);
-            \draw [style=inarrow, draw=gray!80] (AB) to (tau3);
-            \draw [style=inarrow, draw=gray!80, bend left=30] (C) to (tau3);
-            \draw [style=inarrow, draw=gray!80] (tau3) to (AAAB);
-            \draw [style=inarrow, draw=gray!80, bend left=30] (tau3) to (C);
-            \draw [style=inarrow, draw=gray!80] (AAAB) to (tau4);
-            \draw [style=inarrow, draw=gray!80, bend right=30] (tau4) to (A);
-            \draw [style=inarrow, draw=gray!80, bend right=30] (tau4) to (AA);
-            \draw [style=inarrow, draw=gray!80, bend left=40] (tau4) to (B);
+                \node [text=red, scale=2] (g) at (-1.5, -3) {$g$};
+                \node [text=blue, scale=2] (f) at (0.5, -3) {$f$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow, draw=gray!80, bend right=15] (A) to (tau1);
+                \draw [style=arrow, draw=gray!80, bend left=15] (A) to (tau1);
+                \draw [style=arrow, draw=gray!80, bend right=15] (A) to (tau2);
+                \draw [style=arrow, draw=gray!80] (tau1) to (AA);
+                \draw [style=arrow, draw=gray!80] (B) to (tau2);
+                \draw [style=arrow, draw=gray!80] (tau2) to (AB);
+                \draw [style=arrow, draw=gray!80] (AA) to (tau3);
+                \draw [style=arrow, draw=gray!80] (AB) to (tau3);
+                \draw [style=arrow, draw=gray!80, bend left=30] (C) to (tau3);
+                \draw [style=arrow, draw=gray!80] (tau3) to (AAAB);
+                \draw [style=arrow, draw=gray!80, bend left=30] (tau3) to (C);
+                \draw [style=arrow, draw=gray!80] (AAAB) to (tau4);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau4) to (A);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau4) to (AA);
+                \draw [style=arrow, draw=gray!80, bend left=40] (tau4) to (B);
 
-            \draw [style=inarrow, draw=gray!80, bend left=15] (W) to (tau5);
-            \draw [style=inarrow, draw=gray!80, bend right=15] (W) to (tau5);
-            \draw [style=inarrow, draw=gray!80, bend left=15] (tau5) to (X);
-            \draw [style=inarrow, draw=gray!80, bend right=15] (tau5) to (X);
-            \draw [style=inarrow, draw=gray!80, bend left=15] (X) to (tau6);
-            \draw [style=inarrow, draw=gray!80, bend right=15] (X) to (tau6);
-            \draw [style=inarrow, draw=gray!80] (tau6) to (Y);
-            \draw [style=inarrow, draw=gray!80, bend left=20] (Y) to (tau7);
-            \draw [style=inarrow, draw=gray!80] (Y) to (tau7);
-            \draw [style=inarrow, draw=gray!80, bend right=20] (Y) to (tau7);
-            \draw [style=inarrow, draw=gray!80] (tau7) to (Z);
-            \draw [style=inarrow, draw=gray!80, bend left=50] (tau7.south) to (Y.south);
-            \draw [style=inarrow, draw=gray!80] (Z) to (tau8);
-            \draw [style=inarrow, draw=gray!80, bend left=30] (tau8) to (X);
-            \draw [style=inarrow, draw=gray!80, bend right=30] (tau8) to (X);
-            \draw [style=inarrow, draw=gray!80, bend right=30] (tau8) to (Y);
+                \draw [style=arrow, draw=gray!80, bend left=15] (W) to (tau5);
+                \draw [style=arrow, draw=gray!80, bend right=15] (W) to (tau5);
+                \draw [style=arrow, draw=gray!80, bend left=15] (tau5) to (X);
+                \draw [style=arrow, draw=gray!80, bend right=15] (tau5) to (X);
+                \draw [style=arrow, draw=gray!80, bend left=15] (X) to (tau6);
+                \draw [style=arrow, draw=gray!80, bend right=15] (X) to (tau6);
+                \draw [style=arrow, draw=gray!80] (tau6) to (Y);
+                \draw [style=arrow, draw=gray!80, bend left=20] (Y) to (tau7);
+                \draw [style=arrow, draw=gray!80] (Y) to (tau7);
+                \draw [style=arrow, draw=gray!80, bend right=20] (Y) to (tau7);
+                \draw [style=arrow, draw=gray!80] (tau7) to (Z);
+                \draw [style=arrow, draw=gray!80, bend left=50] (tau7.south) to (Y.south);
+                \draw [style=arrow, draw=gray!80] (Z) to (tau8);
+                \draw [style=arrow, draw=gray!80, bend left=30] (tau8) to (X);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau8) to (X);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau8) to (Y);
 
-            \draw [style=sitemap, bend right=30] (A) to (X);
-            \draw [style=sitemap, bend right=30] (B) to (X);
-            \draw [style=sitemap, bend right=30] (AA) to (Y);
-            \draw [style=sitemap, bend right=30] (AB) to (Y);
-            \draw [style=sitemap, bend right=30] (C) to (Y);
-            \draw [style=sitemap, bend right=30] (AAAB) to (Z);
-            \draw [style=transitionmap, bend right=30] (tau1) to (tau6);
-            \draw [style=transitionmap, bend right=30] (tau2) to (tau6);
-            \draw [style=transitionmap, bend right=30] (tau3) to (tau7);
-            \draw [style=transitionmap, bend right=30] (tau4) to (tau8);
-        \end{pgfonlayer}
-    \end{tikzpicture}
-}
-\end{figure}
+                \draw [style=sitemap, bend right=30] (A) to (X);
+                \draw [style=sitemap, bend right=30] (B) to (X);
+                \draw [style=sitemap, bend right=30] (AA) to (Y);
+                \draw [style=sitemap, bend right=30] (AB) to (Y);
+                \draw [style=sitemap, bend right=30] (C) to (Y);
+                \draw [style=sitemap, bend right=30] (AAAB) to (Z);
+                \draw [style=transitionmap, bend right=30] (tau1) to (tau6);
+                \draw [style=transitionmap, bend right=30] (tau2) to (tau6);
+                \draw [style=transitionmap, bend right=30] (tau3) to (tau7);
+                \draw [style=transitionmap, bend right=30] (tau4) to (tau8);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
 
 \begin{definition}\label{def:subnet}
     % Let $P$ and $Q$ be Petri nets.
@@ -336,72 +411,72 @@ A natural way of graphically representing this $P$ is with a bipartite multigrap
     such that $\sigma_P = \sigma_Q|_{T(P)}$ and $\tau_P = \tau_Q|_{T(P)}$.
 \end{definition}
 
-\begin{figure}[!h]
+\begin{center}
     \scalebox{0.6}{
-    \begin{tikzpicture}
-        \begin{pgfonlayer}{nodelayer}
-            \node [style=site] (A) at (0, 0.8) {$A$};
-            \node [style=site] (B) at (0, -0.8) {$B$};
-            \node [style=site] (C) at (6, -1.6) {$C$};
-            \node [style=site] (AA) at (4, 0.8) {$AA$};
-            \node [style=site] (AB) at (4, -0.8) {$AB$};
-            \node [style=site] (AAAB) at (8, 0) {$AAAB$};
-            \node [style=transition] (tau1) at (2, 0.8) {$\alpha$};
-            \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
-            \node [style=transition] (tau3) at (6, 0) {$\gamma$};
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [style=site] (A) at (0, 0.8) {$A$};
+                \node [style=site] (B) at (0, -0.8) {$B$};
+                \node [style=site] (C) at (6, -1.6) {$C$};
+                \node [style=site] (AA) at (4, 0.8) {$AA$};
+                \node [style=site] (AB) at (4, -0.8) {$AB$};
+                \node [style=site] (AAAB) at (8, 0) {$AAAB$};
+                \node [style=transition] (tau1) at (2, 0.8) {$\alpha$};
+                \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
+                \node [style=transition] (tau3) at (6, 0) {$\gamma$};
 
-            \node [style=site] (W) at (-4, -6) {$W$};
-            \node [style=site, fill=green!20] (X) at (0, -6) {$X$};
-            \node [style=site, fill=green!20] (Y) at (4, -6) {$Y$};
-            \node [style=site, fill=green!20] (Z) at (8, -6) {$Z$};
-            \node [style=transition] (tau5) at (-2, -6) {$\phi$};
-            \node [style=transition, fill=yellow!20] (tau6) at (2, -6) {$\chi$};
-            \node [style=transition, fill=yellow!20] (tau7) at (6, -6) {$\psi$};
-            \node [style=transition] (tau8) at (10, -6) {$\omega$};
-        \end{pgfonlayer}
-        \begin{pgfonlayer}{edgelayer}
-            \draw [style=inarrow, draw=gray!80, bend right=15] (A) to (tau1);
-            \draw [style=inarrow, draw=gray!80, bend left=15] (A) to (tau1);
-            \draw [style=inarrow, draw=gray!80, bend right=15] (A) to (tau2);
-            \draw [style=inarrow, draw=gray!80] (tau1) to (AA);
-            \draw [style=inarrow, draw=gray!80] (B) to (tau2);
-            \draw [style=inarrow, draw=gray!80] (tau2) to (AB);
-            \draw [style=inarrow, draw=gray!80] (AA) to (tau3);
-            \draw [style=inarrow, draw=gray!80] (AB) to (tau3);
-            \draw [style=inarrow, draw=gray!80, bend left=30] (C) to (tau3);
-            \draw [style=inarrow, draw=gray!80] (tau3) to (AAAB);
-            \draw [style=inarrow, draw=gray!80, bend left=30] (tau3) to (C);
+                \node [style=site] (W) at (-4, -6) {$W$};
+                \node [style=site, fill=green!20] (X) at (0, -6) {$X$};
+                \node [style=site, fill=green!20] (Y) at (4, -6) {$Y$};
+                \node [style=site, fill=green!20] (Z) at (8, -6) {$Z$};
+                \node [style=transition] (tau5) at (-2, -6) {$\phi$};
+                \node [style=transition, fill=yellow!20] (tau6) at (2, -6) {$\chi$};
+                \node [style=transition, fill=yellow!20] (tau7) at (6, -6) {$\psi$};
+                \node [style=transition] (tau8) at (10, -6) {$\omega$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow, draw=gray!80, bend right=15] (A) to (tau1);
+                \draw [style=arrow, draw=gray!80, bend left=15] (A) to (tau1);
+                \draw [style=arrow, draw=gray!80, bend right=15] (A) to (tau2);
+                \draw [style=arrow, draw=gray!80] (tau1) to (AA);
+                \draw [style=arrow, draw=gray!80] (B) to (tau2);
+                \draw [style=arrow, draw=gray!80] (tau2) to (AB);
+                \draw [style=arrow, draw=gray!80] (AA) to (tau3);
+                \draw [style=arrow, draw=gray!80] (AB) to (tau3);
+                \draw [style=arrow, draw=gray!80, bend left=30] (C) to (tau3);
+                \draw [style=arrow, draw=gray!80] (tau3) to (AAAB);
+                \draw [style=arrow, draw=gray!80, bend left=30] (tau3) to (C);
 
-            \draw [style=inarrow, draw=gray!80, bend left=15] (W) to (tau5);
-            \draw [style=inarrow, draw=gray!80, bend right=15] (W) to (tau5);
-            \draw [style=inarrow, draw=gray!80, bend left=15] (tau5) to (X);
-            \draw [style=inarrow, draw=gray!80, bend right=15] (tau5) to (X);
-            \draw [style=inarrow, draw=red, bend left=15] (X) to (tau6);
-            \draw [style=inarrow, draw=red, bend right=15] (X) to (tau6);
-            \draw [style=inarrow, draw=red] (tau6) to (Y);
-            \draw [style=inarrow, draw=red, bend left=20] (Y) to (tau7);
-            \draw [style=inarrow, draw=red] (Y) to (tau7);
-            \draw [style=inarrow, draw=red, bend right=20] (Y) to (tau7);
-            \draw [style=inarrow, draw=red] (tau7) to (Z);
-            \draw [style=inarrow, draw=red, bend left=50] (tau7.south) to (Y.south);
-            \draw [style=inarrow, draw=gray!80] (Z) to (tau8);
-            \draw [style=inarrow, draw=gray!80, bend left=30] (tau8) to (X);
-            \draw [style=inarrow, draw=gray!80, bend right=30] (tau8) to (X);
-            \draw [style=inarrow, draw=gray!80, bend right=30] (tau8) to (Y);
+                \draw [style=arrow, draw=gray!80, bend left=15] (W) to (tau5);
+                \draw [style=arrow, draw=gray!80, bend right=15] (W) to (tau5);
+                \draw [style=arrow, draw=gray!80, bend left=15] (tau5) to (X);
+                \draw [style=arrow, draw=gray!80, bend right=15] (tau5) to (X);
+                \draw [style=arrow, draw=red, bend left=15] (X) to (tau6);
+                \draw [style=arrow, draw=red, bend right=15] (X) to (tau6);
+                \draw [style=arrow, draw=red] (tau6) to (Y);
+                \draw [style=arrow, draw=red, bend left=20] (Y) to (tau7);
+                \draw [style=arrow, draw=red] (Y) to (tau7);
+                \draw [style=arrow, draw=red, bend right=20] (Y) to (tau7);
+                \draw [style=arrow, draw=red] (tau7) to (Z);
+                \draw [style=arrow, draw=red, bend left=50] (tau7.south) to (Y.south);
+                \draw [style=arrow, draw=gray!80] (Z) to (tau8);
+                \draw [style=arrow, draw=gray!80, bend left=30] (tau8) to (X);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau8) to (X);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau8) to (Y);
 
-            \draw [style=sitemap, bend right=30, shorten >=2mm] (A) to (X);
-            \draw [style=sitemap, bend right=30, shorten >=2mm] (B) to (X);
-            \draw [style=sitemap, bend right=30, shorten >=2mm] (AA) to (Y);
-            \draw [style=sitemap, bend right=30, shorten >=2mm] (AB) to (Y);
-            \draw [style=sitemap, bend right=30, shorten >=2mm] (C) to (Y);
-            \draw [style=sitemap, bend right=30, shorten >=2mm] (AAAB) to (Z);
-            \draw [style=transitionmap, bend right=30, shorten >=2mm] (tau1) to (tau6);
-            \draw [style=transitionmap, bend right=30, shorten >=2mm] (tau2) to (tau6);
-            \draw [style=transitionmap, bend right=30, shorten >=2mm] (tau3) to (tau7);
-        \end{pgfonlayer}
-    \end{tikzpicture}
-}
-\end{figure}
+                \draw [style=sitemap, bend right=30, shorten >=2mm] (A) to (X);
+                \draw [style=sitemap, bend right=30, shorten >=2mm] (B) to (X);
+                \draw [style=sitemap, bend right=30, shorten >=2mm] (AA) to (Y);
+                \draw [style=sitemap, bend right=30, shorten >=2mm] (AB) to (Y);
+                \draw [style=sitemap, bend right=30, shorten >=2mm] (C) to (Y);
+                \draw [style=sitemap, bend right=30, shorten >=2mm] (AAAB) to (Z);
+                \draw [style=transitionmap, bend right=30, shorten >=2mm] (tau1) to (tau6);
+                \draw [style=transitionmap, bend right=30, shorten >=2mm] (tau2) to (tau6);
+                \draw [style=transitionmap, bend right=30, shorten >=2mm] (tau3) to (tau7);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
 
 For a Petri net morphism $f : P \rightarrow Q$, the image $f(P)$ in $Q$ is a Petri subnet with source and target maps $\sigma_{f(P)}$ and $\tau_{f(P)}$ defined by restriction of $\sigma_Q$ and $\tau_Q$, respectively.
 Similarly, the preimage of a Petri subnet of $Q$ is a Petri subnet of $P$ with source and target maps defined by restriction of $\sigma_P$ and $\tau_P$.
@@ -416,64 +491,64 @@ Similarly, the preimage of a Petri subnet of $Q$ is a Petri subnet of $P$ with s
 It follows immediately from the definition of a Petri map that the image of a sourceless Petri net is sourceless, otherwise the $\sigma$-diagram would not commute.
 Similarly, the image of a sinkless Petri net is sinkless.
 
-\begin{figure}[!h]
+\begin{center}
     \scalebox{0.6}{
-    \begin{tikzpicture}
-        \begin{pgfonlayer}{nodelayer}
-            \node [style=site] (A) at (2, 0.8) {$A$};
-            \node [style=site] (B) at (2, -0.8) {$B$};
-            \node [style=transition] (tau1) at (0, 0) {$\alpha$};
-            \node [style=transition] (tau2) at (4, 0) {$\beta$};
-        \end{pgfonlayer}
-        \begin{pgfonlayer}{edgelayer}
-            \draw [style=inarrow, bend left=15] (tau1) to (A);
-            \draw [style=inarrow, bend right=15] (tau1) to (B);
-            \draw [style=inarrow, bend left=15] (A) to (tau2);
-            \draw [style=inarrow, bend right=15] (B) to (tau2);
-        \end{pgfonlayer}
-    \end{tikzpicture}
-}
-\end{figure}
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [style=site] (A) at (2, 0.8) {$A$};
+                \node [style=site] (B) at (2, -0.8) {$B$};
+                \node [style=transition] (tau1) at (0, 0) {$\alpha$};
+                \node [style=transition] (tau2) at (4, 0) {$\beta$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow, bend left=15] (tau1) to (A);
+                \draw [style=arrow, bend right=15] (tau1) to (B);
+                \draw [style=arrow, bend left=15] (A) to (tau2);
+                \draw [style=arrow, bend right=15] (B) to (tau2);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
 
 \begin{definition}\label{def:pathway}
     If $P$ is a Petri net, a \textbf{pathway} $\gamma = t_n \ldots t_1$ in $P$ of length $n \ge 1$ is a sequence of transitions $t_i \in T$ such that $\tau(t_i) \ne 0$, $\sigma(t_i) \ne 0$, $m_{i} + \tau(t_i) = n_{i+1} + \sigma(t_{i+1})$ with $\sigma(t_{i+1}) \ne m_{i}$ and $\tau(t_{i+1}) \ne n_{i+1}$. We write $t \in \gamma$ to denote that the transition $t$ appears in the pathway $\gamma$.
 \end{definition}
 
-\begin{figure}[!h]
+\begin{center}
     \scalebox{0.6}{
-    \begin{tikzpicture}
-        \begin{pgfonlayer}{nodelayer}
-            \node [style=site] (A) at (0, 0.8) {$A$};
-            \node [style=site] (B) at (0, -0.8) {$B$};
-            \node [style=site] (C) at (6, -1.6) {$C$};
-            \node [style=site] (AA) at (4, 0.8) {$AA$};
-            \node [style=site] (AB) at (4, -0.8) {$AB$};
-            \node [style=site] (AAAB) at (8, 0) {$AAAB$};
-            \node [style=transition, fill=green!20] (tau1) at (2, 0.8) {$\alpha$};
-            \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
-            \node [style=transition, fill=green!20] (tau3) at (6, 0) {$\gamma$};
-            \node [style=transition] (tau4) at (10, 0) {$\delta$};
-        \end{pgfonlayer}
-        \begin{pgfonlayer}{edgelayer}
-            \draw [style=inarrow, bend right=15] (A) to (tau1);
-            \draw [style=inarrow, bend left=15] (A) to (tau1);
-            \draw [style=inarrow, bend right=15] (A) to (tau2);
-            \draw [style=inarrow] (tau1) to (AA);
-            \draw [style=inarrow] (B) to (tau2);
-            \draw [style=inarrow] (tau2) to (AB);
-            \draw [style=inarrow] (AA) to (tau3);
-            \draw [style=inarrow] (AB) to (tau3);
-            \draw [style=inarrow, bend left=30] (C) to (tau3);
-            \draw [style=inarrow] (tau3) to (AAAB);
-            \draw [style=inarrow, bend left=30] (tau3) to (C);
-            \draw [style=inarrow] (AAAB) to (tau4);
-            \draw [style=inarrow, bend right=30] (tau4) to (A);
-            \draw [style=inarrow, bend right=30] (tau4) to (AA);
-            \draw [style=inarrow, bend left=40] (tau4) to (B);
-        \end{pgfonlayer}
-    \end{tikzpicture}
-}
-\end{figure}
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [style=site] (A) at (0, 0.8) {$A$};
+                \node [style=site] (B) at (0, -0.8) {$B$};
+                \node [style=site] (C) at (6, -1.6) {$C$};
+                \node [style=site] (AA) at (4, 0.8) {$AA$};
+                \node [style=site] (AB) at (4, -0.8) {$AB$};
+                \node [style=site] (AAAB) at (8, 0) {$AAAB$};
+                \node [style=transition, fill=green!20] (tau1) at (2, 0.8) {$\alpha$};
+                \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
+                \node [style=transition, fill=green!20] (tau3) at (6, 0) {$\gamma$};
+                \node [style=transition] (tau4) at (10, 0) {$\delta$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow, bend right=15] (A) to (tau1);
+                \draw [style=arrow, bend left=15] (A) to (tau1);
+                \draw [style=arrow, bend right=15] (A) to (tau2);
+                \draw [style=arrow] (tau1) to (AA);
+                \draw [style=arrow] (B) to (tau2);
+                \draw [style=arrow] (tau2) to (AB);
+                \draw [style=arrow] (AA) to (tau3);
+                \draw [style=arrow] (AB) to (tau3);
+                \draw [style=arrow, bend left=30] (C) to (tau3);
+                \draw [style=arrow] (tau3) to (AAAB);
+                \draw [style=arrow, bend left=30] (tau3) to (C);
+                \draw [style=arrow] (AAAB) to (tau4);
+                \draw [style=arrow, bend right=30] (tau4) to (A);
+                \draw [style=arrow, bend right=30] (tau4) to (AA);
+                \draw [style=arrow, bend left=40] (tau4) to (B);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
 
 \begin{definition}\label{def:pathway-connected}
     Let $P$ be a Petri net and $x,y \in S(P)$.
