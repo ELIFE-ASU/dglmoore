@@ -574,10 +574,15 @@ For example, each of the following nets are Petri subnets of our ligation net:
     }
 \end{center}
 
+Petri net morphisms and subnets interact well.
+In particular, for a Petri net morphism $f : P \rightarrow Q$, the image $f(P)$ in $Q$ is a Petri subnet with source and target maps $\sigma_{f(P)}$ and $\tau_{f(P)}$ defined by restriction of $\sigma_Q$ and $\tau_Q$, respectively.
+Similarly, the preimage of a Petri subnet of $Q$ is a Petri subnet of $P$ with source and target maps defined by restriction of $\sigma_P$ and $\tau_P$.
+Continuing the example map from our ligation model,
 \begin{center}
     \scalebox{0.6}{
         \begin{tikzpicture}
             \begin{pgfonlayer}{nodelayer}
+                \node [scale=3] (P) at (12, 0) {$P$};
                 \node [style=site] (A) at (0, 0.8) {$A$};
                 \node [style=site] (B) at (0, -0.8) {$B$};
                 \node [style=site] (C) at (6, -1.6) {$C$};
@@ -587,15 +592,18 @@ For example, each of the following nets are Petri subnets of our ligation net:
                 \node [style=transition] (tau1) at (2, 0.8) {$\alpha$};
                 \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
                 \node [style=transition] (tau3) at (6, 0) {$\gamma$};
+                \node [style=transition] (tau3) at (6, 0) {$\gamma$};
+                \node [style=transition] (tau4) at (10, 0) {$\delta$};
 
+                \node [scale=3] (Q) at (12, -6) {$Q$};
                 \node [style=site] (W) at (-4, -6) {$W$};
-                \node [style=site, fill=green!20] (X) at (0, -6) {$X$};
-                \node [style=site, fill=green!20] (Y) at (4, -6) {$Y$};
-                \node [style=site, fill=green!20] (Z) at (8, -6) {$Z$};
+                \node [style=site, fill=green!20, draw=red!50] (X) at (0, -6) {$X$};
+                \node [style=site, fill=green!20, draw=red!50] (Y) at (4, -6) {$Y$};
+                \node [style=site, fill=green!20, draw=red!50] (Z) at (8, -6) {$Z$};
                 \node [style=transition] (tau5) at (-2, -6) {$\phi$};
-                \node [style=transition, fill=yellow!20] (tau6) at (2, -6) {$\chi$};
-                \node [style=transition, fill=yellow!20] (tau7) at (6, -6) {$\psi$};
-                \node [style=transition] (tau8) at (10, -6) {$\omega$};
+                \node [style=transition, fill=yellow!20, draw=red!50] (tau6) at (2, -6) {$\chi$};
+                \node [style=transition, fill=yellow!20, draw=red!50] (tau7) at (6, -6) {$\psi$};
+                \node [style=transition, fill=yellow!20, draw=red!50] (tau8) at (10, -6) {$\omega$};
             \end{pgfonlayer}
             \begin{pgfonlayer}{edgelayer}
                 \draw [style=arrow, draw=gray!80, bend right=15] (A) to (tau1);
@@ -609,23 +617,27 @@ For example, each of the following nets are Petri subnets of our ligation net:
                 \draw [style=arrow, draw=gray!80, bend left=30] (C) to (tau3);
                 \draw [style=arrow, draw=gray!80] (tau3) to (AAAB);
                 \draw [style=arrow, draw=gray!80, bend left=30] (tau3) to (C);
+                \draw [style=arrow, draw=gray!80] (AAAB) to (tau4);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau4) to (A);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau4) to (AA);
+                \draw [style=arrow, draw=gray!80, bend left=40] (tau4) to (B);
 
                 \draw [style=arrow, draw=gray!80, bend left=15] (W) to (tau5);
                 \draw [style=arrow, draw=gray!80, bend right=15] (W) to (tau5);
                 \draw [style=arrow, draw=gray!80, bend left=15] (tau5) to (X);
                 \draw [style=arrow, draw=gray!80, bend right=15] (tau5) to (X);
-                \draw [style=arrow, draw=red, bend left=15] (X) to (tau6);
-                \draw [style=arrow, draw=red, bend right=15] (X) to (tau6);
-                \draw [style=arrow, draw=red] (tau6) to (Y);
-                \draw [style=arrow, draw=red, bend left=20] (Y) to (tau7);
-                \draw [style=arrow, draw=red] (Y) to (tau7);
-                \draw [style=arrow, draw=red, bend right=20] (Y) to (tau7);
-                \draw [style=arrow, draw=red] (tau7) to (Z);
-                \draw [style=arrow, draw=red, bend left=50] (tau7.south) to (Y.south);
-                \draw [style=arrow, draw=gray!80] (Z) to (tau8);
-                \draw [style=arrow, draw=gray!80, bend left=30] (tau8) to (X);
-                \draw [style=arrow, draw=gray!80, bend right=30] (tau8) to (X);
-                \draw [style=arrow, draw=gray!80, bend right=30] (tau8) to (Y);
+                \draw [style=arrow, draw=red!50, bend left=15] (X) to (tau6);
+                \draw [style=arrow, draw=red!50, bend right=15] (X) to (tau6);
+                \draw [style=arrow, draw=red!50] (tau6) to (Y);
+                \draw [style=arrow, draw=red!50, bend left=20] (Y) to (tau7);
+                \draw [style=arrow, draw=red!50] (Y) to (tau7);
+                \draw [style=arrow, draw=red!50, bend right=20] (Y) to (tau7);
+                \draw [style=arrow, draw=red!50] (tau7) to (Z);
+                \draw [style=arrow, draw=red!50, bend left=50] (tau7.south) to (Y.south);
+                \draw [style=arrow, draw=red!50] (Z) to (tau8);
+                \draw [style=arrow, draw=red!50, bend left=30] (tau8) to (X);
+                \draw [style=arrow, draw=red!50, bend right=30] (tau8) to (X);
+                \draw [style=arrow, draw=red!50, bend right=30] (tau8) to (Y);
 
                 \draw [style=sitemap, bend right=30, shorten >=2mm] (A) to (X);
                 \draw [style=sitemap, bend right=30, shorten >=2mm] (B) to (X);
@@ -636,14 +648,15 @@ For example, each of the following nets are Petri subnets of our ligation net:
                 \draw [style=transitionmap, bend right=30, shorten >=2mm] (tau1) to (tau6);
                 \draw [style=transitionmap, bend right=30, shorten >=2mm] (tau2) to (tau6);
                 \draw [style=transitionmap, bend right=30, shorten >=2mm] (tau3) to (tau7);
+                \draw [style=transitionmap, bend right=30, shorten >=2mm] (tau4) to (tau8);
             \end{pgfonlayer}
         \end{tikzpicture}
     }
 \end{center}
+the image, outlined in light red, is a subnet of $Q$.
 
-For a Petri net morphism $f : P \rightarrow Q$, the image $f(P)$ in $Q$ is a Petri subnet with source and target maps $\sigma_{f(P)}$ and $\tau_{f(P)}$ defined by restriction of $\sigma_Q$ and $\tau_Q$, respectively.
-Similarly, the preimage of a Petri subnet of $Q$ is a Petri subnet of $P$ with source and target maps defined by restriction of $\sigma_P$ and $\tau_P$.
-
+When it comes to describing systems like the construction of a string, or the building of a molecule, it is often classically unphysical for objects to be created from nothing or destroyed.
+For that reason, we need to be able to identify aspects of a Petri net that might represent exactly such a process: sources and sinks.
 \begin{definition}\label{def:source-sink}
     Let $P$ be a Petri net and let $t$ be a transition.
     We say that $t$ is a \textbf{source} if $\sigma(t) = 0$, and is a \textbf{sink} if $\tau(t) = 0$.
@@ -651,27 +664,43 @@ Similarly, the preimage of a Petri subnet of $Q$ is a Petri subnet of $P$ with s
     Similarly, $P$ is \textbf{sinkless} if it has no sinks.
 \end{definition}
 
-It follows immediately from the definition of a Petri map that the image of a sourceless Petri net is sourceless, otherwise the $\sigma$-diagram would not commute.
-Similarly, the image of a sinkless Petri net is sinkless.
-
+Graphically, 
 \begin{center}
     \scalebox{0.6}{
         \begin{tikzpicture}
             \begin{pgfonlayer}{nodelayer}
-                \node [style=site] (A) at (2, 0.8) {$A$};
-                \node [style=site] (B) at (2, -0.8) {$B$};
-                \node [style=transition] (tau1) at (0, 0) {$\alpha$};
-                \node [style=transition] (tau2) at (4, 0) {$\beta$};
+                \node [style=transition] (source) at (0, 0) {source};
+                \node (A) at (2, 1.6) {};
+                \node (B) at (2, 0.8) {};
+                \node (C) at (2, 0) {};
+                \node (D) at (2, -0.8) {};
+                \node (E) at (2, -1.6) {};
+
+                \node (F) at (3, 1.6) {};
+                \node (G) at (3, 0.8) {};
+                \node (H) at (3, 0) {};
+                \node (I) at (3, -0.8) {};
+                \node (J) at (3, -1.6) {};
+                \node [style=transition] (sink) at (5, 0) {sink};
             \end{pgfonlayer}
             \begin{pgfonlayer}{edgelayer}
-                \draw [style=arrow, bend left=15] (tau1) to (A);
-                \draw [style=arrow, bend right=15] (tau1) to (B);
-                \draw [style=arrow, bend left=15] (A) to (tau2);
-                \draw [style=arrow, bend right=15] (B) to (tau2);
+                \draw [style=arrow, bend left=15] (source) to (A);
+                \draw [style=arrow, bend left=15] (source) to (B);
+                \draw [style=arrow] (source) to (C);
+                \draw [style=arrow, bend right=15] (source) to (D);
+                \draw [style=arrow, bend right=15] (source) to (E);
+
+                \draw [style=arrow, bend left=15] (F) to (sink);
+                \draw [style=arrow, bend left=15] (G) to (sink);
+                \draw [style=arrow] (H) to (sink);
+                \draw [style=arrow, bend right=15] (I) to (sink);
+                \draw [style=arrow, bend right=15] (J) to (sink);
             \end{pgfonlayer}
         \end{tikzpicture}
     }
 \end{center}
+It follows immediately from the definition of a Petri map that the image of a sourceless Petri net is sourceless, otherwise the $\sigma$-diagram would not commute.
+Similarly, the image of a sinkless Petri net is sinkless.
 
 \begin{definition}\label{def:pathway}
     If $P$ is a Petri net, a \textbf{pathway} $\gamma = t_n \ldots t_1$ in $P$ of length $n \ge 1$ is a sequence of transitions $t_i \in T$ such that $\tau(t_i) \ne 0$, $\sigma(t_i) \ne 0$, $m_{i} + \tau(t_i) = n_{i+1} + \sigma(t_{i+1})$ with $\sigma(t_{i+1}) \ne m_{i}$ and $\tau(t_{i+1}) \ne n_{i+1}$. We write $t \in \gamma$ to denote that the transition $t$ appears in the pathway $\gamma$.
