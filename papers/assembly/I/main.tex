@@ -937,22 +937,75 @@ Taking the paths $\gamma\alpha$, $\gamma\beta$ and the set $\Gamma_A^{AAAB}$ fro
     }
 \end{center}
 
-\begin{definition}\label{def:upper-lower-subnet}
-    Let $P$ be a Petri net and let $X \subseteq S(P)$.
-    The \textbf{upper subnet} of $X$ in $P$, denoted $\upset{X}$, consists of transitions $T(\upset{X}) = \bigcup_{x \in X}\{t \in \gamma ~|~ \gamma \in \Gamma_x\}$, sites $S(\upset{X}) = X \cup S(T(\upset{X})^*)$, $\sigma_{X\uparrow} = \sigma_P|_{T(X\uparrow)^*}$ and $\tau_{X\uparrow} = \tau_P|_{T(X\uparrow)^*}$.
-    Similarly, the \textbf{lower subnet} of $X$ in $P$, denoted $\downset{X}$, consists of transitions $T(\downset{X}) = \{t \in \gamma ~|~ \gamma \in \Gamma_X\}$, sites $S(\downset{X}) = X \cup S(T(\downset{X})^*)$, $\sigma' = \sigma|_{T(X\downarrow)^*}$ and $\tau = \tau|_{T(X\downarrow)^*}$.
-    If $x$ is an element $x \in P$, we write $\upset{x} = \upset{\{x\}}$ and $\downset{x} = \downset{\{x\}}$.
-\end{definition}
+{
+    \color{red}
 
-\begin{definition}\label{def:minimal}
-    Let $P$ be a Petri net. A site $y$ is \textbf{minimal} in $P$ if $\Gamma_x^y = \emptyset$ for all sites $y \ne x$ in $P$.
-    The set of all minimal sites of $P$ is denoted $\Min{P}$.
-\end{definition}
+    {
+        \large
+        \noindent \textbf{MAJOR PROBLEM:} the following three definitions are flawed in that loops gum up the works.
+        The previous example is demonstrative.
+        Every site lies within the upper subset of every other site.
+        Pick any one and call the singleton set containing it $\B$; it is minimal.
+        These two facts combined means that $\B$ is a basis, but \textbf{we don't want that!}.
+        Ideally, the possible bases should be $\{A, B, C\}$, $\{AA, AB, C\}$ and $\{C, AAAB\}$.
 
-\begin{definition}\label{def:basis}
-    Let $P$ be a Petri net and let $\B$ be a non-empty subset of sites of $P$.
-    We say that $\B$ is a \textbf{basis} of $P$ if $P = \upset{\B}$ such that if $U \subseteq \B$ with $P = \upset{U}$ then $U = \B$.
-\end{definition}
+        I think we see the source of this problem in the example of minimal elements below.
+        $C$ should be minimal, but it is not because there are pathways that lead to it, e.g. $\gamma$ from $AA$.
+        The solution, in my mind, is to somehow merge the definition of a pathway and the site completion, and slightly modify the definition of a minimal element.
+    }
+
+    In some Petri nets, there exist sites to which no pathways lead.
+    Consider, for example, the subnet of our ligation network which leaves out the $\delta$ transition:
+
+    \begin{center}
+        \color{black}
+        \scalebox{0.6}{
+            \begin{tikzpicture}
+                \begin{pgfonlayer}{nodelayer}
+                    \node [style=site, draw=red] (A) at (0, 0.8) {$A$};
+                    \node [style=site] (B) at (0, -0.8) {$B$};
+                    \node [style=site, draw=red] (C) at (6, -1.6) {$C$};
+                    \node [style=site, draw=red] (AA) at (4, 0.8) {$AA$};
+                    \node [style=site, draw=red] (AB) at (4, -0.8) {$AB$};
+                    \node [style=site, draw=red] (AAAB) at (8, 0) {$AAAB$};
+                    \node [style=transition, fill=green!20, draw=red] (tau1) at (2, 0.8) {$\alpha$};
+                    \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
+                    \node [style=transition, fill=green!20, draw=red] (tau3) at (6, 0) {$\gamma$};
+                \end{pgfonlayer}
+                \begin{pgfonlayer}{edgelayer}
+                    \draw [style=arrow, bend right=15] (A) to (tau1);
+                    \draw [style=arrow, bend left=15] (A) to (tau1);
+                    \draw [style=arrow, bend right=15] (A) to (tau2);
+                    \draw [style=arrow] (tau1) to (AA);
+                    \draw [style=arrow] (B) to (tau2);
+                    \draw [style=arrow] (tau2) to (AB);
+                    \draw [style=arrow] (AA) to (tau3);
+                    \draw [style=arrow] (AB) to (tau3);
+                    \draw [style=arrow, bend left=30] (C) to (tau3);
+                    \draw [style=arrow] (tau3) to (AAAB);
+                    \draw [style=arrow, bend left=30] (tau3) to (C);
+                \end{pgfonlayer}
+            \end{tikzpicture}
+        }
+    \end{center}
+
+    \begin{definition}\label{def:minimal}
+        Let $P$ be a Petri net. A site $y$ is \textbf{minimal} in $P$ if $\Gamma_x^y = \emptyset$ for all sites $y \ne x$ in $P$.
+        The set of all minimal sites of $P$ is denoted $\Min{P}$.
+    \end{definition}
+
+    \begin{definition}\label{def:upper-lower-subnet}
+        Let $P$ be a Petri net and let $X \subseteq S(P)$.
+        The \textbf{upper subnet} of $X$ in $P$, denoted $\upset{X}$, consists of transitions $T(\upset{X}) = \bigcup_{x \in X}\{t \in \gamma ~|~ \gamma \in \Gamma_x\}$, sites $S(\upset{X}) = X \cup S(T(\upset{X})^*)$, $\sigma_{X\uparrow} = \sigma_P|_{T(X\uparrow)^*}$ and $\tau_{X\uparrow} = \tau_P|_{T(X\uparrow)^*}$.
+        Similarly, the \textbf{lower subnet} of $X$ in $P$, denoted $\downset{X}$, consists of transitions $T(\downset{X}) = \{t \in \gamma ~|~ \gamma \in \Gamma_X\}$, sites $S(\downset{X}) = X \cup S(T(\downset{X})^*)$, $\sigma' = \sigma|_{T(X\downarrow)^*}$ and $\tau = \tau|_{T(X\downarrow)^*}$.
+        If $x$ is an element $x \in P$, we write $\upset{x} = \upset{\{x\}}$ and $\downset{x} = \downset{\{x\}}$.
+    \end{definition}
+
+    \begin{definition}\label{def:basis}
+        Let $P$ be a Petri net and let $\B$ be a non-empty subset of sites of $P$.
+        We say that $\B$ is a \textbf{basis} of $P$ if $P = \upset{\B}$ such that if $U \subseteq \B$ with $P = \upset{U}$ then $U = \B$.
+    \end{definition}
+}
 
 \begin{lemma}
     Let $P$ be a Petri net. For any basis $\B$ of $P$, $\Min{P} \subseteq \B$.
