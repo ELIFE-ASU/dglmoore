@@ -194,7 +194,7 @@ There is a natural way of graphically representing a Petri net as a bipartite mu
 We read this as ``\textit{transition $\alpha$ can only proceed if at least two $\ce{H_2}$ and one $\ce{O_2}$ are present in the system, and will yield two $\ce{H_2O}$ when it does}''.
 In essence, this is a statement about was can possibly happen, not necessarily what will happen; that's more a question of dynamics.
 
-As a more elaborate example, one which we will repeatedly refer to as we expand on the formalism, we imagine a simple ligation type process where in the characters $A$ and $B$ can be combined into strings and $C$ acts something like a \red{``catalyst''} making some transitions possible if and only if $C$ exists.
+As a more elaborate example, one which we will repeatedly refer to as we expand on the formalism as it exhibits number of interesting features, we imagine a simple ligation type process where in the characters $A$ and $B$ can be combined into strings and $C$ acts something like a \red{``catalyst''} making some transitions possible if and only if $C$ exists.
 Consider the Petri $P$ net described by $S(P) = \{ A, B, C, AA, AB, AAAB \}$ and $T(P) = \{ \alpha, \beta, \gamma, \delta \}$ with source and target maps:
 
 \begin{align*}
@@ -702,10 +702,31 @@ Graphically,
 It follows immediately from the definition of a Petri map that the image of a sourceless Petri net is sourceless, otherwise the $\sigma$-diagram would not commute.
 Similarly, the image of a sinkless Petri net is sinkless.
 
+Up to this point, all of the defintions have been fairly standard, at least in terms of concepts.
+We now start constructing apparently new ideas that will allow us to formalize the concepts of an assembly space and the assembly index.
+The first of these is the idea of a pathway.
+Suppose you begin with a given object $x$ and wish to fleshout all of the ways in which a second object $y$ might be constructed.
+The simplest first step is to construct a sequence of transitions, the first of which takes $x$ as part of its input, the last yields $y$ as part of it its output, and every transition in between depends at least partially on the output of the previous.
+Such a sequence of transitions is what we refer to as a \textit{pathway}.
+
 \begin{definition}\label{def:pathway}
     If $P$ is a Petri net, a \textbf{pathway} $\gamma = t_n \ldots t_1$ in $P$ of length $n \ge 1$ is a sequence of transitions $t_i \in T$ such that $\tau(t_i) \ne 0$, $\sigma(t_i) \ne 0$, $m_{i} + \tau(t_i) = n_{i+1} + \sigma(t_{i+1})$ with $\sigma(t_{i+1}) \ne m_{i}$ and $\tau(t_{i+1}) \ne n_{i+1}$. We write $t \in \gamma$ to denote that the transition $t$ appears in the pathway $\gamma$.
 \end{definition}
 
+It is clear that a pathway is a directed concept in general.
+A pathway from $x$ to $y$ is not necessarily a pathway from $y$ to $x$, and the existence of a pathway from $x$ to $y$ does not imply a pathway from $y$ to $x$ exists.
+If there is a pathway from $x$ to $y$ we say \textit{$x$ pathway connected to $y$}.
+In general, if $x$ is pathway connected to $y$ there may be multiple pathways, and it will be useful to refer to that set of pathways.
+
+\begin{definition}\label{def:pathway-connected}
+    Let $P$ be a Petri net and $x,y \in S(P)$.
+    We say that $x$ is \textbf{pathway connected to} $y$ if and only if there exists a pathway $\gamma = t_n \ldots t_1$ such that $\sigma(t_1) = x + m$ and $\tau(t_n) = y + n$ for some $m, n \in \N[S(P)]$.
+    The set of all pathways in $P$ from $x$ to $y$ is denoted $\Gamma_x^y$.
+    We denote the set of all pathways in $P$ starting from $x$ as $\Gamma_x = \bigcup_{y \in S(P)} \Gamma_x^y$, and all pathways terminating at $y$ as $\Gamma^y = \bigcup_{x \in S(P)} \Gamma_x^y$.
+\end{definition}
+
+In our ligation example, you might suppose that you begin with $A$ and would like to ultimately yield $AAAB$.
+There are in fact two pathways which accomplish this, $\gamma\alpha$ and $\gamma\beta$, which we read as \textit{first fire $\alpha$ ($\beta$, respectively) and then fire $\gamma$}:
 \begin{center}
     \scalebox{0.6}{
         \begin{tikzpicture}
@@ -720,6 +741,19 @@ Similarly, the image of a sinkless Petri net is sinkless.
                 \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
                 \node [style=transition, fill=green!20] (tau3) at (6, 0) {$\gamma$};
                 \node [style=transition] (tau4) at (10, 0) {$\delta$};
+                \node [scale=3] at (5, -3.5) {$\gamma\alpha$};
+
+                \node [style=site] (A2) at (14, 0.8) {$A$};
+                \node [style=site] (B2) at (14, -0.8) {$B$};
+                \node [style=site] (C2) at (20, -1.6) {$C$};
+                \node [style=site] (AA2) at (18, 0.8) {$AA$};
+                \node [style=site] (AB2) at (18, -0.8) {$AB$};
+                \node [style=site] (AAAB2) at (22, 0) {$AAAB$};
+                \node [style=transition] (tau12) at (16, 0.8) {$\alpha$};
+                \node [style=transition, fill=green!20] (tau22) at (16, -0.8) {$\beta$};
+                \node [style=transition, fill=green!20] (tau32) at (20, 0) {$\gamma$};
+                \node [style=transition] (tau42) at (24, 0) {$\delta$};
+                \node [scale=3] at (19, -3.5) {$\gamma\beta$};
             \end{pgfonlayer}
             \begin{pgfonlayer}{edgelayer}
                 \draw [style=arrow, bend right=15] (A) to (tau1);
@@ -737,18 +771,33 @@ Similarly, the image of a sinkless Petri net is sinkless.
                 \draw [style=arrow, bend right=30] (tau4) to (A);
                 \draw [style=arrow, bend right=30] (tau4) to (AA);
                 \draw [style=arrow, bend left=40] (tau4) to (B);
+
+                \draw [style=arrow, bend right=15] (A2) to (tau12);
+                \draw [style=arrow, bend left=15] (A2) to (tau12);
+                \draw [style=arrow, bend right=15] (A2) to (tau22);
+                \draw [style=arrow] (tau12) to (AA2);
+                \draw [style=arrow] (B2) to (tau22);
+                \draw [style=arrow] (tau22) to (AB2);
+                \draw [style=arrow] (AA2) to (tau32);
+                \draw [style=arrow] (AB2) to (tau32);
+                \draw [style=arrow, bend left=30] (C2) to (tau32);
+                \draw [style=arrow] (tau32) to (AAAB2);
+                \draw [style=arrow, bend left=30] (tau32) to (C2);
+                \draw [style=arrow] (AAAB2) to (tau42);
+                \draw [style=arrow, bend right=30] (tau42) to (A2);
+                \draw [style=arrow, bend right=30] (tau42) to (AA2);
+                \draw [style=arrow, bend left=40] (tau42) to (B2);
             \end{pgfonlayer}
         \end{tikzpicture}
     }
 \end{center}
+where the transitions involved in the pathway are colored green.
+The set of pathways from $A$ to $AAAB$ is then $\Gamma_{A}^{AAAB} = \{ \gamma\alpha, \gamma\beta \}$.
+In the case where there are loops in the Petri net, some or all of the sets of pathways will be countably infinite.
+While this seems undesirable, it does not present much of a problem for the problems under consideration in this work.
 
-\begin{definition}\label{def:pathway-connected}
-    Let $P$ be a Petri net and $x,y \in S(P)$.
-    We say that $x$ is \textbf{pathway connected to} $y$ if and only if there exists a pathway $\gamma = t_n \ldots t_1$ such that $\sigma(t_1) = x + m$ and $\tau(t_n) = y + n$ for some $m, n \in \N[S(P)]$.
-    The set of all pathways in $P$ from $x$ to $y$ is denoted $\Gamma_x^y$.
-    We denote the set of all pathways in $P$ starting from $x$ as $\Gamma_x = \bigcup_{y \in S(P)} \Gamma_x^y$, and all pathways terminating at $y$ as $\Gamma^y = \bigcup_{x \in S(P)} \Gamma_x^y$.
-\end{definition}
-
+As with subnets, pathways interact well with Petri net morphisms.
+This brings us to our first lemma:
 \begin{lemma}\label{lem:image-of-pathways}
     Let $f: P \rightarrow Q$ be a Petri net morphism and let $x, y \in S(P)$ be pathway connected in $P$.
     Then $f(x)$ and $f(y)$ are pathway connected in $f(P)$.
