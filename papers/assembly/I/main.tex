@@ -89,7 +89,7 @@ Further, we prove several theorems relating to method of bounding the assembly i
 
 \section{Petri Nets}
 
-\subsection{Free Commutative Monoids}
+\subsection{Free Commutative Monoids}\label{subsec:fcm}
 
 The first task we are faced with is how to formally represent the substrates and products of some transition.
 We can look to introductory Chemistry for inspiration.
@@ -825,10 +825,117 @@ This brings us to our first lemma:
     This shows that a pathway exists from $f(x)$ to $f(y)$, so $f(x)$ and $f(y)$ are pathway connected.
 \end{proof}
 
+We can view a pathway in a given Petri net $P$ as, or rather use it to construct, a set of transitions.
+This set of transitions does not, in and of itself, give us a Petri subnet; however, we can imagine collecting all of the sites in $P$ which participate in those transitions.
+Recalling back to \cref{subsec:fcm}, we can use $\pi$ to determine the sites which participate in a given linear combination.
+We can extend this idea to transitions in a Petri net.
+\begin{definition}\label{def:participate}
+    Let $P$ be a Petri net and let $t \in T(P)$ be a transition.
+    The set of all sites which participate in $t$ is denoted $\rho(t) = \pi(\sigma(t)) \cup \pi(\tau(t))$.
+    Similarly, if $X \subseteq T(P)$, $\rho(X) = \bigcup_{t \in X}\rho(x)$.
+\end{definition}
+
+This allows us to then define the \textit{site completion} of a subset of transitions from some Petri net.
+
 \begin{definition}\label{def:site-completion}
     Let $P$ be a petri net and let $X \subseteq T(P)$.
-    The \textbf{site completion} of $X$ in $P$, denoted $X^*$ is the Petri net defined by $T(X^*) = X$, $S(X^*) = \pi(X)$, $\sigma_{X^*} = \sigma_P|_{X^*}$ and $\tau_{X^*} = \tau_P|_{X^*}$.
+    The \textbf{site completion} of $X$ in $P$, denoted $X^*$ is the Petri net defined by $T(X^*) = X$, $S(X^*) = \rho(X)$, $\sigma_{X^*} = \sigma_P|_{X^*}$ and $\tau_{X^*} = \tau_P|_{X^*}$.
 \end{definition}
+It is very clear from the definition that for any given set of transitions $X$, the site completion is a Petri subnet.
+The site completion presents a very natural method for constructing a Petri subnet from a set of pathways, and gives a clean way of thinking about all of the different ways in which an object might be assembled from some starting set of objects.
+Taking the paths $\gamma\alpha$, $\gamma\beta$ and the set $\Gamma_A^{AAAB}$ from the previous example, we can construct the following Petri subnets (highlighted in red):
+\begin{center}
+    \scalebox{0.6}{
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [style=site, draw=red] (A) at (0, 0.8) {$A$};
+                \node [style=site] (B) at (0, -0.8) {$B$};
+                \node [style=site, draw=red] (C) at (6, -1.6) {$C$};
+                \node [style=site, draw=red] (AA) at (4, 0.8) {$AA$};
+                \node [style=site, draw=red] (AB) at (4, -0.8) {$AB$};
+                \node [style=site, draw=red] (AAAB) at (8, 0) {$AAAB$};
+                \node [style=transition, fill=green!20, draw=red] (tau1) at (2, 0.8) {$\alpha$};
+                \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
+                \node [style=transition, fill=green!20, draw=red] (tau3) at (6, 0) {$\gamma$};
+                \node [style=transition] (tau4) at (10, 0) {$\delta$};
+                \node [scale=3] at (5, -3.5) {$\rho(\gamma\alpha)^*$};
+
+                \node [style=site, draw=red] (A2) at (14, 0.8) {$A$};
+                \node [style=site, draw=red] (B2) at (14, -0.8) {$B$};
+                \node [style=site, draw=red] (C2) at (20, -1.6) {$C$};
+                \node [style=site, draw=red] (AA2) at (18, 0.8) {$AA$};
+                \node [style=site, draw=red] (AB2) at (18, -0.8) {$AB$};
+                \node [style=site, draw=red] (AAAB2) at (22, 0) {$AAAB$};
+                \node [style=transition] (tau12) at (16, 0.8) {$\alpha$};
+                \node [style=transition, fill=green!20, draw=red] (tau22) at (16, -0.8) {$\beta$};
+                \node [style=transition, fill=green!20, draw=red] (tau32) at (20, 0) {$\gamma$};
+                \node [style=transition] (tau42) at (24, 0) {$\delta$};
+                \node [scale=3] at (19, -3.5) {$\rho(\gamma\beta)^*$};
+
+                \node [style=site, draw=red] (A3) at (7, -5.2) {$A$};
+                \node [style=site, draw=red] (B3) at (7, -6.8) {$B$};
+                \node [style=site, draw=red] (C3) at (13, -7.6) {$C$};
+                \node [style=site, draw=red] (AA3) at (11, -5.2) {$AA$};
+                \node [style=site, draw=red] (AB3) at (11, -6.8) {$AB$};
+                \node [style=site, draw=red] (AAAB3) at (15, -6) {$AAAB$};
+                \node [style=transition, fill=green!20, draw=red] (tau13) at (9, -5.2) {$\alpha$};
+                \node [style=transition, fill=green!20, draw=red] (tau23) at (9, -6.8) {$\beta$};
+                \node [style=transition, fill=green!20, draw=red] (tau33) at (13, -6) {$\gamma$};
+                \node [style=transition] (tau43) at (17, -6) {$\delta$};
+                \node [scale=3] at (12, -9.5) {$\rho(\Gamma_A^{AAAB})^*$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow, bend right=15, draw=red] (A) to (tau1);
+                \draw [style=arrow, bend left=15, draw=red] (A) to (tau1);
+                \draw [style=arrow, bend right=15] (A) to (tau2);
+                \draw [style=arrow, draw=red] (tau1) to (AA);
+                \draw [style=arrow] (B) to (tau2);
+                \draw [style=arrow] (tau2) to (AB);
+                \draw [style=arrow, draw=red] (AA) to (tau3);
+                \draw [style=arrow, draw=red] (AB) to (tau3);
+                \draw [style=arrow, bend left=30, draw=red] (C) to (tau3);
+                \draw [style=arrow, draw=red] (tau3) to (AAAB);
+                \draw [style=arrow, bend left=30, draw=red] (tau3) to (C);
+                \draw [style=arrow] (AAAB) to (tau4);
+                \draw [style=arrow, bend right=30] (tau4) to (A);
+                \draw [style=arrow, bend right=30] (tau4) to (AA);
+                \draw [style=arrow, bend left=40] (tau4) to (B);
+
+                \draw [style=arrow, bend right=15] (A2) to (tau12);
+                \draw [style=arrow, bend left=15] (A2) to (tau12);
+                \draw [style=arrow, bend right=15, draw=red] (A2) to (tau22);
+                \draw [style=arrow] (tau12) to (AA2);
+                \draw [style=arrow, draw=red] (B2) to (tau22);
+                \draw [style=arrow, draw=red] (tau22) to (AB2);
+                \draw [style=arrow, draw=red] (AA2) to (tau32);
+                \draw [style=arrow, draw=red] (AB2) to (tau32);
+                \draw [style=arrow, bend left=30, draw=red] (C2) to (tau32);
+                \draw [style=arrow, draw=red] (tau32) to (AAAB2);
+                \draw [style=arrow, bend left=30, draw=red] (tau32) to (C2);
+                \draw [style=arrow] (AAAB2) to (tau42);
+                \draw [style=arrow, bend right=30] (tau42) to (A2);
+                \draw [style=arrow, bend right=30] (tau42) to (AA2);
+                \draw [style=arrow, bend left=40] (tau42) to (B2);
+
+                \draw [style=arrow, bend right=15, draw=red] (A3) to (tau13);
+                \draw [style=arrow, bend left=15, draw=red] (A3) to (tau13);
+                \draw [style=arrow, bend right=15, draw=red] (A3) to (tau23);
+                \draw [style=arrow, draw=red] (tau13) to (AA3);
+                \draw [style=arrow, draw=red] (B3) to (tau23);
+                \draw [style=arrow, draw=red] (tau23) to (AB3);
+                \draw [style=arrow, draw=red] (AA3) to (tau33);
+                \draw [style=arrow, draw=red] (AB3) to (tau33);
+                \draw [style=arrow, bend left=30, draw=red] (C3) to (tau33);
+                \draw [style=arrow, draw=red] (tau33) to (AAAB3);
+                \draw [style=arrow, bend left=30, draw=red] (tau33) to (C3);
+                \draw [style=arrow] (AAAB3) to (tau43);
+                \draw [style=arrow, bend right=30] (tau43) to (A3);
+                \draw [style=arrow, bend right=30] (tau43) to (AA3);
+                \draw [style=arrow, bend left=40] (tau43) to (B3);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
 
 \begin{definition}\label{def:upper-lower-subnet}
     Let $P$ be a Petri net and let $X \subseteq S(P)$.
