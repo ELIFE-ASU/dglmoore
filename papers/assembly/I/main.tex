@@ -244,10 +244,10 @@ which we graphically represent as
 
 This particular example exhibits a number of interesting features.
 First, there are transitions wherein one of the input sites is also an output site, namely $\gamma$'s dependence on $C$.
-Drawing from chemical parlance, this represents a catalytic effect; the transition can only proceed when the site is present\footnote{The addition of another transitition next to $\gamma$ which does not depend on or yield $C$ can model processes that can proceed without $C$ but is accelerated by it.}.
+Drawing from chemical parlance, this represents a catalytic effect; the transition can only proceed when the site is present\footnote{The addition of another transitition next to $\gamma$ which does not depend on or yield $C$ can model a process that can proceed without $C$ but is accelerated by it's presence.}.
 Second, transitions such as $\delta$ can be viewed as a degradation or disassembly process.
 This allows reactions to run in both directions.
-To elaborate on this point, we can return to the water example and introduce a second transition allowing for the degradation of water back into Hydrogen and Oxygen:
+To elaborate on this point, we can return to the water example and introduce a second transition allowing for the degradation of water back into diatomic Hydrogen and diatomic Oxygen:
 
 \begin{center}
     \scalebox{0.6}{
@@ -278,7 +278,7 @@ To elaborate on this point, we can return to the water example and introduce a s
 An element of $\N[S(P)]$ is called a \textbf{marking} of the Petri net.
 Markings play an important role in modeling dynamical systems with Petri nets, representing the state of the system at some time.
 For example, the linear combination $5\ce{H_2} + 2\ce{O_2}$ might be thought to represent a system with $5$ molecules of $\ce{H_2}$ and $2$ molecules of $\ce{O_2}$ and no $\ce{H_2O}$.
-From this element, we can see that, at least in principle, the transition $\alpha$ might carried out at most twice.
+From this element, we can see that, at least in principle, the transition $\alpha$ might be carried out at most twice\footnote{This is assuming no water dissociates after formation}.
 The question of whether, under the action of some dynamical model, one marking can be transformed or processed into another is referred to as the reachability problem and is remarkably difficult.
 While we will not delve into dynamical aspects of Petri nets or the to-be-defined assembly spaces in this work, dynamics will likely be a key element of the formal theory going forward.
 
