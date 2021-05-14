@@ -707,11 +707,14 @@ We now start constructing apparently new ideas that will allow us to formalize t
 The first of these is the idea of a pathway.
 Suppose you begin with a given object $x$ and wish to fleshout all of the ways in which a second object $y$ might be constructed.
 The simplest first step is to construct a sequence of transitions, the first of which takes $x$ as part of its input, the last yields $y$ as part of it its output, and every transition in between depends at least partially on the output of the previous.
-Such a sequence of transitions is what we refer to as a \textit{pathway}.
+Such a sequence of transitions forms the core of what we refer to as a \textit{pathway}.
 
-\begin{definition}\label{def:pathway}
-    If $P$ is a Petri net, a \textbf{pathway} $\gamma = t_n \ldots t_1$ in $P$ of length $n \ge 1$ is a sequence of transitions $t_i \in T$ such that $\tau(t_i) \ne 0$, $\sigma(t_i) \ne 0$, $m_{i} + \tau(t_i) = n_{i+1} + \sigma(t_{i+1})$ with $\sigma(t_{i+1}) \ne m_{i}$ and $\tau(t_{i+1}) \ne n_{i+1}$. We write $t \in \gamma$ to denote that the transition $t$ appears in the pathway $\gamma$.
-\end{definition}
+{
+    \color{red}
+    \begin{definition}\label{def:pathway}
+        If $P$ is a Petri net, a \textbf{pathway} $\gamma = t_n \ldots t_1$ in $P$ of length $n \ge 1$ is a sequence of transitions $t_i \in T$ such that $\tau(t_i) \ne 0$, $\sigma(t_i) \ne 0$, $m_{i} + \tau(t_i) = n_{i+1} + \sigma(t_{i+1})$ with $\sigma(t_{i+1}) \ne m_{i}$ and $\tau(t_{i+1}) \ne n_{i+1}$. We write $t \in \gamma$ to denote that the transition $t$ appears in the pathway $\gamma$.
+    \end{definition}
+}
 
 It is clear that a pathway is a directed concept in general.
 A pathway from $x$ to $y$ is not necessarily a pathway from $y$ to $x$, and the existence of a pathway from $x$ to $y$ does not imply a pathway from $y$ to $x$ exists.
@@ -719,12 +722,14 @@ If there is a pathway from $x$ to $y$ we say \textit{$x$ pathway connected to $y
 In general, if $x$ is pathway connected to $y$ there may be multiple pathways, and it will be useful to refer to that set of pathways.
 
 \begin{definition}\label{def:pathway-connected}
+    \TODO{Update this to reflect changes in the definition of a pathway.}
     Let $P$ be a Petri net and $x,y \in S(P)$.
     We say that $x$ is \textbf{pathway connected to} $y$ if and only if there exists a pathway $\gamma = t_n \ldots t_1$ such that $\sigma(t_1) = x + m$ and $\tau(t_n) = y + n$ for some $m, n \in \N[S(P)]$.
     The set of all pathways in $P$ from $x$ to $y$ is denoted $\Gamma_x^y$.
     We denote the set of all pathways in $P$ starting from $x$ as $\Gamma_x = \bigcup_{y \in S(P)} \Gamma_x^y$, and all pathways terminating at $y$ as $\Gamma^y = \bigcup_{x \in S(P)} \Gamma_x^y$.
 \end{definition}
 
+\TODO{Update this example to reflect changes in the definition of a pathway.}
 In our ligation example, you might suppose that you begin with $A$ and would like to ultimately yield $AAAB$.
 There are in fact two pathways which accomplish this, $\gamma\alpha$ and $\gamma\beta$, which we read as \textit{first fire $\alpha$ ($\beta$, respectively) and then fire $\gamma$}:
 \begin{center}
@@ -799,6 +804,7 @@ While this seems undesirable, it does not present much of a problem for the prob
 As with subnets, pathways interact well with Petri net morphisms.
 This brings us to our first lemma:
 \begin{lemma}\label{lem:image-of-pathways}
+    \TODO{Update this proof to reflect changes to the definition of a pathway.}
     Let $f: P \rightarrow Q$ be a Petri net morphism and let $x, y \in S(P)$ be pathway connected in $P$.
     Then $f(x)$ and $f(y)$ are pathway connected in $f(P)$.
 \end{lemma}
