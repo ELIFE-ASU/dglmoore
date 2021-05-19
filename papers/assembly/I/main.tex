@@ -61,7 +61,7 @@
 \newcommand{\Maxim}{\mathcal{Max}}
 \newcommand{\A}{\mathcal{A}}
 \newcommand{\powerset}{\mathcal{P}}
-\newcommand{\pathway}[1]{\langle~#1~\rangle}
+\newcommand{\pathway}[1]{\langle#1\rangle}
 
 \newcommand{\red}[1]{{\color{red}#1}}
 \newcommand{\green}[1]{{\color{green}#1}}
@@ -732,11 +732,11 @@ Such a sequence of transitions forms the core of what we refer to as a \textit{p
     We consider the empty sequence of transitions as a pathway and refer to it as the \textbf{zero pathway}.
 
     \smallskip
-    Let $X$ be a subset of sites in $P$. We say that $\gamma$ is \textit{from $X$} if $\pi(\sigma(t_1)) \subseteq X$.
+    Let $X$ be a subset of sites in $P$. We say that $\gamma$ is \textit{from $X$} if $\pi(\sigma(t_1)) \subseteq X$, an will sometimes say that $\gamma$ starts at $X$.
 
     \smallskip
     Let $y$ be site, and let $Y$ be a subset of sites.
-    We say $\gamma$ is a \textit{to $y$} if $y \in \pi(\tau(t_n))$, and \textit{to $Y$} if $Y \subseteq \pi(\tau(t_n))$.
+    We say $\gamma$ is a \textit{to $y$} if $y \in \pi(\tau(t_n))$, and \textit{to $Y$} if $Y \subseteq \pi(\tau(t_n))$, and will sometimes say that $\gamma$ terminates at $y$ or $Y$.
 
     \smallskip
     We say that the zero pathway is a pathway from any set $X$ to itself and none other.
@@ -754,24 +754,34 @@ Such a sequence of transitions forms the core of what we refer to as a \textit{p
 
 \begin{lemma}\label{lem:image-of-pathways}
     Let $f: P \rightarrow Q$ be a Petri net morphism and let $X, Y \subseteq S(P)$ be pathway connected in $P$.
-    Then either $f(x)$ and $f(y)$ are pathway connected in $f(P)$.
+    Then either $f(X)$ and $f(Y)$ are pathway connected in $f(P)$.
 \end{lemma}
 \begin{proof}
     \TODO{Complete}
 \end{proof}
 
+\begin{definition}\label{def:minimal-maximal}
+    Let $P$ be a Petri net and let $x$ be a site in $P$.
+    We say that $x$ is minimal in $P$ if the only pathway terminating at $x$ is the zero pathway.
+    Similarly, $x$ is maximal in $P$ if the only pathway starting at $x$ is the zero pathway.
+    The set of all minimal sites in $P$ is denoted $\Min{P}$, and the set of all maximal sites is denoted $\Max{P}$.
+\end{definition}
+
 \begin{definition}\label{def:site-completion}
-    \TODO{Complete}
+    \TODO{Given a set of transitions, construct the set of all sites and add all the edges.}
 \end{definition}
 
 \begin{definition}\label{def:generator}
-    \TODO{A set of sites from which there is a pathway to every other object}
+    Let $P$ be a Petri net and let $X$ be a subset of sites of $P$.
+    We say that $X$ is a \textbf{generating set} of $P$ if $X$ is pathway connected to every subset of sites $Y$ in $P$.
 \end{definition}
 
+\red{The set of all generating sets of a Petri net can be ordered by set inclusion}
+
 \begin{definition}\label{def:basis}
-    Let $P$ be a Petri net and $X \subseteq S(P)$.
-    We say that $X$ is a basis of $P$ if $\ldots$.
-    \TODO{Complete}
+    Let $P$ be a Petri net and let $X$ be a set of generators of $P$.
+    We say that $X$ is a \textbf{basis} of $P$ if it is minimal in the partially ordered set of generating sets.
+    That is, $X$ is a basis if for any other generating set $Y$ of $P$, if $Y \subseteq X$ then $X = Y$.
 \end{definition}
 
 \begin{lemma}\label{lem:minimal-are-basic}
