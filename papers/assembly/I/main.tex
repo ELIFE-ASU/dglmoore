@@ -56,13 +56,12 @@
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\B}{\mathcal{B}}
 \newcommand{\G}{\mathcal{G}}
-\newcommand{\Min}[1]{\min{(#1)}}
-\newcommand{\Max}[1]{\max{(#1)}}
-\newcommand{\Minim}{\mathcal{Min}}
-\newcommand{\Maxim}{\mathcal{Max}}
+\newcommand{\Ini}[1]{\textrm{Ini}(#1)}
+\newcommand{\Term}[1]{\textrm{Term}(#1)}
 \newcommand{\A}{\mathcal{A}}
 \newcommand{\powerset}{\mathcal{P}}
 \newcommand{\pathway}[1]{\langle#1\rangle}
+\newcommand{\R}{\mathbb{R}}
 
 \newcommand{\red}[1]{{\color{red}#1}}
 \newcommand{\green}[1]{{\color{ForestGreen}#1}}
@@ -292,7 +291,7 @@ While we will not delve into dynamical aspects of Petri nets or the to-be-define
 
 It is natural, once a mathematical structure has been defined, to ask how two instantiations of that structure may be mapped to one another.
 There is, of course, a well defined notion of a map between Petri nets, termed here a \textit{Petri net morphism}, which maps sites and transitions of one Petri net into another in a way that is compatible and consistent with the source and target maps of both Petri nets.
-These Petri net morphisms will play a crucial roll in the establishment of lower bounds for the assembly index in \cref{sec:assembly-index}.
+These Petri net morphisms will play a crucial roll in the establishment of bounds for the assembly index in \Cref{sec:assembly-index-bounds}.
 
 \begin{definition}\label{def:petri-map}
     A \textbf{Petri net morphism} from a Petri net $P$ to a Petri net $Q$, denoted $f : P \rightarrow Q$, consisists of a pair of functions $T(f) : T(P) \rightarrow T(Q)$ and $S(f): S(P) \rightarrow S(Q))$ such that the following diagrams commute:
@@ -863,12 +862,12 @@ In fact, given any set of transitions, we can construct a Petri subnet.
     The \textbf{site completion} of $X$, denoted $X^*$ is the Petri subnet of $P$ formed such that
     \begin{itemize}
         \item $T(X^*) = X$
-        \item $\displaystyle S(X^*) = \bigcup_{t \in X} \pi(\sigma(t) + \tau(t))$
+        \item $\displaystyle S(X^*) = \bigcup_{t \in X} \pi(\sigma_P(t) + \tau_P(t))$
         \item $\sigma_{X^*} = \sigma_P|_X$ and $\tau_{X^*} = \tau_P|_X$.
     \end{itemize}
 \end{definition}
 
-That this the site completion is, in fact, a subnet follows immediately from the definition of a subnet.
+That the site completion is, in fact, a subnet follows immediately from the definition of a subnet.
 Furthermore, since we can view a pathway as an ordered set of transitions, we can simply site complete that set to construct a Petri subnet.
 There are several questions we could continue with here, such whether every Petri subnet gives rise to a pathway which uses every transition in the subnet.
 However, since questions such as this are immaterial to the problem at hand, we will postpone addressing them to subsequent works.
@@ -882,16 +881,37 @@ We refer to such a subset of objects as a \textit{generating set}.
     The set of all generating sets of $P$ is denoted $\G_P$.
 \end{definition}
 
-It is trivially true that $\G_P \ne \emptyset$ since the set of all sites in $P$ is a generating set.
-The set of all generating sets of a Petri net is naturally a subset of the powerset of the sites of $P$.
-That is, $\G_P \subseteq \powerset(S(P))$.
-As such, $\G_P$ inherits a partial order from $\powerset(S(P))$ with which we can seek ``smaller" generating sets.
+To clarify this idea, let us consider a few sets of sites from the ligation example.
+The first, and least interesting example, is the set of all sites $\{A, B, AA, AB, C, AAAB\}$.
+Clearly every site in the space can be created, or at least provided, from this set.
+In fact it is trivially true that for any Petri net $P$, the set of all sites in the net is a generating set, i.e. $\G_P \ne \emptyset$.
+Furthermore, the empty set of sites is not generating in this case, though it may be in Petri nets with sources (\Cref{def:source-sink}).
+The set $\{A,B\}$ is also not a generating set; what sequence of transitions could yield $C$ or $AAAB$?
+It is reassuring to know that not all subsets sites are generating, in this case at least.
+However, the set $\{A,B,C\}$ is generating, and we can add any other site to this set and the result will be a generating set, e.g. $\{A,B,C,AAAB\}$.
+The sets $\{A, AA, AB, C\}$ and $\{AB, AAAB, C\}$ are generating, but upon close inspection we can see that some of the sites within them are not required, e.g. $A$ or $AA$ in the former, and $AB$ in the latter.
+This alludes to the idea of a \textit{minimal} generating set; one from which we can remove no sites and the result still be a generating set.
+We can formalize this idea by noting that the set of all generating sets of a Petri net is naturally a subset of the powerset of the sites of the net, $\G_P \subseteq \powerset(S(P))$.
+As such, $\G_P$ inherits a partial order from $\powerset(S(P))$ (subset inclusion) within which we can determine if a generating set is minimal.
+We refer to a minimal generating set with respect to this partial order as a \textit{basis}.
 
 \begin{definition}\label{def:basis}
-    Let $P$ be a Petri net and let $X$ be a set of generators of $P$, $X \in \G_P$.
+    Let $P$ be a Petri net and let $X$ be a generating set of $P$, $X \in \G_P$.
     We say that $X$ is a \textbf{basis} if it is minimal with respect to the set inclusion order on $\G_P$.
 \end{definition}
 
+The ligation example admits a choice of basis: $\{A,B,C\}$, $\{A,AB,C\}$, $\{AA,AB,C\}$, or $\{C,AAAB\}$.
+While it may seem undesirable, on its face, for a Petri net to admit more than one basis, there is little difference between this and being able to choose the basis of a vector space such as $\R^2$.
+We can view each choice of basis as representing a minimal set of starting components from which everything of interest can be constructed; similar to deciding which raw materials to use to build a house, or which chemical reagents to use to synthesis a given set of molecules.
+Depending on the context, there may be \textit{a priori} reasons to prefer one basis over another.
+For example, in the ligation example, the $\{A,B,C\}$ basis seems somehow preferable as it is composed of monomers while all other bases consist of higher-order components.
+To make such a distinction, however, requires additional structure, such as a grading\footnote{Here we use the term \textit{grading} loosely. It could, for example, simply mean a map $g : S(P) \rightarrow \N$ for some Petri net $P$ which is consistent in some way with the graph structure of $P$.} on the sites with which to formally distinguish between bases.
+The choice of basis will become important in \Cref{sec:assembly-spaces,sec:assembly-index}, but for now we are only interested in the existence and uniqueness of bases and their preservation under Petri net morphisms.
+For this reason, we will leave the question of mechanisms for preferentially choosing a basis for a future work.
+
+Whether or not a Petri net admits a basis at all and whether that basis is unique, are both fundamentally important questions.
+The establishment of something like the assembly index of an object relies on the specification of a basis.
+Fortuitously, every Petri net admits at least one basis, and in certain cases this basis will be unique.
 \begin{lemma}\label{lem:bases-exist}
     Every Petri net admits at least one basis.
 \end{lemma}
@@ -899,26 +919,95 @@ As such, $\G_P$ inherits a partial order from $\powerset(S(P))$ with which we ca
     \TODO{Complete (likely to use Zorn's lemma)}
 \end{proof}
 
-\begin{definition}\label{def:minimal-maximal}
+If we recall, a generating set (and consequently a basis) is a set of sites from which all others can be reached via a pathway.
+However, some objects are priviledged in that there are not pathways which terminate at them.
+Consider $C$ in the ligation example:
+\begin{center}
+    \scalebox{0.6}{
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node (a) at (-4, 0.8) {};
+                \node (b) at (-4, -0.8) {};
+                \node (c) at (4, 0) {};
+                \node [style=site] (C) at (0, -1.6) {$C$};
+                \node [style=site] (AA) at (-2, 0.8) {$AA$};
+                \node [style=site] (AB) at (-2, -0.8) {$AB$};
+                \node [style=site] (AAAB) at (2, 0) {$AAAB$};
+                \node [style=transition] (gamma) at (0, 0) {$\gamma$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow, bend left=30] (C) to (gamma);
+                \draw [style=arrow, bend left=30] (gamma) to (C);
+                \draw [style=arrow] (AA) to (gamma);
+                \draw [style=arrow] (AB) to (gamma);
+                \draw [style=arrow] (gamma) to (AAAB);
+                \draw [style=arrow] (a) to (AA);
+                \draw [style=arrow] (b) to (AB);
+                \draw [style=arrow] (AAAB) to (c);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
+There is no transition that yields $C$ without depending upon it, so $C$ must be included in any generating set or basis.
+This is also true of any site that has no incoming edges, for example.
+We refer to such a site as these as \textit{initial}, with the concept of \textit{terminal} defined similarly\footnote{We've chosen this terminology to allude to a possible category-theoretic formulation wherein a Petri net is a category with sets of sites as objects and pathways are morphisms. In that context, sets of sites which are initial/terminal this text's formalism are initial/terminal objects in the category.}
+\begin{definition}\label{def:initial-final}
     Let $P$ be a Petri net and let $x$ be a site in $P$.
-    We say that $x$ is minimal in $P$ if the only pathway terminating at $x$ is the zero pathway.
-    Similarly, $x$ is maximal in $P$ if the only pathway starting at $x$ is the zero pathway.
-    The set of all minimal sites in $P$ is denoted $\Min{P}$, and the set of all maximal sites is denoted $\Max{P}$.
+    We say that $x$ is initial in $P$ if the only pathway terminating at $x$ is the zero pathway.
+    Similarly, $x$ is final in $P$ if the only pathway starting at $x$ is the zero pathway.
+    The set of all initial sites in $P$ is denoted $\Ini{P}$, and the set of all final sites is denoted $\Term{P}$.
 \end{definition}
+In the ligation example, the only inital site is $C$ and there are no terminal sites.
+However, if we were to remove the $\delta$ transition, for example,
+\begin{center}
+    \scalebox{0.6}{
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [style=site] (A) at (0, 0.8) {$A$};
+                \node [style=site] (B) at (0, -0.8) {$B$};
+                \node [style=site] (C) at (6, -1.6) {$C$};
+                \node [style=site] (AA) at (4, 0.8) {$AA$};
+                \node [style=site] (AB) at (4, -0.8) {$AB$};
+                \node [style=site] (AAAB) at (8, 0) {$AAAB$};
+                \node [style=transition] (tau1) at (2, 0.8) {$\alpha$};
+                \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
+                \node [style=transition] (tau3) at (6, 0) {$\gamma$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow, bend right=15] (A) to (tau1);
+                \draw [style=arrow, bend left=15] (A) to (tau1);
+                \draw [style=arrow, bend right=15] (A) to (tau2);
+                \draw [style=arrow] (tau1) to (AA);
+                \draw [style=arrow] (B) to (tau2);
+                \draw [style=arrow] (tau2) to (AB);
+                \draw [style=arrow] (AA) to (tau3);
+                \draw [style=arrow] (AB) to (tau3);
+                \draw [style=arrow, bend left=30] (C) to (tau3);
+                \draw [style=arrow] (tau3) to (AAAB);
+                \draw [style=arrow, bend left=30] (tau3) to (C);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
+then the site $AAAB$ will be terminal and both the initial sites will be $A$, $B$ and $C$.
+Sourceless, acyclic Petri nets (nets without loops) will necessarily contain initial sites, and similarly sinkless, acyclic Petri nets will contain terminal sites.
 
-\begin{lemma}\label{lem:minimal-are-basic}
+The value of identifying initial sites is that they are necessarily elements of every basis, and if the set of initial sites is a basis in its own right, then it is the only basis.
+\begin{lemma}\label{lem:initial-are-basic}
     Let $P$ be a Petri net.
-    For any basis $\B$ of $P$, $\Min{P} \subseteq \B$.
-    Furthermore, if $\Min{P}$ is a basis, then it is a unique basis for $P$.
+    For any basis $\B$ of $P$, $\Ini{P} \subseteq \B$.
+    Furthermore, if $\Ini{P}$ is a basis, then it is a unique basis for $P$.
 
     \red{I'm not $100\%$ sure of the last point, but I think it's true. We'll find out when we start writing the proof.}
 
-    \green{This is important for internal use. In all of the cases we have dealt with in practice, e.g. molecular assembly as applied, the minimal elements form a basis and there is no ambiguity in the Nat. Comm. paper recently published.}
+    \green{This is important for internal use. In all of the cases we have dealt with in practice, e.g. molecular assembly as applied, the inital sites form a basis and so there is no ambiguity in the Nat. Comm. paper recently published.}
 \end{lemma}
 \begin{proof}
     \TODO{Complete}
 \end{proof}
 
+Our final concern regaring Petri nets is whether or not bases are are preserved under Petri net morphisms.
+To establish that this is the case, we must first show that if two sets of sites are pathway connected, then they will be pathway connected in the image of a Petri net morphism.
 \begin{lemma}\label{lem:image-of-pathways}
     Let $f: P \rightarrow Q$ be a Petri net morphism and let $X, Y \subseteq S(P)$ be pathway connected in $P$.
     Then either $f(X)$ and $f(Y)$ are pathway connected in $f(P)$.
@@ -927,15 +1016,39 @@ As such, $\G_P$ inherits a partial order from $\powerset(S(P))$ with which we ca
     \TODO{Complete}
 \end{proof}
 
-\begin{lemma}\label{lem:image-basis}
-    Let $P$ be a Petri net with basis $\B$ and let $f : A \rightarrow B$ be a Petri net morphism.
-    Then $f(\B)$ is a basis for $f(P)$.
+\TODO{Example}
+
+The fact that generating sets are preserved, follows from the preservation of pathways.
+\begin{lemma}\label{lem:image-of-generating-sets}
+    Let $f: P \rightarrow Q$ be a Petri net morphism and let $X$ be a generating set of $P$.
+    Then $f(X)$ is a generating set of $f(P)$.
 \end{lemma}
 \begin{proof}
     \TODO{Complete}
 \end{proof}
 
-\section{Assembly Spaces, Subspaces and Maps}\label{sec:assembly-index}
+\TODO{Example Figure}
+
+This is not to say that the only generating sets in the image of a Petri net will be the image of a generating set.
+The codomain of the Petri net morphism may in fact have additional generating sets.
+
+\TODO{Example Figure}
+
+Still, the fact that generating sets are preserved yields nicely our final result: bases are preserved under Petri net morphisms
+\begin{corollary}\label{lem:image-basis}
+    Let $P$ be a Petri net with basis $\B$ and let $f : A \rightarrow B$ be a Petri net morphism.
+    Then $f(\B)$ is a basis for $f(P)$.
+\end{corollary}
+\begin{proof}
+    \TODO{Complete}
+\end{proof}
+The property that Petri net morphisms preserve bases is fundamentally important for establishing relationships between basis-dependent quantities computed in one Petri net with those in another.
+
+The Petri net formalism, and the extensions presented in this section, can now be leveraged to define the structure of primary interest in this work: assembly spaces.
+These spaces can be seen as a subclass of Petri nets which admit specific features useful for describing the fewest number of steps required to construct a given object, the assembly index.
+The concepts of subnets and bases will be a key component in the definition of the assembly index, and Petri net morphisms will be indispensible for establishing bounding the value of the assembly index where explict calculation may be infeasible.
+
+\section{Assembly Spaces, Subspaces and Maps}\label{sec:assembly-spaces}
 
 \begin{definition}\label{def:assembly-space}
     An \textbf{assembly space} $(A, \B_A)$ is a sourceless and sinkless Petri net with basis $\B_A$.
@@ -981,7 +1094,7 @@ As such, $\G_P$ inherits a partial order from $\powerset(S(P))$ with which we ca
     \TODO{Complete}
 \end{proof}
 
-\section{The Assembly Index}
+\section{The Assembly Index}\label{sec:assembly-index}
 
 \begin{definition}\label{def:size}
     Let $A$ be an assembly space.
@@ -999,7 +1112,7 @@ As such, $\G_P$ inherits a partial order from $\powerset(S(P))$ with which we ca
     This can be written $c(x)$ when the relevant assembly space is clear from context.
 \end{definition}
 
-\subsection{Bounds on the Assembly Index}
+\subsection{Bounds on the Assembly Index}\label{subsec:assembly-index-bounds}
 
 \begin{theorem}\label{cor:subspace-index-upper-bound}
     Let $(A, \B_A)$ be an assembly space and let $(B, \B_A)$ be a rooted assembly subspace of $A$.
