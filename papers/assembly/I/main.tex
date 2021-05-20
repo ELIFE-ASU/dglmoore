@@ -6,7 +6,7 @@
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{amsthm}
-\usepackage[usenames,dvipsnames]{color}
+\usepackage[usenames,dvipsnames]{xcolor}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{dsfont}
@@ -55,6 +55,7 @@
 \newcommand{\downset}[1]{#1\!\!\downarrow}
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\B}{\mathcal{B}}
+\newcommand{\G}{\mathcal{G}}
 \newcommand{\Min}[1]{\min{(#1)}}
 \newcommand{\Max}[1]{\max{(#1)}}
 \newcommand{\Minim}{\mathcal{Min}}
@@ -64,7 +65,7 @@
 \newcommand{\pathway}[1]{\langle#1\rangle}
 
 \newcommand{\red}[1]{{\color{red}#1}}
-\newcommand{\green}[1]{{\color{green}#1}}
+\newcommand{\green}[1]{{\color{ForestGreen}#1}}
 \newcommand{\blue}[1]{{\color{blue}#1}}
 \newcommand{\TODO}[1]{\noindent\red{\textbf{TODO:}~#1}}
 
@@ -606,7 +607,6 @@ Continuing the example map from our ligation model,
                 \node [style=transition] (tau1) at (2, 0.8) {$\alpha$};
                 \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
                 \node [style=transition] (tau3) at (6, 0) {$\gamma$};
-                \node [style=transition] (tau3) at (6, 0) {$\gamma$};
                 \node [style=transition] (tau4) at (10, 0) {$\delta$};
 
                 \node [scale=3] (Q) at (12, -6) {$Q$};
@@ -719,9 +719,9 @@ Similarly, the image of a sinkless Petri net is sinkless.
 Up to this point, all of the defintions have been fairly standard, at least in terms of concepts.
 We now start constructing apparently new ideas that will allow us to formalize the concepts of an assembly space and the assembly index.
 The first of these is the idea of a pathway.
-Suppose you begin with a given object $x$ and wish to fleshout all of the ways in which a second object $y$ might be constructed.
-The simplest first step is to construct a sequence of transitions, the first of which takes $x$ as part of its input, the last yields $y$ as part of it its output, and every transition in between depends at least partially on the output of the previous.
-Such a sequence of transitions forms the core of what we refer to as a \textit{pathway}.
+Suppose you begin with a set of objects $X$ and wish to consider ways of building some other set of objects.
+The simplest approach is to construct a sequence of transitions such that each transition depends only on $X$ or something produced by an earlier transition.
+This is what we refer to as a \textit{pathway}.
 
 \begin{definition}\label{def:pathway}
     Let $P$ be a Petri net.
@@ -732,7 +732,7 @@ Such a sequence of transitions forms the core of what we refer to as a \textit{p
     We consider the empty sequence of transitions as a pathway and refer to it as the \textbf{zero pathway}.
 
     \smallskip
-    Let $X$ be a subset of sites in $P$. We say that $\gamma$ is \textit{from $X$} if $\pi(\sigma(t_1)) \subseteq X$, an will sometimes say that $\gamma$ starts at $X$.
+    Let $X$ be a subset of sites in $P$. We say that $\gamma$ is \textit{from $X$} if $\pi(\sigma(t_1)) \subseteq X$, and will sometimes say that $\gamma$ starts at $X$.
 
     \smallskip
     Let $y$ be site, and let $Y$ be a subset of sites.
@@ -750,14 +750,153 @@ Such a sequence of transitions forms the core of what we refer to as a \textit{p
     \TODO{Break this definition apart}
 \end{definition}
 
-\red{The definition above is very close to the definition of a firing sequence. The primary difference is that we have no number-preserving requirements.}
+Returning to our ligation example, suppose we have the set $X = \{A, B\}$.
+There are, in fact, pathways from $X$, counting the zero pathway.
+The other three are $\pathway{\alpha}$, $\pathway{\beta}$ and $\pathway{\alpha\beta}$ and $\pathway{\beta\alpha}$.
+We depict these pathways below.
+The sites in $X$ are outlined in blue, the transitions are filled green, and relevant edges are red.
 
-\begin{lemma}\label{lem:image-of-pathways}
-    Let $f: P \rightarrow Q$ be a Petri net morphism and let $X, Y \subseteq S(P)$ be pathway connected in $P$.
-    Then either $f(X)$ and $f(Y)$ are pathway connected in $f(P)$.
+\begin{center}
+    \scalebox{0.6}{
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [style=site, draw=blue] (A1) at (0, 0.8) {$A$};
+                \node [style=site, draw=blue] (B1) at (0, -0.8) {$B$};
+                \node [style=site] (C1) at (6, -1.6) {$C$};
+                \node [style=site] (AA1) at (4, 0.8) {$AA$};
+                \node [style=site] (AB1) at (4, -0.8) {$AB$};
+                \node [style=site] (AAAB1) at (8, 0) {$AAAB$};
+                \node [style=transition, fill=green!20] (tau11) at (2, 0.8) {$\alpha$};
+                \node [style=transition] (tau21) at (2, -0.8) {$\beta$};
+                \node [style=transition] (tau31) at (6, 0) {$\gamma$};
+                \node [style=transition] (tau41) at (10, 0) {$\delta$};
+                \node [scale=3] at (5, -3.6) {$\pathway{\alpha}$};
+
+                \node [style=site, draw=blue] (A2) at (14, 0.8) {$A$};
+                \node [style=site, draw=blue] (B2) at (14, -0.8) {$B$};
+                \node [style=site] (C2) at (20, -1.6) {$C$};
+                \node [style=site] (AA2) at (18, 0.8) {$AA$};
+                \node [style=site] (AB2) at (18, -0.8) {$AB$};
+                \node [style=site] (AAAB2) at (22, 0) {$AAAB$};
+                \node [style=transition] (tau12) at (16, 0.8) {$\alpha$};
+                \node [style=transition, fill=green!20] (tau22) at (16, -0.8) {$\beta$};
+                \node [style=transition] (tau32) at (20, 0) {$\gamma$};
+                \node [style=transition] (tau42) at (24, 0) {$\delta$};
+                \node [scale=3] at (19, -3.6) {$\pathway{\beta}$};
+
+                \node [style=site, draw=blue] (A3) at (7, -5.8) {$A$};
+                \node [style=site, draw=blue] (B3) at (7, -7.4) {$B$};
+                \node [style=site] (C3) at (13, -8.2) {$C$};
+                \node [style=site] (AA3) at (11, -5.8) {$AA$};
+                \node [style=site] (AB3) at (11, -7.4) {$AB$};
+                \node [style=site] (AAAB3) at (15, -6.6) {$AAAB$};
+                \node [style=transition, fill=green!20] (tau13) at (9, -5.8) {$\alpha$};
+                \node [style=transition, fill=green!20] (tau23) at (9, -7.4) {$\beta$};
+                \node [style=transition] (tau33) at (13, -6.6) {$\gamma$};
+                \node [style=transition] (tau43) at (17, -6.6) {$\delta$};
+                \node [scale=3] at (12, -10.2) {$\pathway{\alpha\beta}, \pathway{\beta\alpha}$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow, draw=red, bend right=15] (A1) to (tau11);
+                \draw [style=arrow, draw=red, bend left=15] (A1) to (tau11);
+                \draw [style=arrow, draw=gray!80, bend right=15] (A1) to (tau21);
+                \draw [style=arrow, draw=red] (tau11) to (AA1);
+                \draw [style=arrow, draw=gray!80] (B1) to (tau21);
+                \draw [style=arrow, draw=gray!80] (tau21) to (AB1);
+                \draw [style=arrow, draw=gray!80] (AA1) to (tau31);
+                \draw [style=arrow, draw=gray!80] (AB1) to (tau31);
+                \draw [style=arrow, draw=gray!80, bend left=30] (C1) to (tau31);
+                \draw [style=arrow, draw=gray!80] (tau31) to (AAAB1);
+                \draw [style=arrow, draw=gray!80, bend left=30] (tau31) to (C1);
+                \draw [style=arrow, draw=gray!80] (AAAB1) to (tau41);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau41) to (A1);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau41) to (AA1);
+                \draw [style=arrow, draw=gray!80, bend left=40] (tau41) to (B1);
+
+                \draw [style=arrow, draw=gray!80, bend right=15] (A2) to (tau12);
+                \draw [style=arrow, draw=gray!80, bend left=15] (A2) to (tau12);
+                \draw [style=arrow, draw=red, bend right=15] (A2) to (tau22);
+                \draw [style=arrow, draw=gray!80] (tau12) to (AA2);
+                \draw [style=arrow, draw=red] (B2) to (tau22);
+                \draw [style=arrow, draw=red] (tau22) to (AB2);
+                \draw [style=arrow, draw=gray!80] (AA2) to (tau32);
+                \draw [style=arrow, draw=gray!80] (AB2) to (tau32);
+                \draw [style=arrow, draw=gray!80, bend left=30] (C2) to (tau32);
+                \draw [style=arrow, draw=gray!80] (tau32) to (AAAB2);
+                \draw [style=arrow, draw=gray!80, bend left=30] (tau32) to (C2);
+                \draw [style=arrow, draw=gray!80] (AAAB2) to (tau42);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau42) to (A2);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau42) to (AA2);
+                \draw [style=arrow, draw=gray!80, bend left=40] (tau42) to (B2);
+
+                \draw [style=arrow, draw=red, bend right=15] (A3) to (tau13);
+                \draw [style=arrow, draw=red, bend left=15] (A3) to (tau13);
+                \draw [style=arrow, draw=red, bend right=15] (A3) to (tau23);
+                \draw [style=arrow, draw=red] (tau13) to (AA3);
+                \draw [style=arrow, draw=red] (B3) to (tau23);
+                \draw [style=arrow, draw=red] (tau23) to (AB3);
+                \draw [style=arrow, draw=gray!80] (AA3) to (tau33);
+                \draw [style=arrow, draw=gray!80] (AB3) to (tau33);
+                \draw [style=arrow, draw=gray!80, bend left=30] (C3) to (tau33);
+                \draw [style=arrow, draw=gray!80] (tau33) to (AAAB3);
+                \draw [style=arrow, draw=gray!80, bend left=30] (tau33) to (C3);
+                \draw [style=arrow, draw=gray!80] (AAAB3) to (tau43);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau43) to (A3);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau43) to (AA3);
+                \draw [style=arrow, draw=gray!80, bend left=40] (tau43) to (B3);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
+
+There are a number of points to make with this example.
+First, because we did not include $C$ in our starting set, the pathways cannot include $\gamma$ or consequently $\delta$.
+Had $X$ included $C$, there would have been at least one pathway from $X$ to any subset of sites.
+This is an important point which we will return to shortly.
+Second, the graphical representations of both $\pathway{\alpha\beta}$ and $\pathway{\beta\alpha}$ are identical.
+This tells us that the order in which $\alpha$ and $\beta$ fire is unimportant as the result is the same.
+Finally, in each case the highlighted sites and transitions form a Petri subnet of the larger net.
+In fact, given any set of transitions, we can construct a Petri subnet.
+
+\begin{definition}\label{def:site-completion}
+    Let $P$ be a Petri net and let $X$ be a set of transitions in $P$.
+    The \textbf{site completion} of $X$, denoted $X^*$ is the Petri subnet of $P$ formed such that
+    \begin{itemize}
+        \item $T(X^*) = X$
+        \item $\displaystyle S(X^*) = \bigcup_{t \in X} \pi(\sigma(t) + \tau(t))$
+        \item $\sigma_{X^*} = \sigma_P|_X$ and $\tau_{X^*} = \tau_P|_X$.
+    \end{itemize}
+\end{definition}
+
+That this the site completion is, in fact, a subnet follows immediately from the definition of a subnet.
+Furthermore, since we can view a pathway as an ordered set of transitions, we can simply site complete that set to construct a Petri subnet.
+There are several questions we could continue with here, such whether every Petri subnet gives rise to a pathway which uses every transition in the subnet.
+However, since questions such as this are immaterial to the problem at hand, we will postpone addressing them to subsequent works.
+
+The value of pathways is that they allow us to consider or construct sets of sites which are sufficient to construct every other object in the space.
+We refer to such a subset of objects as a \textit{generating set}.
+
+\begin{definition}\label{def:generating-set}
+    Let $P$ be a Petri net and let $X$ be a subset of sites of $P$.
+    We say that $X$ is a \textbf{generating set} of $P$ if $X$ is pathway connected to every subset of sites $Y$ in $P$.
+    The set of all generating sets of $P$ is denoted $\G_P$.
+\end{definition}
+
+It is trivially true that $\G_P \ne \emptyset$ since the set of all sites in $P$ is a generating set.
+The set of all generating sets of a Petri net is naturally a subset of the powerset of the sites of $P$.
+That is, $\G_P \subseteq \powerset(S(P))$.
+As such, $\G_P$ inherits a partial order from $\powerset(S(P))$ with which we can seek ``smaller" generating sets.
+
+\begin{definition}\label{def:basis}
+    Let $P$ be a Petri net and let $X$ be a set of generators of $P$, $X \in \G_P$.
+    We say that $X$ is a \textbf{basis} if it is minimal with respect to the set inclusion order on $\G_P$.
+\end{definition}
+
+\begin{lemma}\label{lem:bases-exist}
+    Every Petri net admits at least one basis.
 \end{lemma}
 \begin{proof}
-    \TODO{Complete}
+    \TODO{Complete (likely to use Zorn's lemma)}
 \end{proof}
 
 \begin{definition}\label{def:minimal-maximal}
@@ -767,25 +906,22 @@ Such a sequence of transitions forms the core of what we refer to as a \textit{p
     The set of all minimal sites in $P$ is denoted $\Min{P}$, and the set of all maximal sites is denoted $\Max{P}$.
 \end{definition}
 
-\begin{definition}\label{def:site-completion}
-    \TODO{Given a set of transitions, construct the set of all sites and add all the edges.}
-\end{definition}
-
-\begin{definition}\label{def:generator}
-    Let $P$ be a Petri net and let $X$ be a subset of sites of $P$.
-    We say that $X$ is a \textbf{generating set} of $P$ if $X$ is pathway connected to every subset of sites $Y$ in $P$.
-\end{definition}
-
-\red{The set of all generating sets of a Petri net can be ordered by set inclusion}
-
-\begin{definition}\label{def:basis}
-    Let $P$ be a Petri net and let $X$ be a set of generators of $P$.
-    We say that $X$ is a \textbf{basis} of $P$ if it is minimal in the partially ordered set of generating sets.
-    That is, $X$ is a basis if for any other generating set $Y$ of $P$, if $Y \subseteq X$ then $X = Y$.
-\end{definition}
-
 \begin{lemma}\label{lem:minimal-are-basic}
-    Let $P$ be a Petri net. For any basis $\B$ of $P$, $\Min{P} \subseteq \B$.
+    Let $P$ be a Petri net.
+    For any basis $\B$ of $P$, $\Min{P} \subseteq \B$.
+    Furthermore, if $\Min{P}$ is a basis, then it is a unique basis for $P$.
+
+    \red{I'm not $100\%$ sure of the last point, but I think it's true. We'll find out when we start writing the proof.}
+
+    \green{This is important for internal use. In all of the cases we have dealt with in practice, e.g. molecular assembly as applied, the minimal elements form a basis and there is no ambiguity in the Nat. Comm. paper recently published.}
+\end{lemma}
+\begin{proof}
+    \TODO{Complete}
+\end{proof}
+
+\begin{lemma}\label{lem:image-of-pathways}
+    Let $f: P \rightarrow Q$ be a Petri net morphism and let $X, Y \subseteq S(P)$ be pathway connected in $P$.
+    Then either $f(X)$ and $f(Y)$ are pathway connected in $f(P)$.
 \end{lemma}
 \begin{proof}
     \TODO{Complete}
