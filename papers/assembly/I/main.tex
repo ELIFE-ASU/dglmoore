@@ -55,6 +55,7 @@
 \newcommand{\downset}[1]{#1\!\!\downarrow}
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\B}{\mathcal{B}}
+\newcommand{\C}{\mathcal{C}}
 \newcommand{\G}{\mathcal{G}}
 \newcommand{\Ini}[1]{\textrm{Ini}(#1)}
 \newcommand{\Term}[1]{\textrm{Term}(#1)}
@@ -92,7 +93,7 @@ Further, we prove several theorems relating to method of bounding the assembly i
 
 [This is Sara testing if she can git cool like the rest of the peeps in elife, I will remove on my next commit]
 
-\section{Petri Nets}
+\section{Petri Nets}\label{sec:petri-nets}
 
 \subsection{Free Commutative Monoids}\label{subsec:fcm}
 
@@ -291,7 +292,7 @@ While we will not delve into dynamical aspects of Petri nets or the to-be-define
 
 It is natural, once a mathematical structure has been defined, to ask how two instantiations of that structure may be mapped to one another.
 There is, of course, a well defined notion of a map between Petri nets, termed here a \textit{Petri net morphism}, which maps sites and transitions of one Petri net into another in a way that is compatible and consistent with the source and target maps of both Petri nets.
-These Petri net morphisms will play a crucial roll in the establishment of bounds for the assembly index in \Cref{sec:assembly-index-bounds}.
+These Petri net morphisms will play a crucial roll in the establishment of bounds for the assembly index in \Cref{subsec:assembly-index-bounds}.
 
 \begin{definition}\label{def:petri-map}
     A \textbf{Petri net morphism} from a Petri net $P$ to a Petri net $Q$, denoted $f : P \rightarrow Q$, consisists of a pair of functions $T(f) : T(P) \rightarrow T(Q)$ and $S(f): S(P) \rightarrow S(Q))$ such that the following diagrams commute:
@@ -677,7 +678,7 @@ For that reason, we need to be able to identify aspects of a Petri net that migh
     Similarly, $P$ is \textbf{sinkless} if it has no sinks.
 \end{definition}
 
-Graphically, 
+Graphically,
 \begin{center}
     \scalebox{0.6}{
         \begin{tikzpicture}
@@ -1050,35 +1051,100 @@ The concepts of subnets and bases will be a key component in the definition of t
 
 \section{Assembly Spaces, Subspaces and Maps}\label{sec:assembly-spaces}
 
+This this work, we are specifically interested in determing if it is possible, given some set of starting objects, to assembly a desired product through some sequence of joining (or disjoining) operations.
+If so, how can we assess the minimum number of steps required in the assembly process?
+We will refer to the resulting value as the \textit{assembly index} of the object, and ascribe it to the a combination of the structure of the underlying space of assembly processes (\textit{assembly space}), the chosen set of starting objects (\textit{basis}) and the desired product itself.
+
+We draw on the Petri net formalism described and extended in \Cref{sec:petri-nets} to formally define an \textit{assembly space} as a particular variety of Petri net.
+
 \begin{definition}\label{def:assembly-space}
-    An \textbf{assembly space} $(A, \B_A)$ is a sourceless and sinkless Petri net with basis $\B_A$.
-    Were possible, we will simply write $A$ to denote an assembly space $(A, \B_A)$.
+    An \textbf{assembly space} $(A, \B_A)$ is a sourceless and sinkless Petri net with a chosen basis $\B_A$.
+    Where possible, we will simply write $A$ to denote an assembly space $(A, \B_A)$.
 \end{definition}
 
+The ligation example, reproduced below and used throughout \Cref{sec:petri-nets}, is in fact an assembly space, provided we endow it with a basis.
+
+\begin{center}
+    \scalebox{0.6}{
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [style=site] (A) at (0, 0.8) {$A$};
+                \node [style=site] (B) at (0, -0.8) {$B$};
+                \node [style=site] (C) at (6, -1.6) {$C$};
+                \node [style=site] (AA) at (4, 0.8) {$AA$};
+                \node [style=site] (AB) at (4, -0.8) {$AB$};
+                \node [style=site] (AAAB) at (8, 0) {$AAAB$};
+                \node [style=transition] (tau1) at (2, 0.8) {$\alpha$};
+                \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
+                \node [style=transition] (tau3) at (6, 0) {$\gamma$};
+                \node [style=transition] (tau4) at (10, 0) {$\delta$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow, bend right=15] (A) to (tau1);
+                \draw [style=arrow, bend left=15] (A) to (tau1);
+                \draw [style=arrow, bend right=15] (A) to (tau2);
+                \draw [style=arrow] (tau1) to (AA);
+                \draw [style=arrow] (B) to (tau2);
+                \draw [style=arrow] (tau2) to (AB);
+                \draw [style=arrow] (AA) to (tau3);
+                \draw [style=arrow] (AB) to (tau3);
+                \draw [style=arrow, bend left=30] (C) to (tau3);
+                \draw [style=arrow] (tau3) to (AAAB);
+                \draw [style=arrow, bend left=30] (tau3) to (C);
+                \draw [style=arrow] (AAAB) to (tau4);
+                \draw [style=arrow, bend right=30] (tau4) to (A);
+                \draw [style=arrow, bend right=30] (tau4) to (AA);
+                \draw [style=arrow, bend left=40] (tau4) to (B);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
+As previously discussed, this net admits four possible bases: $\{A,B,C\}$, $\{A,AB,C\}$, $\{AA,AB,C\}$, or $\{C,AAAB\}$.
+In the all of the examples in this sections, we use $\B = \{A,B,C\}$ as the particular basis unless and refer to this this Petri net with $\B$ as the assembly space $\A$.
+
+Assembly spaces, as with Petri nets in general, admit a subnet structure.
+In general, a Petri subnet need now have a specified basis; however, we will require this of subnets of assembly spaces.
+To distinguish the two concepts, we will refer exclusively to \textit{assembly subspaces} which are little more than Petri subnets with a specified basis.
 \begin{definition}\label{def:assembly-subspace}
     Let $A$ and $A'$ be assembly spaces.
     $A'$ is an \textbf{assembly subspace} of $A$ if $A'$ is a Petri subnet of $A$.
     This relationship is denoted $A' \subseteq A$.
 \end{definition}
 
+\TODO{Example Figure}
+
+Assembly subspaces whose basis is a subset of the larger space, such as \red{subexample} from the previous example, will be referred to as \textit{rooted}.
 \begin{definition}\label{def:rooted}
     Let $(A', \B_{A'})$ be an assembly subspace of $(A, \B_A)$.
     We say that $A'$ is rooted in $A$ if $\B_{A'} \subseteq \B_A$.
 \end{definition}
+By restricting ourselves to rooted assembly subspaces we tie the particular processes which they represent to the basis of the larger space.
+We are particularly interested in constructing assembly subspaces which may produce some specific object.
+The subspace relation on the set of all assembly subspaces allows us to partially order the subspaces.
+Our ultimate objective is to then constrain the full set of assembly subspaces by requiring they they contain some desired object and determine which subspaces are minimal.
+However, if we are do not further restrict this subset of subspace to rooted subspaces, we will inevitably yield highly trivial minimal subspaces.
+To elucidate this point, consider the minimal subspaces of $\A$ containing $AB$ with and without the rooting constraint:
 
-\begin{lemma}\label{lem:lower-is-rooted}
-    Let $A$ be an assembly space and let $x \in S(A)$.
-    Then $\downset{x}$ with basis $\B_A \cap S(\downset{x})$ is a rooted assembly subspace of $A$.
-\end{lemma}
-\begin{proof}
-    \TODO{Complete}
-\end{proof}
+\TODO{Example Figure}
 
+Without requiring that the subspaces be rooted, we find that the unenlightening subspace containing only $AB$ as a site and no transitions.
+However, given the rooted constraint, we find only one minimal, rooted assembly subspace.
+The uniqueness of this minimal rooted subspace is possibly misleading; in general, the minimal subpsaces will not be unique.
+This point will be addressed in \Cref{sec:assembly-index}.
+
+As with Petri nets in general, assembly spaces admit structure preserving maps.
+In fact, \textit{assembly maps} are just Petri net morphisms between assembly spaces.
 \begin{definition}\label{def:assembly-map}
     Let $A$ and $B$ be assembly spaces.
-    An \textbf{assembly map} is simply a Petri net map $f: A \rightarrow B$ between assembly spaces.
+    An \textbf{assembly map} is a Petri net morphism $f: A \rightarrow B$ between assembly spaces.
 \end{definition}
 
+As a simple example of this, consider $\A$ and a map to a second space, here referred to as $\C$.
+
+\TODO{Example Figure}
+
+Of particular note here is that $\A$ is certainly a subspace of $\C$, though it is decidedly not rooted in $\C$.
+In fact, it will always be the case that the image of an assembly space will be a subspace of the codomain.
 \begin{theorem}\label{lem:assembly-image-is-subspace}
     If $f : A \rightarrow B$ is an assembly map between assembly spaces $A$ and $B$, then $f(A)$ is an assembly subspace of $B$.
 \end{theorem}
@@ -1086,6 +1152,11 @@ The concepts of subnets and bases will be a key component in the definition of t
     \TODO{Complete}
 \end{proof}
 
+Exploring the previous example a bit more, by highlighting a rooted subspace of $\A$ we see that the image of that subspace is rooted in the image of $\A$ in $\C$.
+
+\TODO{Example Figure}
+
+This too will alway be the case: the image of a rooted subspace will always be rooted in the image.
 \begin{theorem}\label{thm:rooted-image}
     Let $A$ be an assembly space, $Z \subseteq A$ a rooted assembly subspace, and $f : A \rightarrow B$ an assembly map.
     Then $(f(Z), S(f)(\B_Z))$ is rooted in $(f(A), S(f)(\B_A)$.
@@ -1094,11 +1165,19 @@ The concepts of subnets and bases will be a key component in the definition of t
     \TODO{Complete}
 \end{proof}
 
+The interaction of assembly maps and rooted subspaces will allow us to establish bounds on the assembly index, defined in the next section, by considering the image of the space under some map.
+These bounds will be useful in situations where determining the assembly index of some object is computationally infeasible.
+
 \section{The Assembly Index}\label{sec:assembly-index}
 
 \begin{definition}\label{def:size}
     Let $A$ be an assembly space.
     The \textbf{size} of $A$ is the cardinality of $T(A)$, denoted $|A|$.
+\end{definition}
+
+\begin{definition}\label{def:downset}
+    Let $(A, \B_A)$ be an assembly space and let $x$ be a site in $A$.
+    The \textbf{down set} of $x$, denoted $\downset{x}$ in $A$ is the site completion of all pathways from $\B_A$ terminating at $x$.
 \end{definition}
 
 \begin{definition}\label{def:finiteness}
@@ -1112,6 +1191,14 @@ The concepts of subnets and bases will be a key component in the definition of t
     This can be written $c(x)$ when the relevant assembly space is clear from context.
 \end{definition}
 
+\begin{theorem}\label{def:index-existence-uniqueness}
+    Let $A$ be an assembly space and let $x$ be a finite site in $A$.
+    Then the assembly index $c_A(x)$ is exists and is unique.
+\end{theorem}
+\begin{proof}
+    \TODO{Complete: likely requires Zorn's lemma, but maybe not...}
+\end{proof}
+
 \subsection{Bounds on the Assembly Index}\label{subsec:assembly-index-bounds}
 
 \begin{theorem}\label{cor:subspace-index-upper-bound}
@@ -1121,10 +1208,6 @@ The concepts of subnets and bases will be a key component in the definition of t
 \end{theorem}
 \begin{proof}
     \TODO{Complete}
-    % We need only show that $c_A(b)$ cannot be greater than $c_B(b)$ for any $b \in S(B)$.
-    % To see this, let $Z \subseteq B$ be a rooted assembly subspace containing $b$ with $|Z| = c_B(b)$.
-    % Then $Z$ is also a rooted assembly subspace of $A$ containing $b$, and so $c_A(b)$ can be at most $|Z|$.
-    % That is, $c_A(b) \le |Z| = c_B(b)$.
 \end{proof}
 
 \begin{theorem}\label{thm:image-lower-bound}
