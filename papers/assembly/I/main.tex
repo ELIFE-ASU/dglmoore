@@ -409,7 +409,7 @@ We can construct Petri net morphism $f: P \rightarrow Q$ such that
 Graphically, this might be depicted as two sets of arrows $T(f)$ and $S(f)$ which map transitions to transitions and sites to sites, respectively colored blue and red.
 \begin{center}
     \scalebox{0.6}{
-        \begin{tikzpicture}
+        \begin{tikzpicture}\label{ex:map}
             \begin{pgfonlayer}{nodelayer}
                 \node [scale=3] (P) at (12, 0) {$P$};
                 \node [style=site] (A) at (0, 0.8) {$A$};
@@ -1006,15 +1006,91 @@ Our final concern regaring Petri nets is whether or not bases are are preserved 
 To establish that this is the case, we must first show that if two sets of sites are pathway connected, then they will be pathway connected in the image of a Petri net morphism.
 \begin{lemma}\label{lem:image-of-pathways}
     Let $f: P \rightarrow Q$ be a Petri net morphism and let $X, Y \subseteq S(P)$ be pathway connected in $P$.
-    Then either $f(X)$ and $f(Y)$ are pathway connected in $f(P)$.
+    The images $f(X)$ and $f(Y)$ are pathway connected in $f(P)$.
 \end{lemma}
 \begin{proof}
     \TODO{Complete}
 \end{proof}
 
-\TODO{Example}
+As a specific example, we can consider the pathway $\pathway{\alpha\beta}$ in our ligation model, which starts at $\{A, B\}$ and terminates at $\{AA, AB\}$, under the map describe previously.
+\begin{center}
+    \scalebox{0.6}{
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [scale=3] (P) at (12, 0) {$P$};
+                \node [style=site, fill=blue!20] (A) at (0, 0.8) {$A$};
+                \node [style=site, fill=blue!20] (B) at (0, -0.8) {$B$};
+                \node [style=site] (C) at (6, -1.6) {$C$};
+                \node [style=site, fill=red!20] (AA) at (4, 0.8) {$AA$};
+                \node [style=site, fill=red!20] (AB) at (4, -0.8) {$AB$};
+                \node [style=site] (AAAB) at (8, 0) {$AAAB$};
+                \node [style=transition, fill=green!20] (tau1) at (2, 0.8) {$\alpha$};
+                \node [style=transition, fill=green!20] (tau2) at (2, -0.8) {$\beta$};
+                \node [style=transition] (tau3) at (6, 0) {$\gamma$};
+                \node [style=transition] (tau4) at (10, 0) {$\delta$};
 
-The fact that generating sets are preserved, follows from the preservation of pathways.
+                \node [scale=3] (Q) at (12, -6) {$Q$};
+                \node [style=site] (W) at (-4, -6) {$W$};
+                \node [style=site, fill=blue!20] (X) at (0, -6) {$X$};
+                \node [style=site, fill=red!20] (Y) at (4, -6) {$Y$};
+                \node [style=site] (Z) at (8, -6) {$Z$};
+                \node [style=transition] (tau5) at (-2, -6) {$\phi$};
+                \node [style=transition, fill=green!20] (tau6) at (2, -6) {$\chi$};
+                \node [style=transition] (tau7) at (6, -6) {$\psi$};
+                \node [style=transition] (tau8) at (10, -6) {$\omega$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow, line width=1.5, draw=red, bend right=15] (A) to (tau1);
+                \draw [style=arrow, line width=1.5, draw=red, bend left=15] (A) to (tau1);
+                \draw [style=arrow, line width=1.5, draw=red, bend right=15] (A) to (tau2);
+                \draw [style=arrow, line width=1.5, draw=red] (tau1) to (AA);
+                \draw [style=arrow, line width=1.5, draw=red] (B) to (tau2);
+                \draw [style=arrow, line width=1.5, draw=red] (tau2) to (AB);
+                \draw [style=arrow, draw=gray!80] (AA) to (tau3);
+                \draw [style=arrow, draw=gray!80] (AB) to (tau3);
+                \draw [style=arrow, draw=gray!80, bend left=30] (C) to (tau3);
+                \draw [style=arrow, draw=gray!80] (tau3) to (AAAB);
+                \draw [style=arrow, draw=gray!80, bend left=30] (tau3) to (C);
+                \draw [style=arrow, draw=gray!80] (AAAB) to (tau4);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau4) to (A);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau4) to (AA);
+                \draw [style=arrow, draw=gray!80, bend left=40] (tau4) to (B);
+
+                \draw [style=sitemap, opacity=0.5, bend right=30, shorten >=2mm] (A) to (X);
+                \draw [style=sitemap, opacity=0.5, bend right=30, shorten >=2mm] (B) to (X);
+                \draw [style=sitemap, opacity=0.5, bend right=30, shorten >=2mm] (AA) to (Y);
+                \draw [style=sitemap, opacity=0.5, bend right=30, shorten >=2mm] (AB) to (Y);
+                \draw [style=sitemap, opacity=0.5, bend right=30, shorten >=2mm] (C) to (Y);
+                \draw [style=sitemap, opacity=0.5, bend right=30, shorten >=2mm] (AAAB) to (Z);
+                \draw [style=transitionmap, opacity=0.5, bend right=30, shorten >=2mm] (tau1) to (tau6);
+                \draw [style=transitionmap, opacity=0.5, bend right=30, shorten >=2mm] (tau2) to (tau6);
+                \draw [style=transitionmap, opacity=0.5, bend right=30, shorten >=2mm] (tau3) to (tau7);
+                \draw [style=transitionmap, opacity=0.5, bend right=30, shorten >=2mm] (tau4) to (tau8);
+
+                \draw [style=arrow, draw=gray!80, bend left=15] (W) to (tau5);
+                \draw [style=arrow, draw=gray!80, bend right=15] (W) to (tau5);
+                \draw [style=arrow, draw=gray!80, bend left=15] (tau5) to (X);
+                \draw [style=arrow, draw=gray!80, bend right=15] (tau5) to (X);
+                \draw [style=arrow, line width=1.5, draw=red, bend left=15] (X) to (tau6);
+                \draw [style=arrow, line width=1.5, draw=red, bend right=15] (X) to (tau6);
+                \draw [style=arrow, line width=1.5, draw=red] (tau6) to (Y);
+                \draw [style=arrow, draw=gray!80, bend left=20] (Y) to (tau7);
+                \draw [style=arrow, draw=gray!80] (Y) to (tau7);
+                \draw [style=arrow, draw=gray!80, bend right=20] (Y) to (tau7);
+                \draw [style=arrow, draw=gray!80] (tau7) to (Z);
+                \draw [style=arrow, draw=gray!80, bend left=50] (tau7.south) to (Y.south);
+                \draw [style=arrow, draw=gray!80] (Z) to (tau8);
+                \draw [style=arrow, draw=gray!80, bend left=30] (tau8) to (X);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau8) to (X);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau8) to (Y);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
+Here the starting set of sites is highlight in blue, the terminal sites in red, the transitions in green and relevant edges are emboldened red.
+The images of $\{A,B\}$ and $\{AA,AB\}$ are $\{X\}$ and $\{Y\}$ respectively, and the pathway $\pathway{\alpha\beta}$ is mapped to $\pathway{\chi}$.
+As we've proven, any pathway we choose will map to a pathway.
+From this fact, it follows that generating sets are preserved.
 \begin{lemma}\label{lem:image-of-generating-sets}
     Let $f: P \rightarrow Q$ be a Petri net morphism and let $X$ be a generating set of $P$.
     Then $f(X)$ is a generating set of $f(P)$.
@@ -1022,13 +1098,85 @@ The fact that generating sets are preserved, follows from the preservation of pa
 \begin{proof}
     \TODO{Complete}
 \end{proof}
+Identifying a generating set of the ligation model, say $\{A, AB, C\}$, and mapping it forward we see that the result is a generating set of \textit{within the image}:
+\begin{center}
+    \scalebox{0.6}{
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [scale=3] (P) at (12, 0) {$P$};
+                \node [style=site, fill=blue!20] (A) at (0, 0.8) {$A$};
+                \node [style=site] (B) at (0, -0.8) {$B$};
+                \node [style=site, fill=blue!20] (C) at (6, -1.6) {$C$};
+                \node [style=site] (AA) at (4, 0.8) {$AA$};
+                \node [style=site, fill=blue!20] (AB) at (4, -0.8) {$AB$};
+                \node [style=site] (AAAB) at (8, 0) {$AAAB$};
+                \node [style=transition] (tau1) at (2, 0.8) {$\alpha$};
+                \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
+                \node [style=transition] (tau3) at (6, 0) {$\gamma$};
+                \node [style=transition] (tau4) at (10, 0) {$\delta$};
 
-\TODO{Example Figure}
+                \node [scale=3] (Q) at (12, -6) {$Q$};
+                \node [style=site] (W) at (-4, -6) {$W$};
+                \node [style=site, fill=blue!20] (X) at (0, -6) {$X$};
+                \node [style=site, fill=blue!20] (Y) at (4, -6) {$Y$};
+                \node [style=site] (Z) at (8, -6) {$Z$};
+                \node [style=transition] (tau5) at (-2, -6) {$\phi$};
+                \node [style=transition] (tau6) at (2, -6) {$\chi$};
+                \node [style=transition] (tau7) at (6, -6) {$\psi$};
+                \node [style=transition] (tau8) at (10, -6) {$\omega$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow, draw=gray!80, bend right=15] (A) to (tau1);
+                \draw [style=arrow, draw=gray!80, bend left=15] (A) to (tau1);
+                \draw [style=arrow, draw=gray!80, bend right=15] (A) to (tau2);
+                \draw [style=arrow, draw=gray!80] (tau1) to (AA);
+                \draw [style=arrow, draw=gray!80] (B) to (tau2);
+                \draw [style=arrow, draw=gray!80] (tau2) to (AB);
+                \draw [style=arrow, draw=gray!80] (AA) to (tau3);
+                \draw [style=arrow, draw=gray!80] (AB) to (tau3);
+                \draw [style=arrow, draw=gray!80, bend left=30] (C) to (tau3);
+                \draw [style=arrow, draw=gray!80] (tau3) to (AAAB);
+                \draw [style=arrow, draw=gray!80, bend left=30] (tau3) to (C);
+                \draw [style=arrow, draw=gray!80] (AAAB) to (tau4);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau4) to (A);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau4) to (AA);
+                \draw [style=arrow, draw=gray!80, bend left=40] (tau4) to (B);
 
-This is not to say that the only generating sets in the image of a Petri net will be the image of a generating set.
-The codomain of the Petri net morphism may in fact have additional generating sets.
+                \draw [style=sitemap, opacity=0.5, bend right=30, shorten >=2mm] (A) to (X);
+                \draw [style=sitemap, opacity=0.5, bend right=30, shorten >=2mm] (B) to (X);
+                \draw [style=sitemap, opacity=0.5, bend right=30, shorten >=2mm] (AA) to (Y);
+                \draw [style=sitemap, opacity=0.5, bend right=30, shorten >=2mm] (AB) to (Y);
+                \draw [style=sitemap, opacity=0.5, bend right=30, shorten >=2mm] (C) to (Y);
+                \draw [style=sitemap, opacity=0.5, bend right=30, shorten >=2mm] (AAAB) to (Z);
+                \draw [style=transitionmap, opacity=0.5, bend right=30, shorten >=2mm] (tau1) to (tau6);
+                \draw [style=transitionmap, opacity=0.5, bend right=30, shorten >=2mm] (tau2) to (tau6);
+                \draw [style=transitionmap, opacity=0.5, bend right=30, shorten >=2mm] (tau3) to (tau7);
+                \draw [style=transitionmap, opacity=0.5, bend right=30, shorten >=2mm] (tau4) to (tau8);
 
-\TODO{Example Figure}
+                \draw [style=arrow, draw=gray!80, bend left=15] (W) to (tau5);
+                \draw [style=arrow, draw=gray!80, bend right=15] (W) to (tau5);
+                \draw [style=arrow, draw=gray!80, bend left=15] (tau5) to (X);
+                \draw [style=arrow, draw=gray!80, bend right=15] (tau5) to (X);
+                \draw [style=arrow, draw=red!50, bend left=15] (X) to (tau6);
+                \draw [style=arrow, draw=red!50, bend right=15] (X) to (tau6);
+                \draw [style=arrow, draw=red!50] (tau6) to (Y);
+                \draw [style=arrow, draw=red!50, bend left=20] (Y) to (tau7);
+                \draw [style=arrow, draw=red!50] (Y) to (tau7);
+                \draw [style=arrow, draw=red!50, bend right=20] (Y) to (tau7);
+                \draw [style=arrow, draw=red!50] (tau7) to (Z);
+                \draw [style=arrow, draw=red!50, bend left=50] (tau7.south) to (Y.south);
+                \draw [style=arrow, draw=red!50] (Z) to (tau8);
+                \draw [style=arrow, draw=red!50, bend left=30] (tau8) to (X);
+                \draw [style=arrow, draw=red!50, bend right=30] (tau8) to (X);
+                \draw [style=arrow, draw=red!50, bend right=30] (tau8) to (Y);
+
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
+where the generating set $\{A, AB, C\}$ is mapped into the set $\{X, Y\}$, both blue.
+The set $\{X, Y\}$ generates the entire image of $P$, whose edges are red.
+This is not to say that the only generating sets in the image of a Petri net will be the image of a generating set, for example $\{X\}$ is generating in the image $f(P)$ but its preimage $\{A,B\}$ is not.
 
 Still, the fact that generating sets are preserved yields nicely our final result: bases are preserved under Petri net morphisms
 \begin{corollary}\label{lem:image-basis}
