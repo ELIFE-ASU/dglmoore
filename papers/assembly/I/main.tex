@@ -1176,17 +1176,7 @@ Identifying a generating set of the ligation model, say $\{A, AB, C\}$, and mapp
 \end{center}
 where the generating set $\{A, AB, C\}$ is mapped into the set $\{X, Y\}$, both blue.
 The set $\{X, Y\}$ generates the entire image of $P$, whose edges are red.
-This is not to say that the only generating sets in the image of a Petri net will be the image of a generating set, for example $\{X\}$ is generating in the image $f(P)$ but its preimage $\{A,B\}$ is not.
-
-Still, the fact that generating sets are preserved yields nicely our final result: bases are preserved under Petri net morphisms
-\begin{corollary}\label{lem:image-basis}
-    Let $P$ be a Petri net with basis $\B$ and let $f : A \rightarrow B$ be a Petri net morphism.
-    Then $f(\B)$ is a basis for $f(P)$.
-\end{corollary}
-\begin{proof}
-    \TODO{Complete}
-\end{proof}
-The property that Petri net morphisms preserve bases is fundamentally important for establishing relationships between basis-dependent quantities computed in one Petri net with those in another.
+This is not to say that the only generating sets in the image of a Petri net will be the image of a generating set, for example $\{X\}$ is generating in the image $f(P)$ but its preimage $\{A,B\}$ is not. The property that Petri net morphisms preserve generating sets is fundamentally important for establishing relationships between generator-dependent quantities computed in one Petri net with those in another.
 
 The Petri net formalism, and the extensions presented in this section, can now be leveraged to define the structure of primary interest in this work: assembly spaces.
 These spaces can be seen as a subclass of Petri nets which admit specific features useful for describing the fewest number of steps required to construct a given object, the assembly index.
@@ -1299,10 +1289,12 @@ Exploring the previous example a bit more, by highlighting a rooted subspace of 
 
 \TODO{Example Figure}
 
-This too will alway be the case: the image of a rooted subspace will always be rooted in the image.
+This too will always be the case: the image of a rooted subspace will always be rooted in the image.
 \begin{theorem}\label{thm:rooted-image}
     Let $A$ be an assembly space, $Z \subseteq A$ a rooted assembly subspace, and $f : A \rightarrow B$ an assembly map.
     Then $(f(Z), S(f)(\B_Z))$ is rooted in $(f(A), S(f)(\B_A)$.
+
+    \TODO{This almost certainly isn't true as defined at present. Assembly maps do not, in general, preserve the basis, $S(f)(\B_A)$ and $S(f)(\B_Z)$ are probably not bases. That said, we might not actually need this. It'll depend on how the proof of \Cref{thm:image-lower-bound} go.}
 \end{theorem}
 \begin{proof}
     \TODO{Complete}
@@ -1379,7 +1371,7 @@ Of course, just because the value is computable does not mean that it can be com
 In fact, the general problem is likely to be \texttt{NP}-hard.
 In situtations where direct computation is infeasible, we can resort to bounding the value of the assembly index by computing the index in an analogous space.
 The first of the bounds we present is an upper bound determined by computing the assembly index in a subspace containing the site.
-\begin{theorem}\label{cor:subspace-index-upper-bound}
+\begin{theorem}\label{thm:subspace-index-upper-bound}
     Let $(A, \B_A)$ be an assembly space and let $(B, \B_A)$ be a rooted assembly subspace of $A$.
     For every finite $b \in S(B)$, the assembly index of $b$ in $B$ is at least the assembly index of $b$ in $A$.
     That is, $c_B(b) \ge c_A(b)$ for all $b \in S(B)$
@@ -1397,6 +1389,8 @@ The second bound we establish is a lower bound determined by mapping the space i
 \end{theorem}
 \begin{proof}
     \TODO{Complete}
+
+    \red{This may suffer from the fact that assembly maps do not preserve bases. If that's the case, we should rip all mention of bases out for a future work.}
 \end{proof}
 
 \TODO{Example and Figure}
