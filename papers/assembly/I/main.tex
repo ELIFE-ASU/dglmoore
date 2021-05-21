@@ -1201,9 +1201,9 @@ The ligation example, reproduced below and used throughout \Cref{sec:petri-nets}
     \scalebox{0.6}{
         \begin{tikzpicture}
             \begin{pgfonlayer}{nodelayer}
-                \node [style=site] (A) at (0, 0.8) {$A$};
-                \node [style=site] (B) at (0, -0.8) {$B$};
-                \node [style=site] (C) at (6, -1.6) {$C$};
+                \node [style=site, fill=blue!20] (A) at (0, 0.8) {$A$};
+                \node [style=site, fill=blue!20] (B) at (0, -0.8) {$B$};
+                \node [style=site, fill=blue!20] (C) at (6, -1.6) {$C$};
                 \node [style=site] (AA) at (4, 0.8) {$AA$};
                 \node [style=site] (AB) at (4, -0.8) {$AB$};
                 \node [style=site] (AAAB) at (8, 0) {$AAAB$};
@@ -1233,7 +1233,7 @@ The ligation example, reproduced below and used throughout \Cref{sec:petri-nets}
     }
 \end{center}
 As previously discussed, this net admits four possible bases: $\{A,B,C\}$, $\{A,AB,C\}$, $\{AA,AB,C\}$, or $\{C,AAAB\}$.
-In the all of the examples in this sections, we use $\B = \{A,B,C\}$ as the particular basis unless and refer to this this Petri net with $\B$ as the assembly space $\A$.
+In the all of the examples in this sections, we use $\B = \{A,B,C\}$ (highlighted in blue) as the particular basis unless and refer to this this Petri net with $\B$ as the assembly space $\A$.
 
 Assembly spaces, as with Petri nets in general, admit a subnet structure.
 In general, a Petri subnet need now have a specified basis; however, we will require this of subnets of assembly spaces.
@@ -1243,10 +1243,76 @@ To distinguish the two concepts, we will refer exclusively to \textit{assembly s
     $A'$ is an \textbf{assembly subspace} of $A$ if $A'$ is a Petri subnet of $A$.
     This relationship is denoted $A' \subseteq A$.
 \end{definition}
+The example space $\A$ admits a number of subspaces, a few of which are depicted below.
+\begin{center}
+    \scalebox{0.6}{
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [style=site, fill=blue!20] (A) at (0,  1.6) {$A$};
+                \node [style=site, fill=blue!20] (B) at (0,  0.0) {$B$};
+                \node [style=site, fill=blue!20] (C) at (0, -1.6) {$C$};
+                \node [scale=2] at (0, -3.6) {a.};
 
-\TODO{Example Figure}
+                \node [style=site, fill=blue!20] (A1) at (4,  0.8) {$A$};
+                \node [style=site, fill=blue!20] (B1) at (4, -0.8) {$B$};
+                \node [style=transition] (alpha) at (6, 0.8) {$\alpha$};
+                \node [style=transition] (beta) at (6, -0.8) {$\beta$};
+                \node [style=site] (AA1) at (8, 0.8) {$AA$};
+                \node [style=site] (AB1) at (8, -0.8) {$AB$};
+                \node [scale=2] at (6, -3.6) {b.};
 
-Assembly subspaces whose basis is a subset of the larger space, such as \red{subexample} from the previous example, will be referred to as \textit{rooted}.
+                \node [style=site, fill=blue!20] (AA2) at (12, 0.8) {$AA$};
+                \node [style=site, fill=blue!20] (AB2) at (12, -0.8) {$AB$};
+                \node [style=site, fill=blue!20] (C2) at (14, -1.6) {$C$};
+                \node [style=transition] (gamma) at (14, 0) {$\gamma$};
+                \node [style=site] (AAAB) at (16, 0) {$AAAB$};
+                \node [scale=2] at (14, -3.6) {c.};
+
+                \node [style=site, fill=blue!20] (A3) at (20,  0.8) {$A$};
+                \node [style=site, fill=blue!20] (B3) at (20, -0.8) {$B$};
+                \node [style=transition] (alpha3) at (22, 0.8) {$\alpha$};
+                \node [style=transition] (beta3) at (22, -0.8) {$\beta$};
+                \node [style=site] (AA3) at (24, 0.8) {$AA$};
+                \node [style=site] (AB3) at (24, -0.8) {$AB$};
+                \node [style=site, fill=blue!20] (C3) at (26, -1.6) {$C$};
+                \node [style=transition] (gamma3) at (26, 0) {$\gamma$};
+                \node [style=site] (AAAB3) at (28, 0) {$AAAB$};
+                \node [scale=2] at (24, -3.6) {d.};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow, bend right=15] (A1) to (alpha);
+                \draw [style=arrow, bend left=15] (A1) to (alpha);
+                \draw [style=arrow, bend right=15] (A1) to (beta);
+                \draw [style=arrow] (alpha) to (AA1);
+                \draw [style=arrow] (B1) to (beta);
+                \draw [style=arrow] (beta) to (AB1);
+
+                \draw [style=arrow] (AA2) to (gamma);
+                \draw [style=arrow] (AB2) to (gamma);
+                \draw [style=arrow, bend left=30] (C2) to (gamma);
+                \draw [style=arrow, bend left=30] (gamma) to (C2);
+                \draw [style=arrow] (gamma) to (AAAB);
+
+                \draw [style=arrow, bend right=15] (A3) to (alpha3);
+                \draw [style=arrow, bend left=15] (A3) to (alpha3);
+                \draw [style=arrow, bend right=15] (A3) to (beta3);
+                \draw [style=arrow] (alpha3) to (AA3);
+                \draw [style=arrow] (B3) to (beta3);
+                \draw [style=arrow] (beta3) to (AB3);
+                \draw [style=arrow] (AA3) to (gamma3);
+                \draw [style=arrow] (AB3) to (gamma3);
+                \draw [style=arrow, bend left=30] (C3) to (gamma3);
+                \draw [style=arrow, bend left=30] (gamma3) to (C3);
+                \draw [style=arrow] (gamma3) to (AAAB3);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
+In all of these cases, we've highlighted the chosen (and in fact only) basis for the subspace.
+Some of these subspaces are quite trivial, such as \textbf{a.}, while the others capture some information about the way in which some objects be be assembled.
+In subspace \textbf{c.} we can see that the basis has sites which are not in the basis of $\A$, while the other spaces $\textbf{a.}$, $\textbf{b.}$ and $\textbf{d.}$ do not.
+Consequently, \textbf{c.} does not tie the assembly of $AAAB$ to the chosen basis of the $\A$.
+Assembly subspaces whose basis is a subset of the larger space will be referred to as \textit{rooted}.
 \begin{definition}\label{def:rooted}
     Let $(A', \B_{A'})$ be an assembly subspace of $(A, \B_A)$.
     We say that $A'$ is rooted in $A$ if $\B_{A'} \subseteq \B_A$.
@@ -1257,13 +1323,31 @@ The subspace relation on the set of all assembly subspaces allows us to partiall
 Our ultimate objective is to then constrain the full set of assembly subspaces by requiring they they contain some desired object and determine which subspaces are minimal.
 However, if we are do not further restrict this subset of subspace to rooted subspaces, we will inevitably yield highly trivial minimal subspaces.
 To elucidate this point, consider the minimal subspaces of $\A$ containing $AB$ with and without the rooting constraint:
+\begin{center}
+    \scalebox{0.6}{
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [style=site, fill=blue!20] (AB) at (0, 0) {$AB$};
+                \node [scale=2] at (0, -2.8) {a. Not Rooted in $\A$};
 
-\TODO{Example Figure}
-
-Without requiring that the subspaces be rooted, we find that the unenlightening subspace containing only $AB$ as a site and no transitions.
+                \node [style=site, fill=blue!20] (A1) at (6,  0.8) {$A$};
+                \node [style=site, fill=blue!20] (B1) at (6, -0.8) {$B$};
+                \node [style=transition] (beta1) at (8, 0) {$\beta$};
+                \node [style=site] (AB1) at (10, 0) {$AB$};
+                \node [scale=2] at (8, -2.8) {b. Rooted in $\A$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow] (A1) to (beta1);
+                \draw [style=arrow] (B1) to (beta1);
+                \draw [style=arrow] (beta1) to (AB1);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
+Without requiring that the subspaces be rooted, we find the unenlightening subspace containing only $AB$ as a site and no transitions.
 However, given the rooted constraint, we find only one minimal, rooted assembly subspace.
-The uniqueness of this minimal rooted subspace is possibly misleading; in general, the minimal subpsaces will not be unique.
-This point will be addressed in \Cref{sec:assembly-index}.
+The uniqueness of this minimal, rooted subspace is possibly misleading; in general, the minimal subpsaces will not be unique.
+This point will be further addressed in \Cref{sec:assembly-index}.
 
 As with Petri nets in general, assembly spaces admit structure preserving maps.
 In fact, \textit{assembly maps} are just Petri net morphisms between assembly spaces.
@@ -1272,10 +1356,85 @@ In fact, \textit{assembly maps} are just Petri net morphisms between assembly sp
     An \textbf{assembly map} is a Petri net morphism $f: A \rightarrow B$ between assembly spaces.
 \end{definition}
 
-As a simple example of this, consider $\A$ and a map to a second space, here referred to as $\C$.
+As an example of an assembly map, we can use the example map from the Petri net section:
+\begin{center}
+    \scalebox{0.6}{
+        \begin{tikzpicture}\label{ex:map}
+            \begin{pgfonlayer}{nodelayer}
+                \node [scale=3] (P) at (12, 0) {$\A$};
+                \node [style=site, fill=blue!20] (A) at (0, 0.8) {$A$};
+                \node [style=site, fill=blue!20] (B) at (0, -0.8) {$B$};
+                \node [style=site, fill=blue!20] (C) at (6, -1.6) {$C$};
+                \node [style=site] (AA) at (4, 0.8) {$AA$};
+                \node [style=site] (AB) at (4, -0.8) {$AB$};
+                \node [style=site] (AAAB) at (8, 0) {$AAAB$};
+                \node [style=transition] (tau1) at (2, 0.8) {$\alpha$};
+                \node [style=transition] (tau2) at (2, -0.8) {$\beta$};
+                \node [style=transition] (tau3) at (6, 0) {$\gamma$};
+                \node [style=transition] (tau4) at (10, 0) {$\delta$};
 
-\TODO{Example Figure}
+                \node [scale=3] (Q) at (12, -6) {$\C$};
+                \node [style=site, fill=blue!20] (W) at (-4, -6) {$W$};
+                \node [style=site] (X) at (0, -6) {$X$};
+                \node [style=site] (Y) at (4, -6) {$Y$};
+                \node [style=site] (Z) at (8, -6) {$Z$};
+                \node [style=transition] (tau5) at (-2, -6) {$\phi$};
+                \node [style=transition] (tau6) at (2, -6) {$\chi$};
+                \node [style=transition] (tau7) at (6, -6) {$\psi$};
+                \node [style=transition] (tau8) at (10, -6) {$\omega$};
 
+                \node [text=red, scale=2] (s) at (-2, -2.5) {$S(f)$};
+                \node [text=blue, scale=2] (t) at (0, -3.5) {$T(f)$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow, draw=gray!80, bend right=15] (A) to (tau1);
+                \draw [style=arrow, draw=gray!80, bend left=15] (A) to (tau1);
+                \draw [style=arrow, draw=gray!80, bend right=15] (A) to (tau2);
+                \draw [style=arrow, draw=gray!80] (tau1) to (AA);
+                \draw [style=arrow, draw=gray!80] (B) to (tau2);
+                \draw [style=arrow, draw=gray!80] (tau2) to (AB);
+                \draw [style=arrow, draw=gray!80] (AA) to (tau3);
+                \draw [style=arrow, draw=gray!80] (AB) to (tau3);
+                \draw [style=arrow, draw=gray!80, bend left=30] (C) to (tau3);
+                \draw [style=arrow, draw=gray!80] (tau3) to (AAAB);
+                \draw [style=arrow, draw=gray!80, bend left=30] (tau3) to (C);
+                \draw [style=arrow, draw=gray!80] (AAAB) to (tau4);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau4) to (A);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau4) to (AA);
+                \draw [style=arrow, draw=gray!80, bend left=40] (tau4) to (B);
+
+                \draw [style=arrow, draw=gray!80, bend left=15] (W) to (tau5);
+                \draw [style=arrow, draw=gray!80, bend right=15] (W) to (tau5);
+                \draw [style=arrow, draw=gray!80, bend left=15] (tau5) to (X);
+                \draw [style=arrow, draw=gray!80, bend right=15] (tau5) to (X);
+                \draw [style=arrow, draw=gray!80, bend left=15] (X) to (tau6);
+                \draw [style=arrow, draw=gray!80, bend right=15] (X) to (tau6);
+                \draw [style=arrow, draw=gray!80] (tau6) to (Y);
+                \draw [style=arrow, draw=gray!80, bend left=20] (Y) to (tau7);
+                \draw [style=arrow, draw=gray!80] (Y) to (tau7);
+                \draw [style=arrow, draw=gray!80, bend right=20] (Y) to (tau7);
+                \draw [style=arrow, draw=gray!80] (tau7) to (Z);
+                \draw [style=arrow, draw=gray!80, bend left=50] (tau7.south) to (Y.south);
+                \draw [style=arrow, draw=gray!80] (Z) to (tau8);
+                \draw [style=arrow, draw=gray!80, bend left=30] (tau8) to (X);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau8) to (X);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau8) to (Y);
+
+                \draw [style=sitemap, bend right=30] (A) to (X);
+                \draw [style=sitemap, bend right=30] (B) to (X);
+                \draw [style=sitemap, bend right=30] (AA) to (Y);
+                \draw [style=sitemap, bend right=30] (AB) to (Y);
+                \draw [style=sitemap, bend right=30] (C) to (Y);
+                \draw [style=sitemap, bend right=30] (AAAB) to (Z);
+                \draw [style=transitionmap, bend right=30] (tau1) to (tau6);
+                \draw [style=transitionmap, bend right=30] (tau2) to (tau6);
+                \draw [style=transitionmap, bend right=30] (tau3) to (tau7);
+                \draw [style=transitionmap, bend right=30] (tau4) to (tau8);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
+were we've chosen $\{A,B,C\}$ and $\{W\}$ as the bases for $\A$ and $\C$, respectively.  
 Of particular note here is that $\A$ is certainly a subspace of $\C$, though it is decidedly not rooted in $\C$.
 In fact, it will always be the case that the image of an assembly space will be a subspace of the codomain.
 \begin{theorem}\label{lem:assembly-image-is-subspace}
