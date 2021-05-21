@@ -57,6 +57,7 @@
 \newcommand{\B}{\mathcal{B}}
 \newcommand{\C}{\mathcal{C}}
 \newcommand{\G}{\mathcal{G}}
+\newcommand{\SB}{\mathcal{S}}
 \newcommand{\Ini}[1]{\textrm{Ini}(#1)}
 \newcommand{\Term}[1]{\textrm{Term}(#1)}
 \newcommand{\A}{\mathcal{A}}
@@ -1170,27 +1171,42 @@ These bounds will be useful in situations where determining the assembly index o
 
 \section{The Assembly Index}\label{sec:assembly-index}
 
+With the core formalism established, we can now present the concept of the \textit{assembly index}.
+As we have seen, within the context of an assembly space, the rooted assembly spaces are partially ordered.
+This allows us to inquire about the minimal, rooted assembly subspaces which contain some desirable site.
+Each of these subspaces will consist of some, possibly infinite, number of transitions.
+We refer to the number of transitions in an assembly space as the \textit{size}.
 \begin{definition}\label{def:size}
     Let $A$ be an assembly space.
     The \textbf{size} of $A$ is the cardinality of $T(A)$, denoted $|A|$.
 \end{definition}
+In the running ligation model, $\A$, the size of the entire space is $|\A| = 4$ as there are four transitions.
+Similarly, the minimal, rooted subspace of $\A$ containing $AA$ has size $1$; it contains only one transition, $\alpha$.
 
-\begin{definition}\label{def:downset}
-    Let $(A, \B_A)$ be an assembly space and let $x$ be a site in $A$.
-    The \textbf{down set} of $x$, denoted $\downset{x}$ in $A$ is the site completion of all pathways from $\B_A$ terminating at $x$.
-\end{definition}
-
+We can think of the size of a minimal, rooted subspace containing a given site as counting the number of steps required to assemble that site in a particular way.
+However, it is entirely possible that there is no finite way assembly an site.
+For example, consider a polymer model which consists of combining monomers $A$ and $B$ into polymers of arbitrary length via pairwise joining operations.
+The space of all polymers naturally extends to infinite-length polymers such as $ABABA\ldots$ which require an infinite number of steps to assemble.
+While the abstract assembly space may well contain such sites, we wish to restrict ourselves to sites which can be assembled in finitely many steps.
+We say that such a site if $\textit{finite}$.
 \begin{definition}\label{def:finiteness}
     Let $A$ be an assembly space and let $x$ be a site in $A$.
-    We say that $x$ is \textbf{finite} in $A$ if $\downset{x}$ in $A$ has finite size.
+    We say that $x$ is \textbf{finite} in $A$ there exists a rooted assembly subspace of $A$ which contains $x$ as a site.
 \end{definition}
-
+Every site in our running example space, $\A$ is finite.
+In the polymer model, only sites representing polymers with finitely many monomers are finite.
+If we are presented with such a finite site, we can count the size of every rooted assembly subspaces containing that site.
+The least size of these subspaces is the \textit{assembly index} of the site.
 \begin{definition}\label{def:index}
     Let $A$ be an assembly space and let $x$ be a finite site in $A$.
-    The \textbf{assembly index} of $x$ is the minimal size of all rooted assembly subspaces of $A$ containing $x$, and is denoted $c_A(x)$.
+    The \textbf{assembly index} of $x$ is the minimum size of all rooted assembly subspaces of $A$ containing $x$, and is denoted $c_A(x)$.
     This can be written $c(x)$ when the relevant assembly space is clear from context.
 \end{definition}
-
+In this definition, we do not restrict ourselves specifically to minimal subspaces containing the site $x$.
+However, in effect we are.
+If we were to consider the size of a non-minimal, rooted subspace some site $x$, we'd always be able to find some minimal, rooted subspace which contains $x$ and has at most the same size.
+Since we are looking specifically for the \textit{minimum} size of the subspaces, we need to confirm that such a value even exists.
+It does and is in fact unique.
 \begin{theorem}\label{def:index-existence-uniqueness}
     Let $A$ be an assembly space and let $x$ be a finite site in $A$.
     Then the assembly index $c_A(x)$ is exists and is unique.
@@ -1199,8 +1215,28 @@ These bounds will be useful in situations where determining the assembly index o
     \TODO{Complete: likely requires Zorn's lemma, but maybe not...}
 \end{proof}
 
-\subsection{Bounds on the Assembly Index}\label{subsec:assembly-index-bounds}
+To conclude this section, we present the assembly index of every site of in our ligation model $\A$ together with a minimal, rooted assembly subspace containing that site.
 
+\TODO{Complete Figure}
+
+In the next section, we will consider methods for bounding the assembly index of a site.
+
+\subsection{Computability of and Bounds on the Assembly Index}\label{subsec:assembly-index-bounds}
+
+The first task, when presented with an assembly space, is to determine the assembly index of the sites in the space.
+In practical terms, this requires an algorithm for computing the assembly index relative to some space.
+In this work, we do not present a general algorithm to do so, though a simple depth-first search of the space may suffice in some cases.
+Rather, we first show that the assembly index is in fact computable.
+\begin{theorem}\label{thm:computable}
+    If $A$ is an assembly space and $x \in S(A)$ is finite, then $c(x)$ is computable.
+\end{theorem}
+\begin{proof}
+    \TODO{Complete}
+\end{proof}
+Of course, just because the value is computable does not mean that it can be computed in reasonable time.
+In fact, the general problem is likely to be \texttt{NP}-hard.
+In situtations where direct computation is infeasible, we can resort to bounding the value of the assembly index by computing the index in an analogous space.
+The first of the bounds we present is an upper bound determined by computing the assembly index in a subspace containing the site.
 \begin{theorem}\label{cor:subspace-index-upper-bound}
     Let $(A, \B_A)$ be an assembly space and let $(B, \B_A)$ be a rooted assembly subspace of $A$.
     For every finite $b \in S(B)$, the assembly index of $b$ in $B$ is at least the assembly index of $b$ in $A$.
@@ -1210,50 +1246,40 @@ These bounds will be useful in situations where determining the assembly index o
     \TODO{Complete}
 \end{proof}
 
+\TODO{Example and Figure}
+
+The second bound we establish is a lower bound determined by mapping the space in question into a space within which computing the assembly index may be simpler.
 \begin{theorem}\label{thm:image-lower-bound}
     If $f: A \rightarrow B$ is an assembly map, then $c_{f(A)}(f(x)) \le c_A(x)$ for all finite $x \in S(A)$.
     Furthermore, if $f$ is an embedding, then $c_{f(A)}(f(x)) = c_A(x)$.
 \end{theorem}
 \begin{proof}
     \TODO{Complete}
-    % Suppose $x \in S(A)$ is finite, and $Z \subseteq A$ is a rooted with $s \in S(Z)$ and $|Z| = c_A(x)$.
-    % Restricting $f$ to $Z$ provides an assembly map $f^* : Z \rightarrow B$ such that $f(Z)$ contains $f(x)$, and is rooted in $B$.
-    % As such, $c_{f(A)}(f(x))$ can be no larger than $|f(Z)|$, so $c_{f(A)}(f(x)) \le c_A(x)$.
-    %
-    % Furthermore, suppose that $f$ is an embedding, and consider any $Z' \subseteq f(A)$ rooted and containing $f(x)$.
-    % The preimage of $Z'$ under $f$ is then a rooted assembly subspace of $A$ containing $x$, so $c_A(x)$ can be no larger than $|f^{-1}(Z)|$.
-    % Together with the previous result, we then have $c_{f(A)}(f(x)) = c_A(x)$.
 \end{proof}
 
-\begin{corollary}\label{cor:lowerset-index}
-    Let $A$ be an assembly space and $x \in S(A)$ be finite.
-    Then $c_A(x) = c_{x\downarrow}(x)$.
+\TODO{Example and Figure}
+
+Our final bound is a special case of the lower bound derived from an assembly map; however, it represents an upper bound.
+Given an assembly space with no directed loops, which we refer to as \textbf{acyclic}, we can form an analogous assembly space which has a tree-like structure by duplicating sites that participate in more than one transition.
+We refer to such a space as the \textit{split-branch} representation of the space.
+\begin{definition}\label{def:split-branch}
+    Let $A$ be an acyclic assembly space.
+    The \textbf{split-branch} representation of $A$ is $\ldots$.
+
+    \TODO{Doug is leaving this for Stu since it's his jam.}
+\end{definition}
+
+There is a natural assembly map from the split-branch representation of a space to the space itself.
+As such, \Cref{thm:image-lower-bound} applies, and we can produce an upper bound on the assembly index of sites in the original space.
+\begin{corollary}\label{cor:split-branch}
+    Let $A$ be a \red{adjectives} assembly space and let $\SB(A)$ be the split-branch representation of $A$, and let $f : \SB(A)$ such that $\ldots$.
+    For any site $x$ in $A$, the assembly index $c_A(x) \le \min_{x' \in S(f)^{-1}(x)}c_{\SB(A)}(x')$.
 \end{corollary}
 \begin{proof}
-    \TODO{Complete}
-    % There is a natural embedding $i : \downset{x} \rightarrow A$, so $c_A(x) = c_{x\downarrow}(x)$ for all finite $x \in S(A)$, as per \cref{thm:image-lower-bound}.
+    \TODO{Stu to complete? Or Doug can with a workable \Cref{def:split-branch}.}
 \end{proof}
 
-\subsection{Computability and Algorithms}
-
-\begin{theorem}\label{thm:computable}
-    If $A$ is an assembly space and $x \in S(A)$ is finite, then $c(x)$ is computable.
-\end{theorem}
-\begin{proof}
-    \TODO{Complete}
-    % Every rooted assembly subspace with minimal size and containing $x$ is a minimal, rooted assembly subspace of $\downset{x}$.
-    % Since $x$ is finite, $\downset{x}$ is finite; that is $\downset{x}$ has finitely many transitions.
-    % This, together with the fact that $\pi(\sigma(t))$ and $\pi(\tau(t))$ are finite for all $t \in T(A)$, ensures that there areonly finitely many assembly subspaces of $\downset{x}$.
-    % As such, the set of all rooted assembly subspaces is computable; simply enumerate them.
-    % The size of each subspace is, of course, computable as one need simply count the transitions in the subspace.
-    % Finally, finding the minimum value in a finite set of natural numbers is computable.
-    % Thus, $c(x)$ is computable.
-\end{proof}
-
-\TODO{Typeset split-branch algorithm}
-
-\section{Assembly Examples}
-
-\TODO{Come up with a few fun examples.}
+\TODO{Typeset algorithm}
+\red{I need a PDF version of the previous version of the supplement. The formatted algorithm not rendering correctly for me in Word.}
 
 \end{document}
