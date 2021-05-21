@@ -54,7 +54,7 @@
 \newcommand{\upset}[1]{#1\!\!\uparrow}
 \newcommand{\downset}[1]{#1\!\!\downarrow}
 \newcommand{\N}{\mathbb{N}}
-\newcommand{\B}{\mathcal{B}}
+% \newcommand{\B}{\mathcal{B}}
 \newcommand{\C}{\mathcal{C}}
 \newcommand{\G}{\mathcal{G}}
 \newcommand{\SB}{\mathcal{S}}
@@ -87,9 +87,9 @@ This formalism arose as a means of rigorously describing the ``simplest" way of 
 With this in mind, we consider a universe of objects together with transitions representing ways in which objects can be combined, mutated or disassembled to yield other objects.
 In this setting, the concrete rules or laws relating the transitions with the objects is largely neglected herein, though they are certainly necessary for initially constructing the space for consideration.
 We quickly come to the conclusion that a Petri network is appropriate when we consider this kind of process in general, though with specific modifications to allow the types of questions in which we are interested to be well defined.
-As such, the fundamental mathematical structure we define and explore herein, referred to as an assembly space, can be described as a sourceless, sinkless Petri net with a chosen basis.
+As such, the fundamental mathematical structure we define and explore herein, referred to as an assembly space, can be described as a sourceless, sinkless Petri net with a chosen generating set.
 The details of this description will, of course, be made precise below.
-With assembly spaces defined, we are then able to define an assembly index for each object in the space, relative to the chosen basis, which characterizes how directly that object can be assembled.
+With assembly spaces defined, we are then able to define an assembly index for each object in the space, relative to the chosen generating set, which characterizes how directly that object can be assembled.
 Further, we prove several theorems relating to method of bounding the assembly index for a given object and algorithms for computing or approximating it.
 
 [This is Sara testing if she can git cool like the rest of the peeps in elife, I will remove on my next commit]
@@ -896,6 +896,9 @@ We refer to a minimal generating set with respect to this partial order as a \te
     We say that $X$ is a \textbf{basis} if it is minimal with respect to the set inclusion order on $\G_P$.
 \end{definition}
 
+{
+\color{red}
+\TODO{Rework this text}
 The ligation example admits a choice of basis: $\{A,B,C\}$, $\{A,AB,C\}$, $\{AA,AB,C\}$, or $\{C,AAAB\}$.
 While it may seem undesirable, on its face, for a Petri net to admit more than one basis, there is little difference between this and being able to choose the basis of a vector space such as $\R^2$.
 We can view each choice of basis as representing a minimal set of starting components from which everything of interest can be constructed; similar to deciding which raw materials to use to build a house, or which chemical reagents to use to synthesis a given set of molecules.
@@ -914,6 +917,7 @@ Fortuitously, every Petri net admits at least one basis, and in certain cases th
 \begin{proof}
     \TODO{Complete (likely to use Zorn's lemma)}
 \end{proof}
+}
 
 If we recall, a generating set (and consequently a basis) is a set of sites from which all others can be reached via a pathway.
 However, some objects are priviledged in that there are not pathways which terminate at them.
@@ -988,10 +992,10 @@ However, if we were to remove the $\delta$ transition, for example,
 then the site $AAAB$ will be terminal and both the initial sites will be $A$, $B$ and $C$.
 Sourceless, acyclic Petri nets (nets without loops) will necessarily contain initial sites, and similarly sinkless, acyclic Petri nets will contain terminal sites.
 
-The value of identifying initial sites is that they are necessarily elements of every basis, and if the set of initial sites is a basis in its own right, then it is the only basis.
+The value of identifying initial sites is that they are necessarily elements of every generating set, and if the set of initial sites is a generating set in its own right, then it is the only basis.
 \begin{lemma}\label{lem:initial-are-basic}
     Let $P$ be a Petri net.
-    For any basis $\B$ of $P$, $\Ini{P} \subseteq \B$.
+    For any generating set $G$ of $P$, $\Ini{P} \subseteq G$.
     Furthermore, if $\Ini{P}$ is a basis, then it is a unique basis for $P$.
 
     \red{I'm not $100\%$ sure of the last point, but I think it's true. We'll find out when we start writing the proof.}
@@ -1002,8 +1006,8 @@ The value of identifying initial sites is that they are necessarily elements of 
     \TODO{Complete}
 \end{proof}
 
-Our final concern regaring Petri nets is whether or not bases are are preserved under Petri net morphisms.
-To establish that this is the case, we must first show that if two sets of sites are pathway connected, then they will be pathway connected in the image of a Petri net morphism.
+Our final concern regaring Petri nets is whether or not generating sets and bases are preserved under Petri net morphisms.
+To establish that this is the case for generating sets, we must first show that if two sets of sites are pathway connected, then they will be pathway connected in the image of a Petri net morphism.
 \begin{lemma}\label{lem:image-of-pathways}
     Let $f: P \rightarrow Q$ be a Petri net morphism and let $X, Y \subseteq S(P)$ be pathway connected in $P$.
     The images $f(X)$ and $f(Y)$ are pathway connected in $f(P)$.
@@ -1176,27 +1180,29 @@ Identifying a generating set of the ligation model, say $\{A, AB, C\}$, and mapp
 \end{center}
 where the generating set $\{A, AB, C\}$ is mapped into the set $\{X, Y\}$, both blue.
 The set $\{X, Y\}$ generates the entire image of $P$, whose edges are red.
-This is not to say that the only generating sets in the image of a Petri net will be the image of a generating set, for example $\{X\}$ is generating in the image $f(P)$ but its preimage $\{A,B\}$ is not. The property that Petri net morphisms preserve generating sets is fundamentally important for establishing relationships between generator-dependent quantities computed in one Petri net with those in another.
+This is not to say that the only generating sets in the image of a Petri net will be the image of a generating set, for example $\{X\}$ is generating in the image $f(P)$ but its preimage $\{A,B\}$ is not.
+Additionally, this examples provides a counter example for the assertion that bases are preserved under Petri net morphisms since $\{A, AB, C\}$ is a basis for $P$, but $\{X, Y\}$ is not a basis for $f(P)$ -- both $\{X\}$ and $\{Y\}$ are generating sets for $f(P)$ and subsets of $\{X, Y\}$.
+This religates the concept of a basis to simply a special class of generating set that might be preferable in some ways, namely minimality, to a generic generating set.
+The property that Petri net morphisms preserve generating sets is fundamentally important for establishing relationships between generator-dependent quantities computed in one Petri net with those in another.
 
 The Petri net formalism, and the extensions presented in this section, can now be leveraged to define the structure of primary interest in this work: assembly spaces.
 These spaces can be seen as a subclass of Petri nets which admit specific features useful for describing the fewest number of steps required to construct a given object, the assembly index.
-The concepts of subnets and bases will be a key component in the definition of the assembly index, and Petri net morphisms will be indispensible for establishing bounding the value of the assembly index where explict calculation may be infeasible.
+The concepts of subnets and generating sets will be a key component in the definition of the assembly index, and Petri net morphisms will be indispensible for establishing bounding the value of the assembly index where explict calculation may be infeasible.
 
 \section{Assembly Spaces, Subspaces and Maps}\label{sec:assembly-spaces}
 
 This this work, we are specifically interested in determing if it is possible, given some set of starting objects, to assembly a desired product through some sequence of joining (or disjoining) operations.
 If so, how can we assess the minimum number of steps required in the assembly process?
-We will refer to the resulting value as the \textit{assembly index} of the object, and ascribe it to the a combination of the structure of the underlying space of assembly processes (\textit{assembly space}), the chosen set of starting objects (\textit{basis}) and the desired product itself.
+We will refer to the resulting value as the \textit{assembly index} of the object, and ascribe it to the a combination of the structure of the underlying space of assembly processes (\textit{assembly space}), the chosen set of starting objects (\textit{generating set}) and the desired product itself.
 
 We draw on the Petri net formalism described and extended in \Cref{sec:petri-nets} to formally define an \textit{assembly space} as a particular variety of Petri net.
 
 \begin{definition}\label{def:assembly-space}
-    An \textbf{assembly space} $(A, \B_A)$ is a sourceless and sinkless Petri net with a chosen basis $\B_A$.
-    Where possible, we will simply write $A$ to denote an assembly space $(A, \B_A)$.
+    An \textbf{assembly space} $(A, G_A)$ is a sourceless and sinkless Petri net with a chosen generating set $G_A$ of $A$.
+    Where possible, we will simply write $A$ to denote an assembly space $(A, G_A)$.
 \end{definition}
 
-The ligation example, reproduced below and used throughout \Cref{sec:petri-nets}, is in fact an assembly space, provided we endow it with a basis.
-
+The ligation example, used throughout \Cref{sec:petri-nets} and reproduced below, is in fact an assembly space, provided we choose a generating set.
 \begin{center}
     \scalebox{0.6}{
         \begin{tikzpicture}
@@ -1232,12 +1238,12 @@ The ligation example, reproduced below and used throughout \Cref{sec:petri-nets}
         \end{tikzpicture}
     }
 \end{center}
-As previously discussed, this net admits four possible bases: $\{A,B,C\}$, $\{A,AB,C\}$, $\{AA,AB,C\}$, or $\{C,AAAB\}$.
-In the all of the examples in this sections, we use $\B = \{A,B,C\}$ (highlighted in blue) as the particular basis unless and refer to this this Petri net with $\B$ as the assembly space $\A$.
+As previously discussed, this net admits four possible bases ($\{A,B,C\}$, $\{A,AB,C\}$, $\{AA,AB,C\}$, or $\{C,AAAB\}$) and numerous, non-minimal generating sets.
+In the all of the examples in this sections, we use $G = \{A,B,C\}$ (highlighted in blue) as the particular generating set unless and refer to this this Petri net with $G$ as the assembly space $\A$.
 
 Assembly spaces, as with Petri nets in general, admit a subnet structure.
-In general, a Petri subnet need now have a specified basis; however, we will require this of subnets of assembly spaces.
-To distinguish the two concepts, we will refer exclusively to \textit{assembly subspaces} which are little more than Petri subnets with a specified basis.
+In general, a Petri subnet need now have a specified generating set; however, we will require this of subnets of assembly spaces.
+To distinguish the two concepts, we will refer exclusively to \textit{assembly subspaces} which are little more than Petri subnets with a chosen generating set.
 \begin{definition}\label{def:assembly-subspace}
     Let $A$ and $A'$ be assembly spaces.
     $A'$ is an \textbf{assembly subspace} of $A$ if $A'$ is a Petri subnet of $A$.
@@ -1308,16 +1314,16 @@ The example space $\A$ admits a number of subspaces, a few of which are depicted
         \end{tikzpicture}
     }
 \end{center}
-In all of these cases, we've highlighted the chosen (and in fact only) basis for the subspace.
+In all of these cases, we've highlighted the chosen generating set for the subspace which is in fact the only basis for each.
 Some of these subspaces are quite trivial, such as \textbf{a.}, while the others capture some information about the way in which some objects be be assembled.
-In subspace \textbf{c.} we can see that the basis has sites which are not in the basis of $\A$, while the other spaces $\textbf{a.}$, $\textbf{b.}$ and $\textbf{d.}$ do not.
-Consequently, \textbf{c.} does not tie the assembly of $AAAB$ to the chosen basis of the $\A$.
-Assembly subspaces whose basis is a subset of the larger space will be referred to as \textit{rooted}.
+In subspace \textbf{c.} we can see that the generating set has sites which are not in the generating set of $\A$, while the other spaces $\textbf{a.}$, $\textbf{b.}$ and $\textbf{d.}$ do not.
+Consequently, \textbf{c.} does not tie the assembly of $AAAB$ to the chosen generating set of the $\A$.
+Assembly subspaces whose generating set is a subset of the larger space will be referred to as \textit{rooted}.
 \begin{definition}\label{def:rooted}
-    Let $(A', \B_{A'})$ be an assembly subspace of $(A, \B_A)$.
-    We say that $A'$ is rooted in $A$ if $\B_{A'} \subseteq \B_A$.
+    Let $(A', G_{A'})$ be an assembly subspace of $(A, G_A)$.
+    We say that $A'$ is rooted in $A$ if $G_{A'} \subseteq G_A$.
 \end{definition}
-By restricting ourselves to rooted assembly subspaces we tie the particular processes which they represent to the basis of the larger space.
+By restricting ourselves to rooted assembly subspaces we tie the particular processes which they represent to the generating set of the larger space.
 We are particularly interested in constructing assembly subspaces which may produce some specific object.
 The subspace relation on the set of all assembly subspaces allows us to partially order the subspaces.
 Our ultimate objective is to then constrain the full set of assembly subspaces by requiring they they contain some desired object and determine which subspaces are minimal.
@@ -1434,7 +1440,7 @@ As an example of an assembly map, we can use the example map from the Petri net 
         \end{tikzpicture}
     }
 \end{center}
-were we've chosen $\{A,B,C\}$ and $\{W\}$ as the bases for $\A$ and $\C$, respectively.  
+were we've chosen $\{A,B,C\}$ and $\{W\}$ as the generating sets (in fact, bases) for $\A$ and $\C$, respectively.  
 Of particular note here is that $\A$ is certainly a subspace of $\C$, though it is decidedly not rooted in $\C$.
 In fact, it will always be the case that the image of an assembly space will be a subspace of the codomain.
 \begin{theorem}\label{lem:assembly-image-is-subspace}
@@ -1451,14 +1457,11 @@ Exploring the previous example a bit more, by highlighting a rooted subspace of 
 This too will always be the case: the image of a rooted subspace will always be rooted in the image.
 \begin{theorem}\label{thm:rooted-image}
     Let $A$ be an assembly space, $Z \subseteq A$ a rooted assembly subspace, and $f : A \rightarrow B$ an assembly map.
-    Then $(f(Z), S(f)(\B_Z))$ is rooted in $(f(A), S(f)(\B_A)$.
-
-    \TODO{This almost certainly isn't true as defined at present. Assembly maps do not, in general, preserve the basis, $S(f)(\B_A)$ and $S(f)(\B_Z)$ are probably not bases. That said, we might not actually need this. It'll depend on how the proof of \Cref{thm:image-lower-bound} go.}
+    Then $(f(Z), S(f)(G_Z))$ is rooted in $(f(A), S(f)(G_A)$.
 \end{theorem}
 \begin{proof}
     \TODO{Complete}
 \end{proof}
-
 The interaction of assembly maps and rooted subspaces will allow us to establish bounds on the assembly index, defined in the next section, by considering the image of the space under some map.
 These bounds will be useful in situations where determining the assembly index of some object is computationally infeasible.
 
@@ -1531,7 +1534,7 @@ In fact, the general problem is likely to be \texttt{NP}-hard.
 In situtations where direct computation is infeasible, we can resort to bounding the value of the assembly index by computing the index in an analogous space.
 The first of the bounds we present is an upper bound determined by computing the assembly index in a subspace containing the site.
 \begin{theorem}\label{thm:subspace-index-upper-bound}
-    Let $(A, \B_A)$ be an assembly space and let $(B, \B_A)$ be a rooted assembly subspace of $A$.
+    Let $(A, G_A)$ be an assembly space and let $(B, G_A)$ be a rooted assembly subspace of $A$.
     For every finite $b \in S(B)$, the assembly index of $b$ in $B$ is at least the assembly index of $b$ in $A$.
     That is, $c_B(b) \ge c_A(b)$ for all $b \in S(B)$
 \end{theorem}
@@ -1548,8 +1551,6 @@ The second bound we establish is a lower bound determined by mapping the space i
 \end{theorem}
 \begin{proof}
     \TODO{Complete}
-
-    \red{This may suffer from the fact that assembly maps do not preserve bases. If that's the case, we should rip all mention of bases out for a future work.}
 \end{proof}
 
 \TODO{Example and Figure}
