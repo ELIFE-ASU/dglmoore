@@ -293,7 +293,7 @@ While we will not delve into dynamical aspects of Petri nets or the to-be-define
 
 It is natural, once a mathematical structure has been defined, to ask how two instantiations of that structure may be mapped to one another.
 There is, of course, a well defined notion of a map between Petri nets, termed here a \textit{Petri net morphism}, which maps sites and transitions of one Petri net into another in a way that is compatible and consistent with the source and target maps of both Petri nets.
-These Petri net morphisms will play a crucial roll in the establishment of bounds for the assembly index in \Cref{subsec:assembly-index-bounds}.
+These Petri net morphisms will play a crucial roll in the establishment of bounds for the assembly index in \Cref{sec:assembly-index}.
 
 \begin{definition}\label{def:petri-map}
     A \textbf{Petri net morphism} from a Petri net $P$ to a Petri net $Q$, denoted $f : P \rightarrow Q$, consisists of a pair of functions $T(f) : T(P) \rightarrow T(Q)$ and $S(f): S(P) \rightarrow S(Q))$ such that the following diagrams commute:
@@ -896,9 +896,6 @@ We refer to a minimal generating set with respect to this partial order as a \te
     We say that $X$ is a \textbf{basis} if it is minimal with respect to the set inclusion order on $\G_P$.
 \end{definition}
 
-{
-\color{red}
-\TODO{Rework this text}
 The ligation example admits a choice of basis: $\{A,B,C\}$, $\{A,AB,C\}$, $\{AA,AB,C\}$, or $\{C,AAAB\}$.
 While it may seem undesirable, on its face, for a Petri net to admit more than one basis, there is little difference between this and being able to choose the basis of a vector space such as $\R^2$.
 We can view each choice of basis as representing a minimal set of starting components from which everything of interest can be constructed; similar to deciding which raw materials to use to build a house, or which chemical reagents to use to synthesis a given set of molecules.
@@ -917,7 +914,6 @@ Fortuitously, every Petri net admits at least one basis, and in certain cases th
 \begin{proof}
     \TODO{Complete (likely to use Zorn's lemma)}
 \end{proof}
-}
 
 If we recall, a generating set (and consequently a basis) is a set of sites from which all others can be reached via a pathway.
 However, some objects are priviledged in that there are not pathways which terminate at them.
@@ -1365,7 +1361,7 @@ In fact, \textit{assembly maps} are just Petri net morphisms between assembly sp
 As an example of an assembly map, we can use the example map from the Petri net section:
 \begin{center}
     \scalebox{0.6}{
-        \begin{tikzpicture}\label{ex:map}
+        \begin{tikzpicture}
             \begin{pgfonlayer}{nodelayer}
                 \node [scale=3] (P) at (12, 0) {$\A$};
                 \node [style=site, fill=blue!20] (A) at (0, 0.8) {$A$};
@@ -1381,13 +1377,13 @@ As an example of an assembly map, we can use the example map from the Petri net 
 
                 \node [scale=3] (Q) at (12, -6) {$\C$};
                 \node [style=site, fill=blue!20] (W) at (-4, -6) {$W$};
-                \node [style=site] (X) at (0, -6) {$X$};
-                \node [style=site] (Y) at (4, -6) {$Y$};
-                \node [style=site] (Z) at (8, -6) {$Z$};
+                \node [style=site, draw=ForestGreen] (X) at (0, -6) {$X$};
+                \node [style=site, draw=ForestGreen] (Y) at (4, -6) {$Y$};
+                \node [style=site, draw=ForestGreen] (Z) at (8, -6) {$Z$};
                 \node [style=transition] (tau5) at (-2, -6) {$\phi$};
-                \node [style=transition] (tau6) at (2, -6) {$\chi$};
-                \node [style=transition] (tau7) at (6, -6) {$\psi$};
-                \node [style=transition] (tau8) at (10, -6) {$\omega$};
+                \node [style=transition, draw=ForestGreen] (tau6) at (2, -6) {$\chi$};
+                \node [style=transition, draw=ForestGreen] (tau7) at (6, -6) {$\psi$};
+                \node [style=transition, draw=ForestGreen] (tau8) at (10, -6) {$\omega$};
 
                 \node [text=red, scale=2] (s) at (-2, -2.5) {$S(f)$};
                 \node [text=blue, scale=2] (t) at (0, -3.5) {$T(f)$};
@@ -1413,18 +1409,18 @@ As an example of an assembly map, we can use the example map from the Petri net 
                 \draw [style=arrow, draw=gray!80, bend right=15] (W) to (tau5);
                 \draw [style=arrow, draw=gray!80, bend left=15] (tau5) to (X);
                 \draw [style=arrow, draw=gray!80, bend right=15] (tau5) to (X);
-                \draw [style=arrow, draw=gray!80, bend left=15] (X) to (tau6);
-                \draw [style=arrow, draw=gray!80, bend right=15] (X) to (tau6);
-                \draw [style=arrow, draw=gray!80] (tau6) to (Y);
-                \draw [style=arrow, draw=gray!80, bend left=20] (Y) to (tau7);
-                \draw [style=arrow, draw=gray!80] (Y) to (tau7);
-                \draw [style=arrow, draw=gray!80, bend right=20] (Y) to (tau7);
-                \draw [style=arrow, draw=gray!80] (tau7) to (Z);
-                \draw [style=arrow, draw=gray!80, bend left=50] (tau7.south) to (Y.south);
-                \draw [style=arrow, draw=gray!80] (Z) to (tau8);
-                \draw [style=arrow, draw=gray!80, bend left=30] (tau8) to (X);
-                \draw [style=arrow, draw=gray!80, bend right=30] (tau8) to (X);
-                \draw [style=arrow, draw=gray!80, bend right=30] (tau8) to (Y);
+                \draw [style=arrow, draw=ForestGreen, bend left=15] (X) to (tau6);
+                \draw [style=arrow, draw=ForestGreen, bend right=15] (X) to (tau6);
+                \draw [style=arrow, draw=ForestGreen] (tau6) to (Y);
+                \draw [style=arrow, draw=ForestGreen, bend left=20] (Y) to (tau7);
+                \draw [style=arrow, draw=ForestGreen] (Y) to (tau7);
+                \draw [style=arrow, draw=ForestGreen, bend right=20] (Y) to (tau7);
+                \draw [style=arrow, draw=ForestGreen] (tau7) to (Z);
+                \draw [style=arrow, draw=ForestGreen, bend left=50] (tau7.south) to (Y.south);
+                \draw [style=arrow, draw=ForestGreen] (Z) to (tau8);
+                \draw [style=arrow, draw=ForestGreen, bend left=30] (tau8) to (X);
+                \draw [style=arrow, draw=ForestGreen, bend right=30] (tau8) to (X);
+                \draw [style=arrow, draw=ForestGreen, bend right=30] (tau8) to (Y);
 
                 \draw [style=sitemap, bend right=30] (A) to (X);
                 \draw [style=sitemap, bend right=30] (B) to (X);
@@ -1440,20 +1436,91 @@ As an example of an assembly map, we can use the example map from the Petri net 
         \end{tikzpicture}
     }
 \end{center}
-were we've chosen $\{A,B,C\}$ and $\{W\}$ as the generating sets (in fact, bases) for $\A$ and $\C$, respectively.  
-Of particular note here is that $\A$ is certainly a subspace of $\C$, though it is decidedly not rooted in $\C$.
-In fact, it will always be the case that the image of an assembly space will be a subspace of the codomain.
+were we've chosen $\{A,B,C\}$ and $\{W\}$ as the generating sets (in fact, bases) for $\A$ and $\C$, respectively.
+Of particular note here is that $f(\A)$ (outlined in red) is a subspace of $\C$.
+It will always be the case that the image of an assembly space will be a subspace of the codomain.
 \begin{theorem}\label{lem:assembly-image-is-subspace}
     If $f : A \rightarrow B$ is an assembly map between assembly spaces $A$ and $B$, then $f(A)$ is an assembly subspace of $B$.
 \end{theorem}
 \begin{proof}
     \TODO{Complete}
 \end{proof}
+While $f(\A)$ is a subspace of $\C$, it is decidedly not rooted in $\C$.
+However, by highlighting a rooted subspace of $\A$ we see that the image of that subspace is rooted in $f(\A)$.
+\begin{center}
+    \scalebox{0.6}{
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [scale=3] (P) at (12, 0) {$\A$};
+                \node [style=site, fill=blue!20, draw=red, line width=1.5] (A) at (0, 0.8) {$A$};
+                \node [style=site, fill=blue!20, draw=red, line width=1.5] (B) at (0, -0.8) {$B$};
+                \node [style=site] (C) at (6, -1.6) {$C$};
+                \node [style=site, draw=red, line width=1.5] (AA) at (4, 0.8) {$AA$};
+                \node [style=site, draw=red, line width=1.5] (AB) at (4, -0.8) {$AB$};
+                \node [style=site] (AAAB) at (8, 0) {$AAAB$};
+                \node [style=transition, draw=red, line width=1.5] (tau1) at (2, 0.8) {$\alpha$};
+                \node [style=transition, draw=red, line width=1.5] (tau2) at (2, -0.8) {$\beta$};
+                \node [style=transition] (tau3) at (6, 0) {$\gamma$};
+                \node [style=transition] (tau4) at (10, 0) {$\delta$};
 
-Exploring the previous example a bit more, by highlighting a rooted subspace of $\A$ we see that the image of that subspace is rooted in the image of $\A$ in $\C$.
+                \node [scale=3] (Q) at (12, -6) {$\C$};
+                \node [style=site, fill=blue!20] (W) at (-4, -6) {$W$};
+                \node [style=site, draw=red, line width=1.5] (X) at (0, -6) {$X$};
+                \node [style=site, draw=red, line width=1.5] (Y) at (4, -6) {$Y$};
+                \node [style=site, draw=ForestGreen] (Z) at (8, -6) {$Z$};
+                \node [style=transition] (tau5) at (-2, -6) {$\phi$};
+                \node [style=transition, draw=red, line width=1.5] (tau6) at (2, -6) {$\chi$};
+                \node [style=transition, draw=ForestGreen] (tau7) at (6, -6) {$\psi$};
+                \node [style=transition, draw=ForestGreen] (tau8) at (10, -6) {$\omega$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow, draw=red, line width=1.5, bend right=15] (A) to (tau1);
+                \draw [style=arrow, draw=red, line width=1.5, bend left=15] (A) to (tau1);
+                \draw [style=arrow, draw=red, line width=1.5, bend right=15] (A) to (tau2);
+                \draw [style=arrow, draw=red, line width=1.5] (tau1) to (AA);
+                \draw [style=arrow, draw=red, line width=1.5] (B) to (tau2);
+                \draw [style=arrow, draw=red, line width=1.5] (tau2) to (AB);
+                \draw [style=arrow, draw=gray!80] (AA) to (tau3);
+                \draw [style=arrow, draw=gray!80] (AB) to (tau3);
+                \draw [style=arrow, draw=gray!80, bend left=30] (C) to (tau3);
+                \draw [style=arrow, draw=gray!80] (tau3) to (AAAB);
+                \draw [style=arrow, draw=gray!80, bend left=30] (tau3) to (C);
+                \draw [style=arrow, draw=gray!80] (AAAB) to (tau4);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau4) to (A);
+                \draw [style=arrow, draw=gray!80, bend right=30] (tau4) to (AA);
+                \draw [style=arrow, draw=gray!80, bend left=40] (tau4) to (B);
 
-\TODO{Example Figure}
+                \draw [style=arrow, draw=gray!80, bend left=15] (W) to (tau5);
+                \draw [style=arrow, draw=gray!80, bend right=15] (W) to (tau5);
+                \draw [style=arrow, draw=gray!80, bend left=15] (tau5) to (X);
+                \draw [style=arrow, draw=gray!80, bend right=15] (tau5) to (X);
+                \draw [style=arrow, draw=red, line width=1.5, bend left=15] (X) to (tau6);
+                \draw [style=arrow, draw=red, line width=1.5, bend right=15] (X) to (tau6);
+                \draw [style=arrow, draw=red, line width=1.5] (tau6) to (Y);
+                \draw [style=arrow, draw=ForestGreen, bend left=20] (Y) to (tau7);
+                \draw [style=arrow, draw=ForestGreen] (Y) to (tau7);
+                \draw [style=arrow, draw=ForestGreen, bend right=20] (Y) to (tau7);
+                \draw [style=arrow, draw=ForestGreen] (tau7) to (Z);
+                \draw [style=arrow, draw=ForestGreen, bend left=50] (tau7.south) to (Y.south);
+                \draw [style=arrow, draw=ForestGreen] (Z) to (tau8);
+                \draw [style=arrow, draw=ForestGreen, bend left=30] (tau8) to (X);
+                \draw [style=arrow, draw=ForestGreen, bend right=30] (tau8) to (X);
+                \draw [style=arrow, draw=ForestGreen, bend right=30] (tau8) to (Y);
 
+                \draw [style=sitemap, opacity=0.5,  bend right=30] (A) to (X);
+                \draw [style=sitemap, opacity=0.5,  bend right=30] (B) to (X);
+                \draw [style=sitemap, opacity=0.5,  bend right=30] (AA) to (Y);
+                \draw [style=sitemap, opacity=0.5,  bend right=30] (AB) to (Y);
+                \draw [style=sitemap, opacity=0.5,  bend right=30] (C) to (Y);
+                \draw [style=sitemap, opacity=0.5,  bend right=30] (AAAB) to (Z);
+                \draw [style=transitionmap, opacity=0.5,  bend right=30] (tau1) to (tau6);
+                \draw [style=transitionmap, opacity=0.5,  bend right=30] (tau2) to (tau6);
+                \draw [style=transitionmap, opacity=0.5,  bend right=30] (tau3) to (tau7);
+                \draw [style=transitionmap, opacity=0.5,  bend right=30] (tau4) to (tau8);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
 This too will always be the case: the image of a rooted subspace will always be rooted in the image.
 \begin{theorem}\label{thm:rooted-image}
     Let $A$ be an assembly space, $Z \subseteq A$ a rooted assembly subspace, and $f : A \rightarrow B$ an assembly map.
@@ -1511,18 +1578,175 @@ It does and is in fact unique.
     \TODO{Complete: likely requires Zorn's lemma, but maybe not...}
 \end{proof}
 
-To conclude this section, we present the assembly index of every site of in our ligation model $\A$ together with a minimal, rooted assembly subspace containing that site.
+The assembly index, as we have defined it, is dependent on the choice of generating set.
+To make this point clear, we will first consider the example assembly space $\A$ and present the assembly index and a representative minimal assembly subspace for each site.
+\begin{center}
+    \scalebox{0.6}{
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [scale=3] (P) at (1, 9) {$\A$};
+                \node [style=site, fill=blue!20] (A) at (0, 7.4) {$A$};
+                \node [style=site, fill=blue!20] (B) at (0, 5.8) {$B$};
+                \node [style=site, fill=blue!20] (C) at (6, 5) {$C$};
+                \node [style=site] (AA) at (4, 7.4) {$AA$};
+                \node [style=site] (AB) at (4, 5.8) {$AB$};
+                \node [style=site] (AAAB) at (8, 6.6) {$AAAB$};
+                \node [style=transition] (alpha) at (2, 7.4) {$\alpha$};
+                \node [style=transition] (beta) at (2, 5.8) {$\beta$};
+                \node [style=transition] (gamma) at (6, 6.6) {$\gamma$};
+                \node [style=transition] (delta) at (10, 6.6) {$\delta$};
 
-\TODO{Complete Figure}
+                \node [style=site, fill=blue!20] (A0) at (0, 0) {$A$};
+                \node [scale=2] at (0, -2) {$c_\A(A) = 0$};
 
-In the next section, we will consider methods for bounding the assembly index of a site.
+                \node [style=site, fill=blue!20] (B1) at (4, 0) {$B$};
+                \node [scale=2] at (4, -2) {$c_\A(B) = 0$};
 
-\subsection{Computability of and Bounds on the Assembly Index}\label{subsec:assembly-index-bounds}
+                \node [style=site, fill=blue!20] (C2) at (8, 0) {$C$};
+                \node [scale=2] at (8, -2) {$c_\A(C) = 0$};
 
-The first task, when presented with an assembly space, is to determine the assembly index of the sites in the space.
+                \node [style=site, fill=blue!20] (A3) at (12, 0) {$A$};
+                \node [style=transition] (alpha3) at (12, 2) {$\alpha$};
+                \node [style=site] (AA3) at (12, 4) {$AA$};
+                \node [scale=2] at (12, -2) {$c_\A(AA) = 1$};
+
+                \node [style=site, fill=blue!20] (A4) at (16, 0) {$A$};
+                \node [style=site, fill=blue!20] (B4) at (17.6, 0) {$B$};
+                \node [style=transition] (beta4) at (16.8, 2) {$\beta$};
+                \node [style=site] (AB4) at (16.8, 4) {$AB$};
+                \node [scale=2] at (16.8, -2) {$c_\A(AB) = 1$};
+
+                \node [style=site, fill=blue!20] (A5) at (21.6, 0) {$A$};
+                \node [style=site, fill=blue!20] (B5) at (23.2, 0) {$B$};
+                \node [style=transition] (alpha5) at (21.6, 2) {$\alpha$};
+                \node [style=transition] (beta5) at (23.2, 2) {$\beta$};
+                \node [style=site] (AA5) at (21.6, 4) {$AA$};
+                \node [style=site] (AB5) at (23.2, 4) {$AB$};
+                \node [style=site, fill=blue!20] (C5) at (24, 6) {$C$};
+                \node [style=transition] (gamma5) at (22.4, 6) {$\gamma$};
+                \node [style=site] (AAAB5) at (22.4, 8) {$AAAB$};
+                \node [scale=2] at (22.4, -2) {$c_\A(AAAB) = 3$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow, bend right=15] (A) to (alpha);
+                \draw [style=arrow, bend left=15] (A) to (alpha);
+                \draw [style=arrow] (alpha) to (AA);
+                \draw [style=arrow, bend right=15] (A) to (beta);
+                \draw [style=arrow] (B) to (beta);
+                \draw [style=arrow] (beta) to (AB);
+                \draw [style=arrow] (AA) to (gamma);
+                \draw [style=arrow] (AB) to (gamma);
+                \draw [style=arrow, bend left=30] (C) to (gamma);
+                \draw [style=arrow, bend left=30] (gamma) to (C);
+                \draw [style=arrow] (gamma) to (AAAB);
+                \draw [style=arrow] (AAAB) to (delta);
+                \draw [style=arrow, bend right=30] (delta) to (A);
+                \draw [style=arrow, bend right=30] (delta) to (AA);
+                \draw [style=arrow, bend left=40] (delta) to (B);
+
+                \draw [style=arrow, bend left=15] (A3) to (alpha3);
+                \draw [style=arrow, bend right=15] (A3) to (alpha3);
+                \draw [style=arrow] (alpha3) to (AA3);
+
+                \draw [style=arrow] (A4) to (beta4);
+                \draw [style=arrow] (B4) to (beta4);
+                \draw [style=arrow] (beta4) to (AB4);
+
+                \draw [style=arrow, bend left=15] (A5) to (alpha5);
+                \draw [style=arrow, bend right=15] (A5) to (alpha5);
+                \draw [style=arrow] (alpha5) to (AA5);
+                \draw [style=arrow, bend right=15] (A5) to (beta5);
+                \draw [style=arrow] (B5) to (beta5);
+                \draw [style=arrow] (beta5) to (AB5);
+                \draw [style=arrow] (AA5) to (gamma5);
+                \draw [style=arrow] (AB5) to (gamma5);
+                \draw [style=arrow, bend left=30] (C5) to (gamma5);
+                \draw [style=arrow, bend left=30] (gamma5) to (C5);
+                \draw [style=arrow] (gamma5) to (AAAB5);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
+However, if we were to have chosen a different generating set, say $\{C, AAAB\}$, while retaining the same underlying Petri net the results would have been quite different.
+\begin{center}
+    \scalebox{0.6}{
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [scale=3] (P) at (1, 10.2) {$\A'$};
+                \node [style=site, fill=blue!20] (AAAB) at (0, 7.8) {$AAAB$};
+                \node [style=transition] (delta) at (2, 7.8) {$\delta$};
+                \node [style=site] (A) at (4, 8.6) {$A$};
+                \node [style=site] (B) at (4, 7.0) {$B$};
+                \node [style=transition] (alpha) at (6, 8.6) {$\alpha$};
+                \node [style=transition] (beta) at (6, 7.0) {$\beta$};
+                \node [style=site] (AA) at (8, 8.6) {$AA$};
+                \node [style=site] (AB) at (8, 7.0) {$AB$};
+                \node [style=site, fill=blue!20] (C) at (10, 9.4) {$C$};
+                \node [style=transition] (gamma) at (10, 7.8) {$\gamma$};
+
+                \node [style=site, fill=blue!20] (AAAB0) at (0, 0) {$AAAB$};
+                \node [scale=2] at (0, -2) {$c_{\A'}(AAAB) = 0$};
+
+                \node [style=site, fill=blue!20] (C1) at (6, 0) {$C$};
+                \node [scale=2] at (6, -2) {$c_{\A'}(C) = 0$};
+
+                \node [style=site, fill=blue!20] (AAAB2) at (13.6, 0) {$AAAB$};
+                \node [style=transition] (delta2) at (13.6, 2) {$\delta$};
+                \node [style=site] (A2) at (12, 4) {$A$};
+                \node [style=site] (B2) at (13.6, 4) {$B$};
+                \node [style=site] (AA2) at (15.2, 4) {$AA$};
+                \node [scale=2] at (13.6, -2) {$c_{\A'}(A) = c_{\A'}(B) = c_{\A'}(AA) = 1$};
+
+                \node [style=site, fill=blue!20] (AAAB3) at (22, 0) {$AAAB$};
+                \node [style=transition] (delta3) at (22, 2) {$\delta$};
+                \node [style=site] (A3) at (21.2, 4) {$A$};
+                \node [style=site] (B3) at (22.8, 4) {$B$};
+                \node [style=site] (AA3) at (23.6, 2) {$AA$};
+                \node [style=transition] (beta3) at (22, 6) {$\beta$};
+                \node [style=site] (AB3) at (22, 8) {$AB$};
+                \node [scale=2] at (22, -2) {$c_{\A'}(AB) = 2$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow] (AAAB) to (delta);
+                \draw [style=arrow] (delta) to (A);
+                \draw [style=arrow, bend left=40] (delta.north) to (AA);
+                \draw [style=arrow] (delta) to (B);
+                \draw [style=arrow, bend right=15] (A) to (alpha);
+                \draw [style=arrow, bend left=15] (A) to (alpha);
+                \draw [style=arrow] (alpha) to (AA);
+                \draw [style=arrow, bend right=15] (A) to (beta);
+                \draw [style=arrow] (B) to (beta);
+                \draw [style=arrow] (beta) to (AB);
+                \draw [style=arrow] (AA) to (gamma);
+                \draw [style=arrow] (AB) to (gamma);
+                \draw [style=arrow, bend right=30] (C) to (gamma);
+                \draw [style=arrow, bend right=30] (gamma) to (C);
+                \draw [style=arrow, bend left=40] (gamma.south) to (AAAB);
+
+                \draw [style=arrow] (AAAB2) to (delta2);
+                \draw [style=arrow] (delta2) to (AA2);
+                \draw [style=arrow] (delta2) to (A2);
+                \draw [style=arrow] (delta2) to (B2);
+
+                \draw [style=arrow] (AAAB3) to (delta3);
+                \draw [style=arrow] (delta3) to (A3);
+                \draw [style=arrow] (delta3) to (B3);
+                \draw [style=arrow] (delta3) to (AA3);
+                \draw [style=arrow] (A3) to (beta3);
+                \draw [style=arrow] (B3) to (beta3);
+                \draw [style=arrow] (beta3) to (AB3);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
+While this may seem, at first glance, to be undesirable it captures a very important point about the assembly process: the materials that you start with greatly influence how difficult, complex or costly assembling a given object may be.
+The cases of interest in this work presume that we being with only ``simple" objects from which we aim to build more ``complex" objects.
+However, the formalism, in and of itself, it far more general than this.
+
+We now turn our attention to the task of determining the assembly index of an object.
 In practical terms, this requires an algorithm for computing the assembly index relative to some space.
 In this work, we do not present a general algorithm to do so, though a simple depth-first search of the space may suffice in some cases.
-Rather, we first show that the assembly index is in fact computable.
+Rather, we first show that the assembly index is in fact computable, and subsequently establish methods of bounding the assembly index in cases where direct calculation is infeasible.
 \begin{theorem}\label{thm:computable}
     If $A$ is an assembly space and $x \in S(A)$ is finite, then $c(x)$ is computable.
 \end{theorem}
@@ -1542,7 +1766,69 @@ The first of the bounds we present is an upper bound determined by computing the
     \TODO{Complete}
 \end{proof}
 
-\TODO{Example and Figure}
+The the remaining examples, we will depart from using $\A$ since large enough to demonstrate the desired points.
+Consider the assembly space and subspace depicted below:
+\begin{center}
+    \scalebox{0.6}{
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [style=site, fill=blue!20] (A) at (0, 0) {$A$};
+                \node [style=site] (B) at (4, 0) {$B$};
+                \node [style=site] (C) at (8, 0) {$C$};
+                \node [style=site] (D) at (12, 0) {$D$};
+                \node [style=site] (E) at (16, 0) {$E$};
+                \node [style=site] (F) at (20, 0) {$F$};
+                \node [style=transition] (a) at (2, 0) {$\alpha$};
+                \node [style=transition] (b) at (6, 0) {$\beta$};
+                \node [style=transition] (c) at (10, 0) {$\gamma$};
+                \node [style=transition] (d) at (14, 0) {$\delta$};
+                \node [style=transition] (e) at (18, 0) {$\epsilon$};
+                \node [style=transition] (f) at (8, 2) {$\zeta$};
+                \node [style=transition] (g) at (12, -4) {$\eta$};
+                \node [style=transition] (h) at (16, -3) {$\theta$};
+                \node [style=transition] (i) at (14, 3) {$\iota$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=arrow, bend left=25, draw=gray!70] (B) to (f);
+                \draw [style=arrow, bend left=10, draw=gray!70] (B) to (f);
+                \draw [style=arrow, bend left=25, draw=gray!70] (f) to (D);
+
+                \draw [style=arrow, bend right=10, draw=gray!80] (B) to (g);
+                \draw [style=arrow, bend right=10, draw=gray!80] (C) to (g);
+                \draw [style=arrow, bend right=10, draw=gray!80] (g) to (E);
+
+                \draw [style=arrow, bend right=10, draw=gray!90] (B) to (h);
+                \draw [style=arrow, bend right=10, draw=gray!90] (D) to (h);
+                \draw [style=arrow, bend right=10, draw=gray!90] (h) to (F);
+
+                \draw [style=arrow, bend left=25, draw=gray!80] (C) to (i);
+                \draw [style=arrow, bend left=10, draw=gray!80] (C) to (i);
+                \draw [style=arrow, bend left=25, draw=gray!80] (i) to (F);
+
+                \draw [style=arrow, draw=red, bend left=15] (A) to (a);
+                \draw [style=arrow, draw=red, bend right=15] (A) to (a);
+                \draw [style=arrow, draw=red, bend right=30] (A) to (b);
+                \draw [style=arrow, draw=red, bend right=30] (A) to (c);
+                \draw [style=arrow, draw=red, bend right=30] (A) to (d);
+                \draw [style=arrow, draw=red, bend right=30] (A) to (e);
+                \draw [style=arrow, draw=red] (a) to (B);
+                \draw [style=arrow, draw=red] (B) to (b);
+                \draw [style=arrow, draw=red] (b) to (C);
+                \draw [style=arrow, draw=red] (C) to (c);
+                \draw [style=arrow, draw=red] (c) to (D);
+                \draw [style=arrow, draw=red] (D) to (d);
+                \draw [style=arrow, draw=red] (d) to (E);
+                \draw [style=arrow, draw=red] (E) to (e);
+                \draw [style=arrow, draw=red] (e) to (F);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
+The edges associated with an assembly subspace are highlighed in red.
+If we consider the site $F$ in the context of the space, as a whole, the assembly index is $c(F) = 3$.
+There are two minimal, rooted assembly subspaces with that size which contain either $\alpha$, $\zeta$ and $\eta$; or $\alpha$, $\beta$ and $\theta$; as transitions.
+However, if we've restricted ourselves only the the subspace, then $\zeta$, $\eta$ and $\theta$ are inadmissible.
+As such, the assembly index in the subspace is $5$.
 
 The second bound we establish is a lower bound determined by mapping the space in question into a space within which computing the assembly index may be simpler.
 \begin{theorem}\label{thm:image-lower-bound}
@@ -1553,10 +1839,122 @@ The second bound we establish is a lower bound determined by mapping the space i
     \TODO{Complete}
 \end{proof}
 
-\TODO{Example and Figure}
+For this final example, we will consider a binary string formation process wherein any two strings can be concatentated to form another, and we choose $\{0, 1\}$ as the generating set (in fact the only choice).
+This will be referred to as space $\mathcal{B}$.
+We will also consider a secondary space consisting of the natural numbers wherein any two integers can be added together to for another, and we choose $\{1\}$ as the generating set (again, the only choice).
+This space will be referred to as $\mathcal{N}$.
+There is a canonical map $f : \mathcal{B} \rightarrow \mathcal{N}$ such that $S(f)(x) = \textrm{length}(x)$, and the transition map follows naturally.
+In this example, we are particularly interested in the assembly index of $1100$ in $\mathcal{B}$.
+The site $1100$ maps under $f$ to $4$ in $\mathcal{N}$.
+Depicted below a restricted view of $\mathcal{B}$, $\mathcal{N}$ and $f$ wherein we only consider sites which might be used to produced $1100$.
+\begin{center}
+    \scalebox{0.6}{
+        \begin{tikzpicture}
+            \begin{pgfonlayer}{nodelayer}
+                \node [scale=3] at (15, 12) {$\mathcal{N}$};
+                \node [style=site, fill=blue!20] (A) at (13, 0) {$1$};
+                \node [style=site] (B) at (13, 4) {$2$};
+                \node [style=site] (C) at (13, 8) {$3$};
+                \node [style=site] (D) at (13, 12) {$4$};
+                \node [style=transition, scale=0.5] (a) at (13, 2) {};
+                \node [style=transition, scale=0.5] (b) at (13, 6) {};
+                \node [style=transition, scale=0.5] (c) at (13, 10) {};
+                \node [style=transition, scale=0.5] (d) at (11, 8) {};
+
+                \node [scale=3] at (-2, 14) {$\mathcal{B}$};
+                \node [style=site, fill=blue!20] (0) at (-2, 0) {$0$};
+                \node [style=site, fill=blue!20] (1) at ( 2, 0) {$1$};
+                \node [style=transition, scale=0.5] (a00) at (-3, 2) {};
+                \node [style=transition, scale=0.5] (a10) at ( 0, 2) {};
+                \node [style=transition, scale=0.5] (a11) at ( 3, 2) {};
+                \node [style=site] (00) at (-4, 4) {$00$};
+                \node [style=site] (10) at ( 0, 4) {$10$};
+                \node [style=site] (11) at ( 4, 4) {$11$};
+                \node [style=transition, scale=0.5] (a100a) at (-3, 6) {};
+                \node [style=transition, scale=0.5] (a100b) at (-1, 6) {};
+                \node [style=transition, scale=0.5] (a110a) at ( 1, 6) {};
+                \node [style=transition, scale=0.5] (a110b) at ( 3, 6) {};
+                \node [style=site] (100) at (-2, 8) {$100$};
+                \node [style=site] (110) at ( 2, 8) {$110$};
+                \node [style=transition, scale=0.5] (a1100a) at (-1, 10) {};
+                \node [style=transition, scale=0.5] (a1100b) at ( 1, 10) {};
+                \node [style=transition, scale=0.5] (a1100c) at ( 0, 14) {};
+                \node [style=site] (1100) at (0, 12) {$1100$};
+            \end{pgfonlayer}
+            \begin{pgfonlayer}{edgelayer}
+                \draw [style=sitemap, opacity=0.5, bend left=15] (0) to (A);
+                \draw [style=sitemap, opacity=0.5, bend left=15] (1) to (A);
+                \draw [style=sitemap, opacity=0.5, bend left=15] (00) to (B);
+                \draw [style=sitemap, opacity=0.5, bend left=15] (10) to (B);
+                \draw [style=sitemap, opacity=0.5, bend left=15] (11) to (B);
+                \draw [style=sitemap, opacity=0.5, bend left=15] (100) to (C);
+                \draw [style=sitemap, opacity=0.5, bend left=15] (110) to (C);
+                \draw [style=sitemap, opacity=0.5, bend left=15] (1100) to (D);
+                \draw [style=transitionmap, opacity=0.5, bend left=15] (a00) to (a);
+                \draw [style=transitionmap, opacity=0.5, bend left=15] (a10) to (a);
+                \draw [style=transitionmap, opacity=0.5, bend left=15] (a11) to (a);
+                \draw [style=transitionmap, opacity=0.5, bend left=15] (a100a) to (b);
+                \draw [style=transitionmap, opacity=0.5, bend left=15] (a100b) to (b);
+                \draw [style=transitionmap, opacity=0.5, bend left=15] (a110a) to (b);
+                \draw [style=transitionmap, opacity=0.5, bend left=15] (a110b) to (b);
+                \draw [style=transitionmap, opacity=0.5, bend left=15] (a1100a) to (c);
+                \draw [style=transitionmap, opacity=0.5, bend left=15] (a1100b) to (c);
+                \draw [style=transitionmap, opacity=0.5] (a1100c) to (d);
+
+                \draw [style=arrow, draw=ForestGreen, line width=1.5, bend left=15] (A) to (a);
+                \draw [style=arrow, draw=ForestGreen, line width=1.5, bend right=15] (A) to (a);
+                \draw [style=arrow, draw=gray!80, bend right=30] (A) to (b);
+                \draw [style=arrow, draw=gray!80, bend right=30] (A) to (c);
+                \draw [style=arrow, draw=ForestGreen, line width=1.5] (a) to (B);
+                \draw [style=arrow, draw=gray!80] (B) to (b);
+                \draw [style=arrow, draw=gray!80] (b) to (C);
+                \draw [style=arrow, draw=gray!80] (C) to (c);
+                \draw [style=arrow, draw=gray!80] (c) to (D);
+                \draw [style=arrow, bend left=25, draw=ForestGreen, line width=1.5] (B) to (d);
+                \draw [style=arrow, bend left=10, draw=ForestGreen, line width=1.5] (B) to (d);
+                \draw [style=arrow, bend left=25, draw=ForestGreen, line width=1.5] (d) to (D);
+
+                \draw [style=arrow, draw=ForestGreen, line width=1.5, bend left=15] (0) to (a00);
+                \draw [style=arrow, draw=ForestGreen, line width=1.5, bend right=15] (0) to (a00);
+                \draw [style=arrow, draw=ForestGreen, line width=1.5] (0) to (a10);
+                \draw [style=arrow, draw=ForestGreen, line width=1.5, bend left=15] (1) to (a11);
+                \draw [style=arrow, draw=ForestGreen, line width=1.5, bend right=15] (1) to (a11);
+                \draw [style=arrow, draw=ForestGreen, line width=1.5] (1) to (a10);
+                \draw [style=arrow, draw=ForestGreen, line width=1.5] (a00) to (00);
+                \draw [style=arrow, draw=gray!80] (a10) to (10);
+                \draw [style=arrow, draw=ForestGreen, line width=1.5] (a11) to (11);
+                \draw [style=arrow, draw=gray!80] (00) to (a100a);
+                \draw [style=arrow, draw=gray!80] (10) to (a100b);
+                \draw [style=arrow, draw=gray!80] (10) to (a110a);
+                \draw [style=arrow, draw=gray!80] (11) to (a110b);
+                \draw [style=arrow, draw=gray!80, bend left=30] (1) to (a100a);
+                \draw [style=arrow, draw=gray!80, bend left=10] (0) to (a100b);
+                \draw [style=arrow, draw=gray!80, bend right=10] (1) to (a110a);
+                \draw [style=arrow, draw=gray!80, bend right=30] (0) to (a110b);
+                \draw [style=arrow, draw=gray!80] (a100a) to (100);
+                \draw [style=arrow, draw=gray!80] (a100b) to (100);
+                \draw [style=arrow, draw=gray!80] (a110a) to (110);
+                \draw [style=arrow, draw=gray!80] (a110b) to (110);
+                \draw [style=arrow, draw=gray!80] (100) to (a1100a);
+                \draw [style=arrow, draw=gray!80] (110) to (a1100b);
+                \draw [style=arrow, draw=gray!80, bend right=5] (1) to (a1100a);
+                \draw [style=arrow, draw=gray!80, bend left=5] (0) to (a1100b);
+                \draw [style=arrow, draw=gray!80] (a1100a) to (1100);
+                \draw [style=arrow, draw=gray!80] (a1100b) to (1100);
+                \draw [style=arrow, draw=ForestGreen, line width=1.5, bend left=15] (00) to (a1100c);
+                \draw [style=arrow, draw=ForestGreen, line width=1.5, bend right=15] (11) to (a1100c);
+                \draw [style=arrow, draw=ForestGreen, line width=1.5] (a1100c) to (1100);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+    }
+\end{center}
+Minimal, rooted subspaces of minimum size are highlighed in green in both cases.
+It is easy to see that the assembly index of $1100$ is $c_{\mathcal{B}}(1100) = 3$ while the index of $4$ is $c_{\mathcal{N}}(4) = 2$, so of course $c_{\mathcal{N}}(4) \le c_{\mathcal{B}}(1100)$.
+The only reason these two indices are directly comparable is that $\mathcal{B}$ maps onto $\mathcal{N}$, and as such the entire space $\mathcal{N}$ is the image of $\mathcal{B}$.
+If this were not the case, special care would have to be taken to ensure that only transitions in $f(\mathcal{B})$ were considered.
 
 Our final bound is a special case of the lower bound derived from an assembly map; however, it represents an upper bound.
-Given an assembly space with no directed loops, which we refer to as \textbf{acyclic}, we can form an analogous assembly space which has a tree-like structure by duplicating sites that participate in more than one transition.
+Given an assembly space with no directed loops, which we refer to as \textbf{acyclic}, we can form an analogous assembly space which has a tree-like structure by duplicating sites that participate in more than one pathway.
 We refer to such a space as the \textit{split-branch} representation of the space.
 \begin{definition}\label{def:split-branch}
     Let $A$ be an acyclic assembly space.
