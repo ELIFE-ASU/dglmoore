@@ -1,0 +1,216 @@
+\documentclass[letterpaper]{article}
+
+\usepackage{natbib,alifeconf}
+\usepackage{amsmath,amssymb}
+\usepackage{blindtext}
+\usepackage{hyperref}
+\usepackage[caption=false]{subfig}
+\usepackage{cleveref}
+\usepackage{enumitem}
+\usepackage[font=small]{caption}
+\usepackage{xcolor}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{xfrac}
+
+\newcommand{\BA}{Barab\'{a}si-Albert~}
+\newcommand{\BAbox}{\mbox{\BA}}
+\newcommand{\ER}{Erd\H{o}s-R\'{e}nyi~}
+\newcommand{\ERbox}{\mbox{\ER}}
+
+\setlength{\textfloatsep}{0pt plus 0.0pt minus 2.0pt}
+\makeatletter
+\g@addto@macro\normalsize{%
+  \setlength\abovedisplayskip{5pt}
+  \setlength\belowdisplayskip{5pt}
+  \setlength\abovedisplayshortskip{5pt}
+  \setlength\belowdisplayshortskip{5pt}
+}
+\makeatother
+
+\title{Inferring a Graph's Topology from Games Played on It}
+\author{Douglas G. Moore and Sara I. Walker\\ \mbox{} \\
+BEYOND Center, Arizona State University, Tempe, AZ 85281\\
+douglas.g.moore@asu.edu\\
+sara.i.walker@asu.edu}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We consider an iterated model of agents playing a two-player game on a graph. The agents change their strategies as the game progresses based on anticipated payoffs. Using only the time series of the agents' strategies, we determine the pair-wise mutual information between all agents in the graph, and use these values as a predictors of the graph's topology. From this, we assess the influence of various model parameters on the effectiveness of mutual information at recovering the actual causal structure. It is found that the degree to which the functional connectivity reflects the actual causal structure of the graph strongly depends on which game is being played and how the agents are changing their strategies. Further, there is evidence that the edge density of the graph may also have some impact on the accuracy of the inferred network. This approach allows us to better connect the dynamics of the systems under study with the difference in their functional and actual connectivity, and has broad implications for the interpretation and application of information-based network inference. The methods and analyses described can be generalized and applied to other types of network models.
+\end{abstract}
+
+\section{Introduction}\label{sec:intro}
+
+There is a wealth of literature on using information-theoretic tools to infer the network topology of collections of interacting random variables, particularly in neuroscience \citep{Ito2011-yi, Vicente2011-mj,Lizier2012-nf,Ver_Steeg2012-sl,Banerji2013-wd,Sun2014-ib,Sun2015-xs}. In many of these works, the phrase ``functional connectivity'' is used to underscore the fact that the actual causal interactions are not always readily inferred from the dynamics of the variables. This is often considered yet another example of the inequivalence of correlation and causation. While it appears that functional connectivity is a useful construct in neuroscience, that may not be the case is other fields. However, it is interesting to explore the conditions under which the actual and functional connectivity may coincide.
+
+We consider a somewhat unorthodox model system to explore whether and when information-theoretic tools recapitulate the actual topology of a causal graph. Agents are situated on the vertices of a graph, and allowed to repeatedly play a two-player, two-strategy, symmetric game. In each round of the game, the agents may change their strategies based on their anticipated payoff. Treating the strategies of the agents as random variables in time, when can we confidently infer the actual connectivity of the graph? This model system was inspired by conversations with colleagues who explored the dynamics of games when agents' perception of which game they're playing is allowed to change \citep{Antonioni2018-cc}. Such a system is intrinsically interesting to consider, but it has value beyond that; namely in potential applications. Biologist have modeled interacting cells \citep{Hummert2014-gz}, organisms \citep{Smith_John_Maynard1979-hr, Smith1982-le, S_E_Riechert2003-bg, Nowak2004-rq} and even cancer \citep{Bach2001-vs,Gatenby2003-ha,Basanta2008-ta,Dingli2009-bd} as game-playing agents, and game theory has of course found innumerable applications in economics. In both cases, the strategies of the agents may be readily apparent, while the network itself is obscured. The ability to infer functional or actual connectivity based solely on the strategies could lead to more impactful methods of intervening on these systems.
+
+From a technical perspective, this model offers a number of useful features: the graph's topology can be varied, the rules the agents use to update their strategies can be changed, and the space of graphs is nicely parameterized by two bounded variables. Altogether, this provides a number of ways to tweak the system and observe changes in the efficacy of network inference. Further, because this model is a particular type of Boolean network, it seems reasonable that the results and methods herein could be extrapolated and applied to more generic settings.
+
+In this work, we describe the basic formalism, and present early results from simulations\footnote{All code used for these simulations is publicly available at \url{https://github.com/dglmoore/gomen}.}. We observe that the efficacy of the network reconstruction is dependent on the game the agents are playing, the rule they are using to update their strategies, and possibly the density of edges in the graph. We conclude with a number of possible future directions.
+
+\section{Methods}
+\label{sec:methods}
+
+Consider a finite collection of agents $\{A_1, \ldots, A_n\}$. Each agent $A_i$ is situated at a vertex $v_i$ of some \textit{simple}\footnote{\textit{Simple} here means an undirected graph with no self-loops and at most one edge between any two given vertices.} graph $G=(V,E)$ with vertices $V=\{1,\dots,n\}$ and edges ${E \subset V \times V}$. The agents then play some, two-player, two-strategy, symmetric game with each of their neighbors. We restrict the games to those characterized by a payoff matrix of the form
+\begin{equation}
+    \label{eq:game}
+    \mathcal{G} = \begin{array}{c|cc}
+      & 0 & 1 \\\hline
+    0 & 1 & S \\
+    1 & T & 0
+    \end{array}
+\end{equation}
+with $-1 \leq S \leq 1$ and $0 \leq T \leq 2$. The elements of this matrix $\mathcal{G}_{ab}$ specify the payoff received by the agent should they play strategy $a$ against an opponent playing strategy $b$. It is assumed throughout that all players are knowingly playing the same game, and that the game does not change. The strategy played by $A_i$ is denoted $s_i$ and can be either $0$ or $1$, sometimes referred to as \textit{cooperate} or \textit{defect}, respectively. The collection of strategies played by all of the agents is denoted $\bm{s} = (s_1,\ldots,s_n)$.
+
+The game is played in rounds starting with each agent's strategy selected uniformly at random. In each round, the agents play with their neighbors $N_i = \{j~|~(i,j) \in E\}$ and accumulate payoff
+\begin{equation}
+    P_i(s_1, \ldots, s_n) = \sum_{j \in N_i} \mathcal{G}_{{s_i}{s_j}}
+\end{equation}
+We write this as $P_i(\bm{s})$ for compactness. Since the agents know which game they are playing, they may also consider the \textit{counterfactual} payoff they would have received had they played their alternative strategy $\hat{s}_i$:
+\begin{equation}
+    \bar{P}_i(\bm{s}) = P_i(s_1, \ldots, \hat{s}_i, \ldots, s_n) = \sum_{j \in N_i} \mathcal{G}_{{\hat{s}_i}{s_j}}.
+\end{equation}
+Based on the difference between counterfactual payoffs ${\Delta P_i(\bm{s})=\bar{P}_i(\bm{s})-P_i(\bm{s})}$, each agent may stochastically change its strategy for the next round with probability
+\begin{equation}
+    \label{eq:sigmoid}
+    q_i(\beta; \bm{s}) = \frac{1}{1 + \exp{\left(-\beta \Delta P_i(\bm{s})\right)}},\quad \beta > 0.
+\end{equation}
+In words, agent $A_i$ will use strategy $\hat{s}_i$ in the next round with probability $q_i(\beta; \bm{s})$. All agents then synchronously update their strategies, and a new round is ready to begin. This process is iterated $t$ times, and a time series of strategies is generated $\{\bm{s}_0, \bm{s}_1, \ldots, \bm{s}_t\}$.
+
+The outstanding question is to what degree this time series can be used to infer the topology of the underlying graph. A number of information-theoretic tools have been proposed for assessing connectivity in similar situations. The most popular, particularly among neuroscientists, is transfer entropy or some variation thereof \citep{Ito2011-yi, Vicente2011-mj, Orlandi2014-bh}. However, in this initial work we decided to consider a simpler measure. We start with
+\begin{equation}
+    I(s_i^+,s_j) = \sum_{s_i^+,s_j}p(s_i^+,s_j)\log{\frac{p(s_i^+,s_j)}{p(s_i^+)p(s_j)}},
+\end{equation}
+the mutual information between agent $A_i$'s next strategy $s_i^+$ and agent $A_j$'s current strategy $s_j$. Since we know that edges of the graph are undirected, we construct a measure that is symmetric in the agents:
+\begin{equation}
+    \phi_{ij} = \frac{1}{2}(I(s_i^+, s_j) + I(s_j^+,s_i)).
+\end{equation}
+This value is computed for every pair of distinct agents, $i \ne j$ for $i,j \in V$, and used as a predictor for the existence of an edge in the graph. If $\phi_{ij} \geq \theta$ for some threshold $0 \leq \theta \leq 1$, we predict that the edge $(i,j)$ exists, and that it otherwise does not. In a binary classification process such as this, one method of characterizing the effectiveness of the classification is in terms of the true-positive rate (TPR) and false-positive rate (FPR)
+\begin{equation}
+    TPR = \frac{TP}{R} \qquad and \qquad FPR = \frac{FP}{F}.
+\end{equation}
+Here the $TPR$ is the ratio of the number of edges \textit{correctly} predicted to exist ($TP$) and the actual number of existent edges ($R$), while the $FPR$ is the ratio of the number of edges \textit{incorrectly} predicted to exist ($FP$) and the number of possible edges which \textit{do not} exist ($F$). The value of the threshold can be varied continuously over its range $\theta \in [0,1]$, yielding a receiver operating characteristic (ROC) curve in the \mbox{$TPR$-$FPR$} space (\cref{fig:rocs}). The area under the curve (AUC) acts as a summary statistic for the quality of the classification. A predictor which is no better than uniformly random will yield a perfect diagonal with $AUC=0.5$. Better predictors will yield curves which deviate from the diagonal with $|AUC - 0.5| \gg 0$. We consider predictors with $AUC \ll 0.5$ to be of high-quality because the ROC curve reflects over the diagonal if we change the classification criterion from $\phi_{i,j} \geq \theta$ to $\phi_{ij} \leq \theta$. In other words, the predictor was good, but we were using the wrong criterion. It is important to note that this analysis does not tell us what the threshold $\theta$ should be, though in principle it can be determined. For now, it is sufficient to know only that such a threshold exists.
+
+\section{Results}\label{sec:results}
+
+\begin{figure}[!h]
+    \begin{tabular}{ccc}
+        \multicolumn{2}{c}{\BAbox} & \\
+        {\footnotesize (a)\quad$m=1$} & {\footnotesize (b)\quad$m=5$} & {\footnotesize (c)\quad Cycle} \\
+        \includegraphics[width=0.14\textwidth]{"topologies/ba1"} &
+        \includegraphics[width=0.14\textwidth]{"topologies/ba5"} &
+        \includegraphics[width=0.14\textwidth]{"topologies/cycle"} \\
+        \multicolumn{2}{c}{\ERbox} & \\
+        {\footnotesize (d)\quad$p=0.04$} & {\footnotesize (e)\quad$p=0.18$}& {\footnotesize (f)\quad Wheel} \\
+        \includegraphics[width=0.14\textwidth]{"topologies/er0.04"} &
+        \includegraphics[width=0.14\textwidth]{"topologies/er0.18"} &
+        \includegraphics[width=0.14\textwidth]{"topologies/wheel"} \\
+        \multicolumn{3}{c}{\footnotesize (g)\quad Lattice} \\
+        \multicolumn{3}{c}{\includegraphics[width=0.14\textwidth]{"topologies/lattice"}} \\
+    \end{tabular}
+    \caption{\label{fig:topologies}
+    Samples of the topologies considered. The \BA (a-b) and \ER graphs (d-e) are generated non-deterministically according to edge density parameters $m$ and $p$ respectively. The cycle (c), wheel (f) and $5 \times 10$ lattice (g) topologies have only one representative each. \\}
+\end{figure}
+
+We were interested in the relationship between the form of the game $\mathcal{G}$, the topology of the graph $G$, and the rule parameter $\beta$. To explore this, we considered $50$ agents playing on graphs with one of 5 types of topology: \mbox{a.) \BAbox} graphs, \mbox{b.) \ERbox} graphs, and the \mbox{c.) cycle}, \mbox{d.) wheel} and \mbox{e.) lattice} topologies. The \BAbox model \citep{Barabasi1999-lx} generates random graphs using preferential attachment; as new nodes are iteratively added to the graph they are randomly connected to $m$ existent nodes with a bias toward those with higher degree; we considered only $m\in\{1,5\}$ in this work. The \ERbox model \citep{Erdos1959-bd} starts with the full set of nodes and adds an edge between each pair of distinct nodes with probability $p$. We chose $p\in\{0.04,0.18\}$ to ensure that the edge density of the \BAbox and \ERbox graphs are comparable. The cycle, wheel and $5 \times 10$ non-periodic lattice topologies, on the other hand, are non-random topologies, and are depicted in \ref{fig:topologies}.
+
+Once the graphs were constructed, we considered all games of the form \cref{eq:game} with $S \in \{-1.0, -0.9, \ldots, 1.0\}$ and $T \in \{0.0, 0.1, \ldots, 2.0\}$. We then generated $100$ graphs according to each of the parameters above for each combination of game and topology. For the cycle, wheel and lattice topologies, there is only one graph (up to isomorphism) for a given number of vertices, so we reran the simulations on the same topology $100$ times. We simulated $10$ rounds of play starting from $100$ initial conditions selected uniformly at random. The initial conditions were generated independently for each simulation, i.e. each combination of game, graph and rule parameter. The time series of strategies in each simulation of $10$ rounds with $100$ replicates was used to generate an ROC curve. The $100$ ROC curves for each game and topology combination (one for each randomly generated graph) were point-wise averaged to yield a mean ROC curve. Finally, the AUC was computed for each mean curve, and a scaled deviation of that value from the worst-case value of $0.5$:
+\begin{equation}
+    \label{eq:aucbar}
+    \overline{AUC} = 2|AUC - 0.5|
+\end{equation}
+was plotted as a heatmap on an $S$-$T$ plot (\cref{fig:ba}, \cref{fig:er} and \cref{fig:fixed}). Here $S$ and $T$ refer to the parameters which specify a game as in \cref{eq:game}. In other words, each point in the plot corresponds to a different game with the color roughly characterizing the effectiveness of $\phi_{ij}$ as a predictor for the existence of the edge $(i,j)$ in the graph.
+
+\begin{figure}[!t]
+    \begin{tabular}{cc}
+        {\footnotesize (a) Harmony} & {\footnotesize (b) Hawk-Dove} \\
+        \includegraphics[width=0.21\textwidth]{"ROC/h"} &
+        \includegraphics[width=0.21\textwidth]{"ROC/hd"} \\
+        {\footnotesize (c) Stag-Hunt} & {\footnotesize (d) Prisoner's Dilemma} \\
+        \includegraphics[width=0.21\textwidth]{"ROC/sh"} &
+        \includegraphics[width=0.21\textwidth]{"ROC/pd"}
+    \end{tabular}
+    \caption{\label{fig:rocs}
+    Receiver operating characteristic curves for four canonical games with $(T,S)$ parameterizations of (a) $(\sfrac{1}{2},\sfrac{1}{2})$, (b) $(\sfrac{3}{2},\sfrac{1}{2})$, (c) $(\sfrac{1}{2},\sfrac{-1}{2})$ and (d) $(\sfrac{3}{2},\sfrac{-1}{2})$ as played by $50$ agents on \BAbox graphs with $m=5$. In all cases, the agents employ a threshold function with rule parameter $\beta=1.0$. Each plot summarizes the results of simulations run on $100$ randomly generated graphs. The black curve is the point-wise mean of the $100$ resulting ROC curves, while the blue and orange curves are those with the greatest and least AUC, respectively. The dashed gray line represents the curve for a predictor which is no better than chance.\\}
+\end{figure}
+
+\section{Discussion}\label{sec:discussion}
+
+\begin{figure}[!t]
+    \begin{tabular}{cc}
+        {\footnotesize (a) $m=1,~\beta=1$} & {\footnotesize (b) $m=1,~\beta=10$} \\
+        \includegraphics[width=0.21\textwidth]{"heatmap/BarabasiAlbert_1_01"} &
+        \includegraphics[width=0.21\textwidth]{"heatmap/BarabasiAlbert_1_10"} \\
+        {\footnotesize (c) $m=5,~\beta=1$} & {\footnotesize (d) $m=5,~\beta=10$} \\
+        \includegraphics[width=0.21\textwidth]{"heatmap/BarabasiAlbert_5_01"} &
+        \includegraphics[width=0.21\textwidth]{"heatmap/BarabasiAlbert_5_10"}
+    \end{tabular}
+    \caption{\label{fig:ba}
+    $\overline{AUC}$ heatmaps for games played on \BA random graphs. Each row corresponds to a different connection parameter $m\in\{1,5\}$, while the columns refer to the rule parameter used by the agents $\beta\in\{1,10\}$. Each point in the plot corresponds to a different game parameterized as in \cref{eq:game} by $S$ and $T$. For each game, $100$ random graphs were selected and an average ROC curve was generated. The color represents how much the $AUC$ under the mean curve differs from the uniformly random predictor as in \cref{eq:aucbar}. \\}
+\end{figure}
+
+There are a number of notable features apparent in \cref{fig:ba}. The plots are roughly symmetric across their diagonals so that opposite quadrants have similar characteristics. The nice thing about these $S$-$T$ parameterization is that each of the quadrants corresponds to a common two-player, two-strategy, symmetric game. Counter-clockwise from the top-right quadrant, the games are \mbox{\textit{Hawk-Dove}}, \textit{Harmony}, \mbox{\textit{Stag-Hunt}} and \textit{Prisoner's Dilemma}. The interesting point to note is that the games opposite one another have the same number of pure-strategy Nash equilibria: Harmony and Prisoner's Dilemma each have one while \mbox{Hawk-Dove} and \mbox{Stag-Hunt} have two. On its face, this may not appear to be relevant to the problem of inferring the topology of the graph. However, the Nash equilibria play a crucial role given how the agents are updating their strategies: over time, the agents tend to settle on playing an equilibrium strategy. This process happens fairly quickly, typically within the \mbox{$10$ rounds} of play simulated in this study. In effect, the simulations of the Harmony and Prisoner's Dilemma reach equilibrium and remain there, though with some amount of noise induced by the agents' strategy update rule. However, the transition to equilibrium takes longer for \mbox{Hawk-Dove} and \mbox{Stag-Hunt} because they have two equilibria. The resulting time series then provides more information about the interactions between agents. One additional factor to consider here is that in the two-equilibrium games, it is possible for domains to form wherein agents in a given domain all play the same equilibrium strategy while agents in neighboring domains play a different strategy. The stability of these domains and the impact they have on the graph inference problem is something to be investigated in future work.
+
+One apparent problem with the above interpretation is it suggests that each of the four quadrants of the heatmap should be filled with the same $\overline{AUC}$ value, e.g. that every harmony game should have the same $\overline{AUC} \sim 0$. Of course, that is clearly not the case (\cref{fig:ba}(a)). Notice though that the classification improves as the game moves away from the negatively-slopped diagonal within the Harmony and Prisoner's Dilemma quadrants. This effect is due to the agents using a stochastic update rule which is dependent on the difference in payoffs of two strategies. As the game moves further from the negatively-slopped diagonal, the payoff differences make differentiating between the strategies more difficult in games where there is only one equilibrium. As a result, the agents spend more time in transition to equilibrium and consequently provide more information about the topology of the graph. If this analysis is correct, we should expect to see that increasing the rule parameter $\beta$ allows the agents to differentiate smaller payoff differences, and the quadrants of these heatmaps should tend to become more homogeneous. This is exactly what we see, particularly when edge density of the graphs is low (\cref{fig:ba}, \cref{fig:er} and \cref{fig:fixed}).
+
+\begin{figure}[!t]
+    \begin{tabular}{cc}
+        {\footnotesize (a) $p=0.04,~\beta=1$} & {\footnotesize (b) $p=0.04,~\beta=10$} \\
+        \includegraphics[width=0.21\textwidth]{"heatmap/ErdosRenyi_0.04_01"} &
+        \includegraphics[width=0.21\textwidth]{"heatmap/ErdosRenyi_0.04_10"} \\
+        {\footnotesize (c) $p=0.18,~\beta=1$} & {\footnotesize (d) $p=0.18,~\beta=10$} \\
+        \includegraphics[width=0.21\textwidth]{"heatmap/ErdosRenyi_0.18_01"} &
+        \includegraphics[width=0.21\textwidth]{"heatmap/ErdosRenyi_0.18_10"}
+    \end{tabular}
+    \caption{\label{fig:er}
+    $\overline{AUC}$ heatmaps for games played on \ER random graphs. Each row corresponds to a different connection probability $p\in\{0.04,0.18\}$, while the columns refer to the rule parameter used by the agents $\beta\in\{1,10\}$.\\}
+\end{figure}
+
+\begin{figure}[!h]
+    \begin{tabular}{cc}
+        {\footnotesize (a) Cycle, $\beta=1$} & {\footnotesize (b) Cycle, $\beta=10$} \\
+        \includegraphics[width=0.21\textwidth]{"heatmap/Cycle_01"} &
+        \includegraphics[width=0.21\textwidth]{"heatmap/Cycle_10"} \\
+        {\footnotesize (c) Lattice, $\beta=1$} & {\footnotesize (d) Lattice, $\beta=10$} \\
+        \includegraphics[width=0.21\textwidth]{"heatmap/Lattice_01"} &
+        \includegraphics[width=0.21\textwidth]{"heatmap/Lattice_10"} \\
+        {\footnotesize (e) Wheel, $\beta=1$} & {\footnotesize (f) Wheel, $\beta=10$} \\
+        \includegraphics[width=0.21\textwidth]{"heatmap/Wheel_01"} &
+        \includegraphics[width=0.21\textwidth]{"heatmap/Wheel_10"}
+    \end{tabular}
+    \caption{\label{fig:fixed}
+    $\overline{AUC}$ heatmaps for games played on the cycle, wheel and lattice topologies. Each row corresponds to a different topology while the columns refer to the rule parameter used by the agents $\beta\in\{1,10\}$. The edge density of the topologies increases down the column, i.e. the cycle has fewer edges than the lattice which has fewer edges than the wheel. \\}
+\end{figure}
+
+This brings us to the final factor involved in determining the efficacy of the classification: the edge density of the graph. When we compare, for example, the \BAbox graphs with $m=1$ (\cref{fig:ba}(a-b)) to the \ERbox graphs with $p=0.04$ (\cref{fig:er}(a-b)), we see almost identical structure in the $\overline{AUC}$ heatmaps. On average the \ERbox graphs have the same edge density to their \BAbox counterparts, i.e. they have about the same number of edges. The cycle graph (\cref{fig:fixed}(a-b)) has the same edge density to the \BAbox graph (\mbox{$m=1$}), and again we see almost identical heatmaps. By increasing the edge parameters for the \BAbox and \ERbox graphs, $m$ and $p$ respectively, we can see a similar comparison for yet denser graphs (\mbox{\cref{fig:ba}(c-d)} and \mbox{\cref{fig:er}(c-d)}). Again, the \BAbox ($m=5$) and \ERbox ($p=0.18$) graphs have similar edge density. What's more, the same qualitative change is seen for a single type of topology when the edge density changes. For example, comparing \cref{fig:ba}(a) to \ref{fig:ba}(c) or \cref{fig:er}(a) to \ref{fig:er}(c), we see fewer harmony and prisoner's dilemma games admit a faithful inference. The same phenomenon is observed in comparing cycles, lattices and wheels (\cref{fig:fixed}), which further supports the claim. The graphs have remarkably distinct topologies even with only $50$-nodes. For example, it is difficult to find any similarity between the \BAbox and cycle graphs other than edge density. However, it is entirely plausible that some other topological similarity between the graphs is causing these effects. Increasing the size of the graph should lead to increasingly divergent topological features. That would allow us to test this claim more fully.
+
+\section{Conclusion}\label{sec:conclusion}
+
+From all of these results, however incomplete, we can begin to draw some insight. It seems profoundly important that in order to be confident that the reconstructed topology -- that is the inferred causal structure of the system -- is the actual topology, an outside observer must be privy to the inner workings of the agents. What game are they playing, and how are they deciding which strategy to use next? Of course, the simple retort to this is that reconstructions are failing for the one-equilibrium games because the time series are not diverse enough. If the observer could assess this in advance, it might temper or bolster their confidence. However, it cannot be understated that the rule parameter plays some role in the diversity of the time series. If the rule is too stochastic, the time series will be riddled with \textit{biased} noise. One possibility is to use similar information-theoretic tools to infer which game is being played. It's been shown in previous work that dynamical agents operating under different rules show distinct patterns of information transfer \citep{Valentini2018-qb}. If the observer could first apply such a method to determine the game\footnote{It may not be necessary to know precisely which game is being played. Perhaps knowing the number of equilibria is sufficient?}, rule, and noise profile, they may be able to yield more faithful reconstructions of the topology.
+
+From here there are a number of avenues for further research. The mutual information is a somewhat simplistic measure for applications like this. We chose it in part because of this simplicity. Two alternative measures, for example, might be conditional mutual information (CMI) or transfer entropy (TE), \citep{Schreiber2000-ir}. In preliminary work, we briefly explored both. The conditional mutual information approach was problematic in that it required more substantial computational overhead than we had available at the time. One method of using CMI is to compute $I(s_i^+,s_j|\bm{s}_{ij})$ where $\bm{s}_{ij} = \{s_k | k \ne i, k \ne j\}$, that is to say condition the pair-wise mutual information on the strategies of all other agents. Since our graphs have $50$ nodes, that computation was infeasible using direct approaches. Alternative methods of computing CMI, such as the iterative approaches of \citep{Lizier2012-nf,Sun2015-xs}, may make it viable for future work. Transfer entropy is a special case of CMI; it would condition on the target agent's previous strategies. Both approaches are worth exploring more rigorously.
+
+In this work, we were interested in methods that required only one only observe a system and not intervene on it, as in many cases only observation is accessible to the researcher. However, it is well understood that observation alone, particularly in the case of large systems wherein only a small portion of the state space can be explored, is inadequate for extracting causal relationships between components of a system. Interventional methods, such as \citep{Ay2008-jc}, are much more effective in such cases, provided you have the ability to control aspects of the system. Subsequent work may explore such an approach.
+
+The dynamics of the models we considered here are similar in many respects to the classic Ising model, with $\beta$ acting much like temperature and the payoff matrix \cref{eq:game} behaving similarly to interaction strengths. It is reasonable to expect that analogues of heat capacity, entropy, and other thermodynamic measures could be related in some way to the effectiveness of the network inference. Comparing the AUC with some of these thermodynamic analogues is a possibility for a future work.
+
+Another advance could be to look at other methods of quantifying the efficacy of the edge classifications. As the reader may have noticed, we never considered complete graphs. The reason for this is that to construct the ROC curves, you have to compute the false-positive rate. This value is undefined if your dataset has no negative cases. In our application, that means there must be pairs of agents that are not connected.
+
+Two of the most egregious assumptions we've made in this work are that every agent is using the same rule to update its strategy, and every pair of agents is playing the same game. There is little reason to expect that real-world systems behave in this manner, and either assumption can be relaxed. For example, we could associate a different game with each edge. We have no expectation for how this would affect the results, but will explore it in the future.
+
+Finally, as with virtually every simulation study, there is room for more fine-grained parameter sweeps. Our sampling of the $S$-$T$ space of games was rather coarse; we limited ourselves to an unreasonably small number of initial conditions ($100$ of the $2^{50}$ possible) for each graph, and we considered only a handful of graph topologies. All of this will be greatly expanded in future work.
+
+Ultimately, we see that the difference in functional and actual connectivity can sometimes be tied directly to the dynamical structure of the system. It may be impossible to know how similar the functional and actual connectivity of these types of networks are without detailed knowledge of the dynamics of the agents in the system. This may not be a surprise to some, but it is important that researchers to acknowledge it explicitly. Without that, it can be all too easy to blindly apply these network inference methods and over interpret the results, a sin of which at least the first author is guilty.
+
+\section{Acknowledgements}
+D.G.M. and S.I.W. would like to acknowledge the Lifelong Learning Machines program from DARPA/MTO for funding this work. D.G.M also acknowledges Cole Mathis for the conversations about game theory which inspired this work.
+
+\footnotesize
+\bibliographystyle{apalike}
+\bibliography{gomen.bib}
+
+\end{document}
